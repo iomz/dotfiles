@@ -1,3 +1,5 @@
+if [ "$TMUX" = "" ]; then tmux; fi
+
 bindkey -e
 
 autoload -U compinit
@@ -35,17 +37,16 @@ setopt inc_append_history
 setopt hist_no_store
 setopt hist_reduce_blanks
 
-export PATH=$HOME/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:$PATH
-export LSCOLORS=exfxcxdxbxegedabagacad
 # It is the default value on OSX, so this line can be omitted
 ##export LSCOLORS=gxfxxxxxcxxxxxxxxxxxxx
-##export LANG="en.UTF-8"
+export LSCOLORS=exfxcxdxbxegedabagacad
+
+# Locale setting
 export LC_ALL="ja_JP.UTF-8"
 export LANG="en_US.UTF-8"
 export LANGUAGE="en_US.UTF-8"
 
-export MANPATH=/opt/local/share/man:/opt/local/lib/node_modules/npm/man/:$MANPATH
-
+# alias
 alias ls='ls -CFG'
 alias ll='ls -ahlFG'
 alias la='ls -AG'
@@ -69,3 +70,26 @@ test -r /sw/bin/init.sh && . /sw/bin/init.sh
 
 # Display process taken longer than 3 seconds
 REPORTTIME=3
+
+# MacPorts PATH
+export PATH=$HOME/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:$PATH
+
+# Manual PATH
+export MANPATH=/opt/local/share/man:/opt/local/lib/node_modules/npm/man/:$MANPATH
+
+# Set architecture flags 4 fortran
+export ARCHFLAGS="-arch x86_64"
+
+# Python environment 
+PYTHON_VER=2.7
+export MACPORTS_PREFIX=/opt/local
+export VIRTUALENV_BIN=$MACPORTS_PREFIX/Library/Frameworks/Python.framework/Versions/$PYTHON_VER/bin
+export PYTHONPATH=$MACPORTS_PREFIX/lib/python$PYTHON_VER/:$PYTHONPATH
+export PATH=$VIRTUALENV_BIN:$PYTHONPATH:$PATH
+export WORKON_HOME=$HOME/.virtualenvs
+. $VIRTUALENV_BIN/virtualenvwrapper.sh
+
+mkvenv () {
+    base_python=`which python$1` 
+    mkvirtualenv --distribute --python=$base_python $2
+}
