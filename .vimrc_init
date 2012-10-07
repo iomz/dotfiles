@@ -1,0 +1,14 @@
+"Vim extension
+set nocompatible
+"syntax colour
+syntax on
+"search colour
+set hlsearch
+"line number
+set number
+"line cursor
+"set cursorline
+"automatic indentation
+set autoindent
+"fix view
+set scrolloff=220
