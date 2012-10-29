@@ -1,4 +1,9 @@
 ;;;;;;;;;;;;;;;;;;;;
+;;loads ruby mode when a .rb file is opened.
+(setq load-path (cons "~/.emacs.d/ruby-mode" load-path))
+(autoload 'ruby-mode "ruby-mode" "Load ruby-mode")
+(add-hook 'ruby-mode-hook 'turn-on-font-lock)
+
 ;; lisp
 (setq inferior-lisp-program "sbcl")
 ;; auto-install
@@ -7,11 +12,6 @@
 ;; (auto-install-update-emacswiki-package-name t)
 ;; (auto-install-compatibility-setup)
 ;; (setq ediff-window-setup-function 'ediff-setup-windows-plain)
-
-;;loads ruby mode when a .rb file is opened.
-(autoload 'ruby-mode "ruby-mode" "Major mode for editing ruby scripts." t)
-(setq auto-mode-alist  (cons '(".rb$" . ruby-mode) auto-mode-alist))
-(setq auto-mode-alist  (cons '(".rhtml$" . html-mode) auto-mode-alist))
 
 ;;; open-junk-file
 ;(require 'open-junk-file)

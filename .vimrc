@@ -67,21 +67,21 @@ let g:NeoComplCache_SnippetsDir = '~/.vim/snippets'
 imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
 smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
 
-command! -nargs=* Nes NeoComplCacheEditSnippets
-command! -nargs=* Trinity TrinityToggleAll
+" command! -nargs=* Nes NeoComplCacheEditSnippets
+" command! -nargs=* Trinity TrinityToggleAll
 
-call pathogen#runtime_append_all_bundles()
-call pathogen#infect()
-call pathogen#helptags()
-filetype plugin indent on
+" call pathogen#runtime_append_all_bundles()
+" call pathogen#infect()
+" call pathogen#helptags()
+" filetype plugin indent on
 
-nmap <silent> <C-e>      :TrinityToggleAll<CR>
-vmap <silent> <C-e> <Esc>:TrinityToggleAll<CR>
-omap <silent> <C-e>      :TrinityToggleAll<CR>
-imap <silent> <C-e> <Esc>:TrinityToggleAll<CR>
-cmap <silent> <C-e> <C-u>:TrinityToggleAll<CR>
+" nmap <silent> <C-e>      :TrinityToggleAll<CR>
+" vmap <silent> <C-e> <Esc>:TrinityToggleAll<CR>
+" omap <silent> <C-e>      :TrinityToggleAll<CR>
+" imap <silent> <C-e> <Esc>:TrinityToggleAll<CR>
+" cmap <silent> <C-e> <C-u>:TrinityToggleAll<CR>
 
-nmap <silent> <C-q> :set tags=./.tags
+" nmap <silent> <C-q> :set tags=./.tags
 
 "imap <C-o> <Esc>
 "imap <C-e> <BS>
