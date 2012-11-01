@@ -1,0 +1,10 @@
+[user]
+	name = iomz
+	email = iomz@sfc.wide.ad.jp
+[alias]
+    st = status
+    ci = commit
+    br = branch
+    co = checkout
+    df = diff
+    lg = log -p
