@@ -148,9 +148,11 @@ set smartcase
 set showmatch
 set fileencoding=utf-8
 set encoding=utf-8
-"set cursorline
-set scrolloff=10
+set cursorline
+set scrolloff=20
 set autoindent
 set hidden
 set runtimepath+=~/.vim,~/.vim/colors,~/.vim/plugin,~/.vim/autoload
 
+"Start unbundle
+runtime bundle/vim-unbundle/unbundle.vim
