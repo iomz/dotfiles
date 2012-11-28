@@ -49,9 +49,9 @@ export LC_ALL=en_US.UTF-8
 # export LANGUAGE="en_US.UTF-8"
 
 # alias
-alias ls='ls -CFG'
-alias ll='ls -ahlFG'
-alias la='ls -AG'
+alias ls='ls -CF'
+alias ll='ls -ahlF'
+alias la='ls -A'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'

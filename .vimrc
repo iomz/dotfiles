@@ -57,15 +57,15 @@ let java_heightligt_functions = "style"
 let java_allow_cpp_keywords = 1
 
 " neocomplcache
-let g:neocomplcache_enable_at_startup = 1
-let g:NeoComplCache_SmartCase = 1
-let g:NeoComplCache_EnableCamelCaseCompletion = 1
-let g:NeoComplCache_EnableUnderbarCompletion = 1
-let g:NeoComplCache_MinSyntaxLength = 3
-let g:NeoComplCache_PluginCompletionLength = { 'keyword_complete'  : 2, 'syntax_complete'   : 2 }
-let g:NeoComplCache_SnippetsDir = '~/.vim/snippets'
-imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+" let g:neocomplcache_enable_at_startup = 1
+" let g:NeoComplCache_SmartCase = 1
+" let g:NeoComplCache_EnableCamelCaseCompletion = 1
+" let g:NeoComplCache_EnableUnderbarCompletion = 1
+" let g:NeoComplCache_MinSyntaxLength = 3
+" let g:NeoComplCache_PluginCompletionLength = { 'keyword_complete'  : 2, 'syntax_complete'   : 2 }
+" let g:NeoComplCache_SnippetsDir = '~/.vim/snippets'
+" imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+" smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
 
 " command! -nargs=* Nes NeoComplCacheEditSnippets
 " command! -nargs=* Trinity TrinityToggleAll
