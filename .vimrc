@@ -1,3 +1,4 @@
+"Encoding configuration
 if &encoding !=# 'utf-8'
 	set encoding=japan
 	set fileencoding=japan
@@ -56,41 +57,12 @@ let java_heightligt_all = 1
 let java_heightligt_functions = "style"
 let java_allow_cpp_keywords = 1
 
-" neocomplcache
-" let g:neocomplcache_enable_at_startup = 1
-" let g:NeoComplCache_SmartCase = 1
-" let g:NeoComplCache_EnableCamelCaseCompletion = 1
-" let g:NeoComplCache_EnableUnderbarCompletion = 1
-" let g:NeoComplCache_MinSyntaxLength = 3
-" let g:NeoComplCache_PluginCompletionLength = { 'keyword_complete'  : 2, 'syntax_complete'   : 2 }
-" let g:NeoComplCache_SnippetsDir = '~/.vim/snippets'
-" imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-" smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-
-" command! -nargs=* Nes NeoComplCacheEditSnippets
-" command! -nargs=* Trinity TrinityToggleAll
-
-" call pathogen#runtime_append_all_bundles()
-" call pathogen#infect()
-" call pathogen#helptags()
-" filetype plugin indent on
-
-" nmap <silent> <C-e>      :TrinityToggleAll<CR>
-" vmap <silent> <C-e> <Esc>:TrinityToggleAll<CR>
-" omap <silent> <C-e>      :TrinityToggleAll<CR>
-" imap <silent> <C-e> <Esc>:TrinityToggleAll<CR>
-" cmap <silent> <C-e> <C-u>:TrinityToggleAll<CR>
-
-" nmap <silent> <C-q> :set tags=./.tags
-
-"imap <C-o> <Esc>
-"imap <C-e> <BS>
 imap <C-d> <Del>
 
-inoremap <C-b> <Left>
+"inoremap <C-b> <Left>
 "inoremap <C-n> <Down>
 "inoremap <C-p> <Up>
-inoremap <C-f> <Right>
+"inoremap <C-f> <Right>
 
 "inoremap {} {}<LEFT>
 "inoremap [] []<LEFT>
@@ -148,11 +120,11 @@ set smartcase
 set showmatch
 set fileencoding=utf-8
 set encoding=utf-8
-set cursorline
-set scrolloff=20
+set scrolloff=10
 set autoindent
 set hidden
 set runtimepath+=~/.vim,~/.vim/colors,~/.vim/plugin,~/.vim/autoload
+set cursorline
 
 "Start unbundle
 runtime bundle/vim-unbundle/unbundle.vim
