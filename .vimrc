@@ -95,6 +95,9 @@ autocmd FileType html setlocal includeexpr=substitute(v:fname,'^\\/','','') | se
 au BufNewFile,BufRead *.c set tabstop=8
 au BufNewFile,BufRead *.java set tabstop=4
 au BufNewFile,BufRead *.py set tabstop=4 expandtab
+au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.erb set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.css set tabstop=2 shiftwidth=2
 
 "set backspace+=start,eol,indent
 set tags=./.tags

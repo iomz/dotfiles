@@ -1,8 +1,10 @@
+# Load ~/.profile normally
+source ~/.profile
 # Load ~/.profile in sh mode
-[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'
+#[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'
 
 # Load tmux on login
-# if [ "$TMUX" = "" ]; then tmux attach; fi
+#if [ "$TMUX" = "" ]; then tmux attach; fi
 
 bindkey -e
 
@@ -27,7 +29,7 @@ autoload -U colors && colors
 
 # Setting the style and the color of prompt
 #PROMPT=$'%{\e[0;31m%}%* %n$ '
-PROMPT="%{$fg[red]%}%n%{$reset_color%}@%{$fg[cyan]%}%m %{$fg[magenta]%}%1~ %{$reset_color%}%#"
+PROMPT="%{$fg[blue]%}%T %{$fg[red]%}%n%{$reset_color%}@%{$fg[cyan]%}%m %{$fg[magenta]%}%1~ %{$reset_color%}%#"
 #RPROMPT=$'%{\e[0;33m%}%/%{\e[m%}'
 RPROMPT="%{$fg[yellow]%}%/%{$reset_color%}%"
 
@@ -49,3 +51,5 @@ export LC_ALL=en_US.UTF-8
 
 # Display process taken longer than 3 seconds
 REPORTTIME=3
+
+# alias
