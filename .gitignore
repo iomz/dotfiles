@@ -1,2 +1,3 @@
-.ssh/*
-.vim/*
+# Avoid storing credentials and other repos
+.ssh/
+.vim/
