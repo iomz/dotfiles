@@ -98,36 +98,41 @@ au BufNewFile,BufRead *.py set tabstop=4 expandtab
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.erb set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.css set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
 
 "set backspace+=start,eol,indent
-set tags=./.tags
-set sm
 set ai
-set notitle
-set listchars=tab:^\ \,trail:-,extends:>,precedes:<
-set showmatch
-set number
-set shiftwidth=4
-set tabstop=4
-set softtabstop=4
+set autoindent
+set cursorline
+set encoding=utf-8
 set expandtab
-set smarttab
+set fileencoding=utf-8
+set hidden
 set hlsearch
 set laststatus=2
-set showcmd
-set statusline=%<%f%=%h%w%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%9(\ %m%r\ %)[%4v][%12(\ %5l/%5L%)]
-syntax on
+set listchars=tab:^\ \,trail:-,extends:>,precedes:<
 set modeline
 set nobackup
-set smartcase
-set showmatch
-set fileencoding=utf-8
-set encoding=utf-8
+set notitle
+set number
 set scrolloff=10
-set autoindent
-set hidden
+set shiftwidth=4
+set softtabstop=4
+set smarttab
+set showmatch
+set showcmd
+set showmatch
+set smartcase
+set statusline=%<%f%=%h%w%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%9(\ %m%r\ %)[%4v][%12(\ %5l/%5L%)]
+set sm
+set tabstop=4
+set tags=./.tags
 set runtimepath+=~/.vim,~/.vim/colors,~/.vim/plugin,~/.vim/autoload
-set cursorline
+
+"Ctags
+let Tlist_Ctags_Cmd='/usr/local/bin/ctags'
 
 "Start unbundle
 runtime bundle/vim-unbundle/unbundle.vim
+
+syntax on

@@ -52,4 +52,3 @@ export LC_ALL=en_US.UTF-8
 # Display process taken longer than 3 seconds
 REPORTTIME=3
 
-# alias
