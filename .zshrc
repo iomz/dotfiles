@@ -8,17 +8,33 @@ source ~/.profile
 
 bindkey -e
 
-# Load Complement
+# Load completion
+fpath=($HOME/.zsh $fpath)
+fpath=($HOME/.zsh-completions/src $fpath)
 autoload -U compinit && compinit
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zmodload zsh/complist
+zmodload zsh/computil
+# Go completion
+if [ -f $GOROOT/misc/zsh/go ]; then
+    source $GOROOT/misc/zsh/go
+fi
+#zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*:default' menu select=1
 zstyle ':completion::complete:*' use-cache true
-## vim-style list selection
-zmodload zsh/complist
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
+# View colorful completions
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
+zstyle ':completion:*:messages' format '%F{YELLOW}%d'$DEFAULT
+zstyle ':completion:*:warnings' format '%F{RED}No matches for:''%F{YELLOW} %d'$DEFAULT
+zstyle ':completion:*:descriptions' format '%F{YELLOW}completing %B%d%b'$DEFAULT
+zstyle ':completion:*:options' description 'yes'
+zstyle ':completion:*:descriptions' format '%F{yellow}Completing %B%d%b%f'$DEFAULT
+# View matchings by groups
+zstyle ':completion:*' group-name ''
+#bindkey -M menuselect 'h' vi-backward-char
+#bindkey -M menuselect 'j' vi-down-line-or-history
+#bindkey -M menuselect 'k' vi-up-line-or-history
+#bindkey -M menuselect 'l' vi-forward-char
 ## Colors
 autoload -U colors && colors
 zstyle ':completion:*' list-colors 'di=36' 'ln=35'
@@ -80,4 +96,8 @@ HISTTIMEFORMAT="[%Y/%M/%D %H:%M:%S] "
 
 # Display process taken longer than 3 seconds
 REPORTTIME=3
+
+# Set separators
+zstyle ':completion:*' list-separator '-->'
+zstyle ':completion:*:manuals' separate-sections true
 

@@ -1,4 +1,4 @@
-"Encoding configuration
+" #Encoding configuration
 if &encoding !=# 'utf-8'
 	set encoding=japan
 	set fileencoding=japan
@@ -13,7 +13,6 @@ if has('iconv')
 		let s:enc_euc = 'euc-jisx0213'
 		let s:enc_jis = 'iso-2022-jp-3'
 	endif
-
 	if &encoding ==# 'utf-8'
 		let s:fileencodings_default = &fileencodings
 		let &fileencodings = s:enc_jis .','. s:enc_euc .',cp932'
@@ -33,11 +32,9 @@ if has('iconv')
 			let &fileencodings = &fileencodings .','. s:enc_euc
 		endif
 	endif
-
 	unlet s:enc_euc
 	unlet s:enc_jis
 endif
-
 if has('autocmd')
 	function! AU_ReCheck_FENC()
 		if &fileencoding =~# 'iso-2022-jp' && search("[^\x01-\x7e]", 'n') == 0
@@ -45,40 +42,75 @@ if has('autocmd')
 		endif
 	endfunction
 endif
-
-set fileformats=unix,dos,mac
-
 if exists('ambiwidth')
 	set ambiwidth=double
 endif
+set fileformats=unix,dos,mac
 
-" java
-let java_heightligt_all = 1
-let java_heightligt_functions = "style"
-let java_allow_cpp_keywords = 1
+" #Insert mode keymaps
+inoremap <C-d> <Del>
+inoremap <C-b> <Left>
+inoremap <C-n> <Down>
+inoremap <C-p> <Up>
+inoremap <C-f> <Right>
+"inoremap { {}<LEFT>
+"inoremap [ []<LEFT>
+"inoremap ( ()<LEFT>
+"inoremap " ""<LEFT>
+"inoremap ' ''<LEFT>
+"inoremap < <><LEFT>
 
-imap <C-d> <Del>
+" #Indentation
+au BufNewFile,BufRead *.css set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.erb set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 
-"inoremap <C-b> <Left>
-"inoremap <C-n> <Down>
-"inoremap <C-p> <Up>
-"inoremap <C-f> <Right>
+" #Options
+"set backspace+=start,eol,indent
+set antialias
+"set autochdir
+set autoindent
+set autoread
+set backup
+set backupdir=$HOME/.vim_backup
+set cursorline
+set directory=$HOME/.vim_backup
+set encoding=utf-8
+set equalalways
+set expandtab
+set fileencoding=utf-8
+set gdefault
+set hidden
+set hlsearch
+set ignorecase
+set laststatus=2
+"set list
+"set listchars=tab:^\ \,trail:-,extends:>,precedes:<
+set modeline
+set number
+set runtimepath+=~/.vim,~/.vim/plugin,~/.vim/autoload
+set scrolloff=10
+set shiftwidth=4
+set showcmd
+set showmatch
+set smarttab
+set smartcase
+set softtabstop=4
+set statusline=%<%f%=%h%w%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%9(\ %m%r\ %)[%4v][%12(\ %5l/%5L%)]
+set tabstop=4
+set title
+set undolevels=200
+set writebackup
 
-"inoremap {} {}<LEFT>
-"inoremap [] []<LEFT>
-"inoremap () ()<LEFT>
-"inoremap "" ""<LEFT>
-"inoremap '' ''<LEFT>
-"inoremap <> <><LEFT>
+" # Syntax highlight
+syntax on
 
 augroup InsertHook
-autocmd!
-autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
-autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=ccdc90
+    autocmd!
+    autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
+    autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=ccdc90
 augroup END
-
-autocmd FileType java :setlocal omnifunc=javacomplete#Complete
-autocmd FileType java :setlocal completefunc=javacomplete#CompleteParamsInfo
 
 augroup BinaryXXD
 	autocmd!
@@ -90,49 +122,3 @@ augroup BinaryXXD
 	autocmd BufWritePost * set nomod | endif
 augroup END
 
-autocmd FileType html setlocal includeexpr=substitute(v:fname,'^\\/','','') | setlocal path+=;/
-
-au BufNewFile,BufRead *.c set tabstop=8
-au BufNewFile,BufRead *.java set tabstop=4
-au BufNewFile,BufRead *.py set tabstop=4 expandtab
-au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.erb set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.css set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
-
-"set backspace+=start,eol,indent
-set ai
-set autoindent
-set cursorline
-set encoding=utf-8
-set expandtab
-set fileencoding=utf-8
-set hidden
-set hlsearch
-set laststatus=2
-set listchars=tab:^\ \,trail:-,extends:>,precedes:<
-set modeline
-set nobackup
-set notitle
-set number
-set scrolloff=10
-set shiftwidth=4
-set softtabstop=4
-set smarttab
-set showmatch
-set showcmd
-set showmatch
-set smartcase
-set statusline=%<%f%=%h%w%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%9(\ %m%r\ %)[%4v][%12(\ %5l/%5L%)]
-set sm
-set tabstop=4
-set tags=./.tags
-set runtimepath+=~/.vim,~/.vim/colors,~/.vim/plugin,~/.vim/autoload
-
-"Ctags
-let Tlist_Ctags_Cmd='/usr/local/bin/ctags'
-
-"Start unbundle
-runtime bundle/vim-unbundle/unbundle.vim
-
-syntax on
