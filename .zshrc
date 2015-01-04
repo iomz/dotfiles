@@ -7,6 +7,7 @@ source ~/.profile
 #if [ "$TMUX" = "" ]; then tmux attach; fi
 
 bindkey -e
+export TERM=xterm-256color
 
 # Load completion
 fpath=($HOME/.zsh $fpath)
@@ -14,13 +15,16 @@ fpath=($HOME/.zsh-completions/src $fpath)
 autoload -U compinit && compinit
 zmodload zsh/complist
 zmodload zsh/computil
+
 # Go completion
 if [ -f $GOROOT/misc/zsh/go ]; then
     source $GOROOT/misc/zsh/go
 fi
+
 #zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*:default' menu select=1
 zstyle ':completion::complete:*' use-cache true
+
 # View colorful completions
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
@@ -29,12 +33,13 @@ zstyle ':completion:*:warnings' format '%F{RED}No matches for:''%F{YELLOW} %d'$D
 zstyle ':completion:*:descriptions' format '%F{YELLOW}completing %B%d%b'$DEFAULT
 zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:descriptions' format '%F{yellow}Completing %B%d%b%f'$DEFAULT
+
 # View matchings by groups
 zstyle ':completion:*' group-name ''
-#bindkey -M menuselect 'h' vi-backward-char
-#bindkey -M menuselect 'j' vi-down-line-or-history
-#bindkey -M menuselect 'k' vi-up-line-or-history
-#bindkey -M menuselect 'l' vi-forward-char
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
 ## Colors
 autoload -U colors && colors
 zstyle ':completion:*' list-colors 'di=36' 'ln=35'
@@ -84,7 +89,7 @@ setopt share_history
 
 # Setting the style and the color of prompt
 #PROMPT=$'%{\e[0;31m%}%* %n$ '
-PROMPT="%{$fg_bold[cyan]%}%T %{$fg[red]%}%n%{%}@%{$fg[blue]%}%m %{$fg[magenta]%}%~ %{$reset_color%}%#"
+PROMPT="%{$fg[cyan]%}%T %{$fg[red]%}%n%{$fg[green]%}@%{$fg[blue]%}%m %{$fg[magenta]%}%~ %{$reset_color%}%#"
 #RPROMPT=$'%{\e[0;33m%}%/%{\e[m%}'
 #RPROMPT="%{$fg_bold[yellow]%}%/%{$reset_color%}%"
 
@@ -101,3 +106,9 @@ REPORTTIME=3
 zstyle ':completion:*' list-separator '-->'
 zstyle ':completion:*:manuals' separate-sections true
 
+# <C-q> and <C-s> in Vim with iTerm2
+stty start undef
+stty stop undef
+
+
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting

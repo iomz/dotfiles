@@ -8,7 +8,29 @@ alias egrep='egrep --color=auto'
 
 # It is the default value on OSX, so this line can be omitted
 #export LSCOLORS=exfxcxdxbxegedabagacad
-export LSCOLORS=cxGxbxexFxdhdhbxbxcxcx
+export LSCOLORS=""
+# directory
+export LSCOLORS=$LSCOLORS"gx"
+# symboic link
+export LSCOLORS=$LSCOLORS"fx"
+# socket
+export LSCOLORS=$LSCOLORS"cx"
+# pipe
+export LSCOLORS=$LSCOLORS"Fx"
+# executable
+export LSCOLORS=$LSCOLORS"ex"
+# block special
+export LSCOLORS=$LSCOLORS"ah"
+# character special
+export LSCOLORS=$LSCOLORS"bh"
+# executable with setuid bit set
+export LSCOLORS=$LSCOLORS"bx"
+# executable with setgid bit set
+export LSCOLORS=$LSCOLORS"bx"
+# directory writable to others, with sticky bit
+export LSCOLORS=$LSCOLORS"cx"
+# directory writable to others, without sitcky bit
+export LSCOLORS=$LSCOLORS"cx"
 
 # Locale setting
 export LC_ALL=en_US.UTF-8
@@ -27,3 +49,7 @@ export PATH="$GOROOT/bin:$PATH"
 
 # Android Studio
 export STUDIO_JDK="/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk"
+
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
