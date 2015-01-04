@@ -1,7 +1,7 @@
 # Load ~/.profile normally
-#source ~/.profile
+source ~/.profile
 # Load ~/.profile in sh mode
-[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'
+#[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'
 
 # Load tmux on login
 #if [ "$TMUX" = "" ]; then tmux attach; fi

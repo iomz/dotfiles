@@ -1,7 +1,3 @@
-# alias
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
-
 # It is the default value on OSX, so this line can be omitted
 #export LSCOLORS=exfxcxdxbxegedabagacad
 LSCOLORS=""
@@ -34,5 +30,4 @@ export LS_COLORS=$LSCOLROS
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
-
 

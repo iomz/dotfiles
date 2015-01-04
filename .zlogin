@@ -1,3 +1,6 @@
+# Aliases for OSX
+alias ls='ls -CFG'
+
 # UpTeX bin PATH
 #export PATH="/Applications/UpTeX.app/teTeX/bin:$PATH"
 
