@@ -1,3 +1,6 @@
+# Avoid duplicates in PATHs
+typeset -U path cdpath fpath manpath
+
 # Load ~/.profile normally
 [[ -e ~/.profile ]] && source ~/.profile
 # Load ~/.profile in sh mode

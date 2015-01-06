@@ -1,5 +1,7 @@
 # Aliases for OSX
 alias ls='ls -CFG'
+alias diff='colordiff'
+alias kess='less -R'
 
 # UpTeX bin PATH
 #export PATH="/Applications/UpTeX.app/teTeX/bin:$PATH"
