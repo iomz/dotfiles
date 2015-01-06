@@ -18,6 +18,9 @@ export PATH="$GOROOT/bin:$PATH"
 # Android Studio
 export STUDIO_JDK="/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk"
 
+# Install applications via brew-cask into /Applications
+export HOMEBREW_CASK_OPTS="--appdir=/Applications"
+
 # Add RVM to PATH for scripting
 export PATH="$PATH:$HOME/.rvm/bin" 
 

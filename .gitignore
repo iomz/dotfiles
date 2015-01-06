@@ -1,4 +1,5 @@
 # Avoid storing credentials and other repos
 .ssh/
 .vim/
+make_Brewfile.sh
 .viminfo
