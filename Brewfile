@@ -49,6 +49,7 @@ install lua
 install lv
 install mercurial
 install mpfr2
+install ngrep
 install nkf
 install openssl
 install pango
@@ -69,3 +70,5 @@ install watch
 install wget
 install zeromq
 install zsh
+cask install eclipse-java
+cask install xquartz
