@@ -248,6 +248,7 @@ endif
 " Indentation
 "---------------------------------------------
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 
 "---------------------------------------------
 " File encoding configuration
@@ -318,8 +319,8 @@ endif
 " Key remappings
 "---------------------------------------------
 nnoremap Y y$
-nnoremap + <C-a>
-nnoremap - <C-x>
+nnoremap - <C-a>
+nnoremap + <C-x>
 inoremap <C-b> <Left>
 inoremap <C-n> <Down>
 inoremap <C-p> <Up>
