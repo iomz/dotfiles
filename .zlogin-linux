@@ -4,7 +4,7 @@ alias ls='ls --color=always'
 # golang enviromental set up
 export GOPATH="$HOME/go"
 export GOROOT="/usr/local/opt/go/libexec"
-export PATH="$GOROOT/bin:$PATH"
+export PATH="$PATH:$GOROOT/bin"
 
 # Add RVM to PATH for scripting
 export PATH="$PATH:$HOME/.rvm/bin" 
