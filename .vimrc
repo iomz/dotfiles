@@ -18,9 +18,12 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 " Unite.vim
 "---------------------------------------------
 NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/neomru.vim'
 
 " List buffers
 nnoremap <silent> fb :<C-u>Unite buffer<CR>
+" List file_mru as buffer
+nnoremap <silent> fu :<C-u>Unite file_mru buffer<CR>
 " List files
 nnoremap <silent> ff :<C-u>UniteWithBufferDir -buffer-name=dotfiles file<CR>
 " List recent files
@@ -29,7 +32,7 @@ nnoremap <silent> fm :<C-u>Unite file_mru<CR>
 nnoremap <silent> fr :<C-u>Unite -buffer-name=register register<CR>
 " List and set a yank
 let g:unite_source_history_yank_enable = 1
-nnoremap <leader>y :<C-u>Unite history/yank<CR>
+nnoremap <silent> fy :<C-u>Unite history/yank<CR>
 
 "---------------------------------------------
 " vim-quickrun
@@ -319,8 +322,8 @@ endif
 " Key remappings
 "---------------------------------------------
 nnoremap Y y$
-nnoremap + <C-a>
-nnoremap - <C-x>
+nnoremap - <C-a>
+nnoremap + <C-x>
 inoremap <C-b> <Left>
 inoremap <C-n> <Down>
 inoremap <C-p> <Up>
