@@ -10,6 +10,16 @@ typeset -U path cdpath fpath manpath
 
 # Load tmux on login
 #if [ "$TMUX" = "" ]; then tmux attach; fi
+if [ ! -z `which tmux` ]; then
+  if [ $SHLVL = 1 ]; then
+    if [ $(( `ps aux | grep tmux | grep $USER | grep -v grep | wc -l` )) != 0 ]; then
+      echo -n 'Attach tmux session? [y/N]'
+      read YN
+      [[ $YN = '' ]] && YN=n
+      [[ $YN = y ]] && tmux attach
+    fi
+  fi
+fi
 
 bindkey -e
 export TERM=xterm-256color
