@@ -62,6 +62,7 @@ install pth
 install python
 install readline
 install reattach-to-user-namespace
+install rsense
 install sqlite
 install tmux
 install tree

@@ -1,21 +1,18 @@
-"---------------------------------------------
-" NeoBundle configuration
+" Plugins {{{1
+" NeoBundle
 "---------------------------------------------
 if has('vim_starting')
     set nocompatible
     set runtimepath+=~/.vim/bundle/neobundle.vim
 endif
 
-"---------------------------------------------
 " Install and configure vim plugins
-"---------------------------------------------
 call neobundle#begin(expand('~/.vim/bundle'))
 
 " Manage neobundle itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-"---------------------------------------------
-" Unite.vim
+" Unite.vim {{{2
 "---------------------------------------------
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/neomru.vim'
@@ -34,15 +31,14 @@ nnoremap <silent> fr :<C-u>Unite -buffer-name=register register<CR>
 let g:unite_source_history_yank_enable = 1
 nnoremap <silent> fy :<C-u>Unite history/yank<CR>
 
-"---------------------------------------------
-" vim-quickrun
+" vim-quickrun {{{2
 "---------------------------------------------
 NeoBundle 'thinca/vim-quickrun'
 let g:quickrun_no_default_key_mappings = 1
 nnoremap <silent> <C-q> :QuickRun<CR>
 
-"---------------------------------------------
-" Neocomplete.vim
+"}}}
+" Neocomplete.vim {{{2
 "---------------------------------------------
 NeoBundle 'Shougo/neocomplete.vim'
 
@@ -53,8 +49,12 @@ let g:neocomplete#enable_at_startup = 1
 " Use smartcase.
 let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 3
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+let g:neocomplete#sources#syntax#min_keyword_length = 4
+let g:neocomplete#auto_completion_start_length = 4
+" Skip when stuck
+let g:neocomplete#skip_auto_completion_time = '0.2'
+
 
 " Define dictionary.
 let g:neocomplete#sources#dictionary#dictionaries = {
@@ -94,15 +94,15 @@ autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
-"---------------------------------------------
-" rsense
+"}}}
+" rsense {{{2
 "---------------------------------------------
 NeoBundleLazy 'marcus/rsense', {
     \ 'autoload': {
     \   'filetypes': 'ruby'
     \ },
     \ }
-NeoBundle 'supermomonga/neocomplete-rsense.vim', {
+NeoBundleLazy 'supermomonga/neocomplete-rsense.vim', {
     \ 'depends': ['Shougo/neocomplete.vim', 'marcus/rsense'],
     \ }
 
@@ -112,8 +112,8 @@ if !exists('g:neocomplete#force_omni_input_patterns')
 endif
 let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'']'
 
-"---------------------------------------------
-" jedi-vim
+"}}}
+" jedi-vim {{{2
 "---------------------------------------------
 NeoBundle 'davidhalter/jedi-vim'
 autocmd FileType python setlocal completeopt-=preview
@@ -125,13 +125,13 @@ if !exists('g:neocomplete#force_omni_input_patterns')
 endif
 let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*''])'
 
-"---------------------------------------------
-" emmet-vim
+"}}}
+" emmet-vim {{{2
 "---------------------------------------------
 NeoBundle 'mattn/emmet-vim'
 
-"---------------------------------------------
-" vim-css3-syntax
+"}}}
+" vim-css3-syntax {{{2
 "---------------------------------------------
 NeoBundle 'hail2u/vim-css3-syntax'
 
@@ -140,8 +140,8 @@ augroup VimCSS3Syntax
   autocmd FileType css setlocal iskeyword+=-
 augroup END
 
-"---------------------------------------------
-" vim-go
+"}}}
+" vim-go {{{2
 "---------------------------------------------
 NeoBundle 'fatih/vim-go'
 
@@ -156,13 +156,13 @@ au FileType go nmap <leader>r <Plug>(go-run)
 au FileType go nmap <leader>b <Plug>(go-build)
 au FileType go nmap <leader>t <Plug>(go-test)
 
-"---------------------------------------------
-" vim-dispatch
+"}}}
+" vim-dispatch {{{2
 "---------------------------------------------
 NeoBundle 'tpope/vim-dispatch'
 
-"---------------------------------------------
-" lightline.vim
+"}}}
+" lightline.vim {{{2
 "---------------------------------------------
 NeoBundle 'itchyny/lightline.vim'
 
@@ -229,10 +229,7 @@ function! MyMode()
   return winwidth(0) > 60 ? lightline#mode() : ''
 endfunction
 
-"---------------------------------------------
-" YouCompleteMe
-"---------------------------------------------
-"NeoBundle 'Valloric/YouCompleteMe'
+"}}}
 
 call neobundle#end()
 
@@ -247,14 +244,14 @@ if !has('vim_starting')
     call neobundle#call_hook('on_source')
 endif
 
-"---------------------------------------------
-" Indentation
+"}}}
+" Indentation {{{1
 "---------------------------------------------
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 
-"---------------------------------------------
-" File encoding configuration
+"}}}
+" File encoding configuration {{{1
 "---------------------------------------------
 if &encoding !=# 'utf-8'
 	set encoding=japan
@@ -317,13 +314,12 @@ if exists('ambiwidth')
 	set ambiwidth=double
 endif
 
-
-"---------------------------------------------
-" Key remappings
+"}}}
+" Key remappings {{{1
 "---------------------------------------------
 nnoremap Y y$
-nnoremap - <C-a>
-nnoremap + <C-x>
+nnoremap + <C-a>
+nnoremap - <C-x>
 inoremap <C-b> <Left>
 inoremap <C-n> <Down>
 inoremap <C-p> <Up>
@@ -335,8 +331,8 @@ inoremap <C-f> <Right>
 "inoremap ' ''<LEFT>
 "inoremap < <><LEFT>
 
-"---------------------------------------------
-" Options
+"}}}
+" Options {{{1
 "---------------------------------------------
 set autoindent
 set autoread
@@ -374,8 +370,8 @@ set writebackup
 " Syntax highlight
 syntax on
 
-"---------------------------------------------
-" augroup and autocmd
+"}}}
+" augroup and autocmd {{{1
 "---------------------------------------------
 augroup InsertHook
     autocmd!
@@ -397,4 +393,13 @@ augroup swapchoice-readonly
   autocmd!
   autocmd SwapExists * let v:swapchoice = 'o'
 augroup END
+
+"}}}
+
+" Folding settings
+"---------------------------------------------
+hi Folded ctermbg=232
+" vim: foldmethod=marker
+" vim: foldcolumn=3
+" vim: foldlevel=0
 

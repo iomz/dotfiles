@@ -17,6 +17,7 @@ osx:
 .PHONY: lua-vim
 lua-vim:
 	ln -s `pwd`/.vimrc ~/.vimrc
+	ruby ~/.vim/bundle/rsense/etc/config.rb > ~/.rsense
 	
 .PHONY: tiny-vim
 tiny-vim:
