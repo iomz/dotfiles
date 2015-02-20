@@ -1,6 +1,7 @@
 all:
 	ln -s `pwd`/.zshrc ~/.zshrc
 	ln -s `pwd`/.dircolors ~/.dircolors
+	ln -s `pwd`/.gitconfig ~/.gitconfig
 	mkdir -p ~/.vim_backup
 	mkdir -p ~/.vim/bundle && cd ~/.vim/bundle && git clone https://github.com/Shougo/neobundle.vim.git
 
