@@ -13,9 +13,9 @@ typeset -U path cdpath fpath manpath
 if [ ! -z `which tmux` ]; then
   if [ $SHLVL = 1 ]; then
     if [ $(( `ps aux | grep tmux | grep $USER | grep -v grep | wc -l` )) != 0 ]; then
-      echo -n 'Attach tmux session? [y/N]'
+      echo -n 'Attach tmux session? [Y/n]'
       read YN
-      [[ $YN = '' ]] && YN=n
+      [[ $YN = '' ]] && YN=y
       [[ $YN = y ]] && tmux attach
     fi
   fi
