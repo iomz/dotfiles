@@ -97,20 +97,20 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 "}}}
 " rsense {{{2
 "---------------------------------------------
-NeoBundleLazy 'marcus/rsense', {
-    \ 'autoload': {
-    \   'filetypes': 'ruby'
-    \ },
-    \ }
-NeoBundleLazy 'supermomonga/neocomplete-rsense.vim', {
-    \ 'depends': ['Shougo/neocomplete.vim', 'marcus/rsense'],
-    \ }
-
-let g:rsenseUseOmniFunc = 1
-if !exists('g:neocomplete#force_omni_input_patterns')
-    let g:neocomplete#force_omni_input_patterns = {}
-endif
-let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'']'
+"NeoBundleLazy 'marcus/rsense', {
+"    \ 'autoload': {
+"    \   'filetypes': 'ruby'
+"    \ },
+"    \ }
+"NeoBundleLazy 'supermomonga/neocomplete-rsense.vim', {
+"    \ 'depends': ['Shougo/neocomplete.vim', 'marcus/rsense'],
+"    \ }
+"
+"let g:rsenseUseOmniFunc = 1
+"if !exists('g:neocomplete#force_omni_input_patterns')
+"    let g:neocomplete#force_omni_input_patterns = {}
+"endif
+"let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'']'
 
 "}}}
 " jedi-vim {{{2
@@ -155,6 +155,11 @@ au FileType go nmap <Leader>gb <Plug>(go-doc-browser)
 au FileType go nmap <leader>r <Plug>(go-run)
 au FileType go nmap <leader>b <Plug>(go-build)
 au FileType go nmap <leader>t <Plug>(go-test)
+
+"}}}
+" vim-yaml {{{2
+"---------------------------------------------
+NeoBundle 'stephpy/vim-yaml'
 
 "}}}
 " vim-dispatch {{{2

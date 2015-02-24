@@ -42,11 +42,6 @@ let g:quickrun_no_default_key_mappings = 1
 nnoremap <silent> <C-q> :QuickRun<CR>
 
 "---------------------------------------------
-" vim-dispatch
-"---------------------------------------------
-NeoBundle 'tpope/vim-dispatch'
-
-"---------------------------------------------
 " lightline.vim
 "---------------------------------------------
 NeoBundle 'itchyny/lightline.vim'
@@ -113,11 +108,6 @@ endfunction
 function! MyMode()
   return winwidth(0) > 60 ? lightline#mode() : ''
 endfunction
-
-"---------------------------------------------
-" YouCompleteMe
-"---------------------------------------------
-"NeoBundle 'Valloric/YouCompleteMe'
 
 call neobundle#end()
 
