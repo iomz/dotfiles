@@ -253,6 +253,7 @@ endif
 " Indentation {{{1
 "---------------------------------------------
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 
 "}}}

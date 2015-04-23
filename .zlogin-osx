@@ -6,6 +6,9 @@ alias kess='less -R'
 # UpTeX bin PATH
 #export PATH="/Applications/UpTeX.app/teTeX/bin:$PATH"
 
+# mactex path
+eval `/usr/libexec/path_helper -s`
+
 # Add /usr/local/bin to PATH
 export HOMEBREW_PREFIX="/usr/local/Cellar"
 export PATH="/usr/local/bin:$PATH"
@@ -16,9 +19,16 @@ export GOROOT="/usr/local/opt/go/libexec"
 export PATH="$GOROOT/bin:$PATH"
 
 # Android Studio
-export STUDIO_JDK="/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk"
-export ANDROID_SDK="$HOME/Library/Android/sdk/platform-tools"
+#export STUDIO_JDK="/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk"
+#export ANDROID_SDK="$HOME/Library/Android/sdk/platform-tools"
 export PATH="$ANDROID_SDK:$PATH"
+
+# Maven
+#export M2_HOME="/usr/local/Cellar/maven/3.3.1/libexec"
+#export M2="/usr/local/Cellar/maven/3.3.1/libexec/bin"
+
+# Catalina
+export CATALINA_HOME="/usr/local/Cellar/tomcat/8.0.21/libexec"
 
 # Install applications via brew-cask into /Applications
 export HOMEBREW_CASK_OPTS="--appdir=/Applications"

@@ -1,4 +1,5 @@
 # Avoid storing credentials and other repos
+.DS_Store
 .ssh/
 .vim/
 .viminfo
