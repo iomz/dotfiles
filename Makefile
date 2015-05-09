@@ -13,6 +13,7 @@ linux:
 osx:
 	ln -s `pwd`/.zlogin-osx ~/.zlogin
 	ln -s `pwd`/.tmux.conf-osx ~/.tmux.conf
+	#defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "`pwd`/Environment.app"; "Hide" = 0; }'
 
 .PHONY: bsd
 bsd:
