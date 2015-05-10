@@ -255,6 +255,7 @@ endif
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.xml set tabstop=2 shiftwidth=2
 
 "}}}
 " File encoding configuration {{{1
