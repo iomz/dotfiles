@@ -1,4 +1,5 @@
 install ant
+install aspell
 install astyle
 install autoconf
 install automake
@@ -13,6 +14,7 @@ install cscope
 install ctags
 install czmq
 install dirmngr
+install faac
 install ffmpeg
 install fish
 install flac
@@ -99,6 +101,7 @@ install spark
 install sqlite
 install ssh-copy-id
 install subversion
+install texi2html
 install tmux
 install tree
 install vim
@@ -108,8 +111,12 @@ install x264
 install xpdf
 install xvid
 install xz
+install yasm
 install zeromq
 install zsh
+cask install kaleidoscope
+cask install ksdiff
 cask install mactex
+cask install shapes
 cask install wireshark
 cask install xquartz

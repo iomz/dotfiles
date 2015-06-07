@@ -37,6 +37,12 @@ NeoBundle 'thinca/vim-quickrun'
 let g:quickrun_no_default_key_mappings = 1
 nnoremap <silent> <C-q> :QuickRun<CR>
 
+let g:quickrun_config = {
+\   "_" : {
+\       "outputter/buffer/split" : ":botright vsplit",
+\   }
+\}
+
 "}}}
 " Neocomplete.vim {{{2
 "---------------------------------------------
@@ -252,9 +258,11 @@ endif
 "}}}
 " Indentation {{{1
 "---------------------------------------------
+au BufNewFile,BufRead *.bib set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.tex set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.xml set tabstop=2 shiftwidth=2
 
 "}}}

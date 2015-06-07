@@ -4,6 +4,12 @@ all:
 	ln -s `pwd`/.gitconfig ~/.gitconfig
 	ln -s `pwd`/.screenrc ~/.screenrc
 
+.PHONY: cheat
+cheat:
+	# go get github.com/dufferzafar/cheat
+	git clone https://github.com/jahendrie/cheat.git
+	ln -s `pwd`/cheat/data ~/.cheatsheets
+
 .PHONY: linux
 linux:
 	ln -s `pwd`/.zlogin-linux ~/.zlogin

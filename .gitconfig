@@ -8,3 +8,5 @@
     co = checkout
     df = diff
     lg = log -p
+[gui]
+	recentrepo = /Users/iomz/Dropbox/auto-id/paper/paper-ieeerfidta2015-multicode
