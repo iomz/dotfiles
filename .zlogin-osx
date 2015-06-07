@@ -5,7 +5,8 @@ alias kess='less -R'
 
 # LANG for OSX
 #export LC_ALL=C
-#export LANG=en_US.UTF-8
+export LC_CTYPE=UTF-8
+export LANG=en_US.UTF-8
 
 # UpTeX bin PATH
 #export PATH="/Applications/UpTeX.app/teTeX/bin:$PATH"
