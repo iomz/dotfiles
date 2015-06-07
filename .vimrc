@@ -12,6 +12,10 @@ call neobundle#begin(expand('~/.vim/bundle'))
 " Manage neobundle itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
+" dirvish.vim {{{2
+"---------------------------------------------
+NeoBundle 'justinmk/vim-dirvish'
+
 " Unite.vim {{{2
 "---------------------------------------------
 NeoBundle 'Shougo/unite.vim'

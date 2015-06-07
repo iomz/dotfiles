@@ -10,3 +10,16 @@
     lg = log -p
 [gui]
 	recentrepo = /Users/iomz/Dropbox/auto-id/paper/paper-ieeerfidta2015-multicode
+[mergetool "Kaleidoscope"]
+[merge]
+[difftool "Kaleidoscope"]
+[difftool]
+[mergetool]
+[diff]
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustexitcode = true
+[push]
+	default = simple
