@@ -12,12 +12,17 @@ call neobundle#begin(expand('~/.vim/bundle'))
 " Manage neobundle itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
+" vim-trailing-whitespace {{{2
+"---------------------------------------------
+NeoBundle 'bronson/vim-trailing-whitespace'
+
 " dirvish.vim {{{2
 "---------------------------------------------
 NeoBundle 'justinmk/vim-dirvish'
 
 " Unite.vim {{{2
 "---------------------------------------------
+NeoBundle 'Shougo/vimproc.vim'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/neomru.vim'
 
@@ -36,8 +41,20 @@ let g:unite_source_history_yank_enable = 1
 nnoremap <silent> fy :<C-u>Unite history/yank<CR>
 
 " Configure ag for unite
+
+let g:unite_source_history_yank_enable = 1
+try
+  let g:unite_source_rec_async_command='ag --nocolor --nogroup -g ""'
+  call unite#filters#matcher_default#use(['matcher_fuzzy'])
+catch
+endtry
+" search a file in the filetree
+nnoremap <space><space> :split<cr> :<C-u>Unite -start-insert file_rec/async<cr>
+" reset not it is <C-l> normally
+:nnoremap <space>r <Plug>(unite_restart)
+" grep
 let g:unite_source_grep_command = 'ag'
-"let g:unite_source_grep_default_opts = '--nocolor --nogroup'                                                                                              
+let g:unite_source_grep_default_opts = '--nocolor --nogroup'                                                                                              
 let g:unite_source_grep_max_candidates = 200
 let g:unite_source_grep_recursive_opt = ''
 " unite-grep key map
@@ -268,8 +285,12 @@ if !has('vim_starting')
 endif
 
 "}}}
-" Indentation {{{1
+" Etiquette {{{1
 "---------------------------------------------
+if (exists('+colorcolumn'))
+    set colorcolumn=80
+    highlight ColorColumn ctermbg=8
+endif
 au BufNewFile,BufRead *.bib set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
