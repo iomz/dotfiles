@@ -35,6 +35,14 @@ nnoremap <silent> fr :<C-u>Unite -buffer-name=register register<CR>
 let g:unite_source_history_yank_enable = 1
 nnoremap <silent> fy :<C-u>Unite history/yank<CR>
 
+" Configure ag for unite
+let g:unite_source_grep_command = 'ag'
+"let g:unite_source_grep_default_opts = '--nocolor --nogroup'                                                                                              
+let g:unite_source_grep_max_candidates = 200
+let g:unite_source_grep_recursive_opt = ''
+" unite-grep key map
+vnoremap /g y:Unite grep::-iRn:<C-R>=escape(@", '\\.*$^[]')<CR><CR>
+
 " vim-quickrun {{{2
 "---------------------------------------------
 NeoBundle 'thinca/vim-quickrun'
