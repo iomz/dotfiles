@@ -1,8 +1,13 @@
+install aalib
 install ant
+install arp-scan
 install aspell
 install astyle
+install atk
 install autoconf
 install automake
+install autossh
+install babl
 install bison
 install boost
 install brew-cask
@@ -13,6 +18,7 @@ install colordiff
 install cscope
 install ctags
 install czmq
+install d-bus
 install dirmngr
 install faac
 install ffmpeg
@@ -21,11 +27,16 @@ install flac
 install fontconfig
 install fontforge
 install freetype
+install gawk
 install gcc48
+install gd
 install gdbm
+install gdk-pixbuf
+install gegl02
 install gettext
 install ghostscript
 install gifsicle
+install gimp
 install gist
 install git
 install git-flow
@@ -37,7 +48,12 @@ install gnupg2
 install go
 install gobject-introspection
 install gpg-agent
+install gsettings-desktop-schemas
+install gtk+
+install gtk+3
+install gtk-mac-integration
 install harfbuzz
+install hicolor-icon-theme
 install htop-osx
 install icu4c
 install imagemagick
@@ -48,7 +64,9 @@ install jq
 install lame
 install lesstif
 install libassuan
+install libcroco
 install libebml
+install libepoxy
 install libevent
 install libffi
 install libgcrypt
@@ -59,6 +77,7 @@ install libmatroska
 install libmpc08
 install libogg
 install libpng
+install librsvg
 install libsodium
 install libtiff
 install libtool
@@ -66,9 +85,11 @@ install libusb
 install libusb-compat
 install libvo-aacenc
 install libvorbis
+install libwmf
 install libyaml
 install little-cms2
 install logrotate
+install lsyncd
 install lua
 install lv
 install makedepend
@@ -80,6 +101,8 @@ install ngrep
 install nkf
 install nmap
 install node
+install oniguruma
+install openmotif
 install openssl
 install pandoc
 install pango
@@ -90,6 +113,9 @@ install pkg-config
 install popt
 install pstree
 install pth
+install py2cairo
+install pygobject
+install pygtk
 install python
 install readline
 install reattach-to-user-namespace
@@ -97,11 +123,14 @@ install rsense
 install rtmpdump
 install ruby
 install scons
+install simstring
 install spark
 install sqlite
 install ssh-copy-id
 install subversion
 install texi2html
+install the_silver_searcher
+install tidy-html5
 install tmux
 install tree
 install vim
@@ -114,9 +143,12 @@ install xz
 install yasm
 install zeromq
 install zsh
+cask install handbrake
 cask install kaleidoscope
 cask install ksdiff
 cask install mactex
+cask install osxfuse
 cask install shapes
+cask install sshfs
 cask install wireshark
 cask install xquartz

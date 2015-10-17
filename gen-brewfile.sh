@@ -2,7 +2,7 @@
 
 # Check an existing Brewfile
 if [ -e Brewfile ]; then
-	echo "Brewfile already exists."
+	echo "Brewfile already exists. Overwriting Brewfile."
     rm -f Brewfile
 fi
 

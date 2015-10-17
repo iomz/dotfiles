@@ -8,6 +8,9 @@ alias kess='less -R'
 export LC_CTYPE=UTF-8
 export LANG=en_US.UTF-8
 
+# Python
+export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+
 # UpTeX bin PATH
 #export PATH="/Applications/UpTeX.app/teTeX/bin:$PATH"
 

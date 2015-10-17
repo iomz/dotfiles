@@ -6,10 +6,12 @@
     ci = commit
     br = branch
     co = checkout
-    df = diff
+    df = diff --color
     lg = log -p
+    gg = log --oneline --abbrev-commit --all --graph --decorate --color
 [gui]
 	recentrepo = /Users/iomz/Dropbox/auto-id/paper/paper-ieeerfidta2015-multicode
+	recentrepo = /Users/iomz/violin/OH2015-clone
 [mergetool "Kaleidoscope"]
 [merge]
 [difftool "Kaleidoscope"]
@@ -23,3 +25,11 @@
 	trustexitcode = true
 [push]
 	default = simple
+[core]
+	excludesfile = /Users/iomz/.gitignore_global
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true

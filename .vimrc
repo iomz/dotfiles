@@ -12,6 +12,17 @@ call neobundle#begin(expand('~/.vim/bundle'))
 " Manage neobundle itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
+" vim-easy-align {{{2
+"---------------------------------------------
+NeoBundle 'junegunn/vim-easy-align'
+
+" Easy align interactive
+vnoremap <silent> <Enter> :EasyAlign<cr>
+
+" vim-gitgutter {{{2
+"---------------------------------------------
+NeoBundle 'airblade/vim-gitgutter'
+
 " vim-trailing-whitespace {{{2
 "---------------------------------------------
 NeoBundle 'bronson/vim-trailing-whitespace'
@@ -23,6 +34,7 @@ NeoBundle 'justinmk/vim-dirvish'
 " Unite.vim {{{2
 "---------------------------------------------
 NeoBundle 'Shougo/vimproc.vim'
+" do :VimProcInstall
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/neomru.vim'
 
@@ -41,7 +53,6 @@ let g:unite_source_history_yank_enable = 1
 nnoremap <silent> fy :<C-u>Unite history/yank<CR>
 
 " Configure ag for unite
-
 let g:unite_source_history_yank_enable = 1
 try
   let g:unite_source_rec_async_command='ag --nocolor --nogroup -g ""'
