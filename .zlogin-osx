@@ -36,9 +36,9 @@ export GOROOT=/usr/local/opt/go/libexec
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # Android Studio
-export STUDIO_JDK=/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk
-export ANDROID_SDK=$HOME/Library/Android/sdk/platform-tools
-export PATH=$ANDROID_SDK:$PATH
+#export STUDIO_JDK=/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk
+#export ANDROID_SDK=$HOME/Library/Android/sdk/platform-tools
+#export PATH=$ANDROID_SDK:$PATH
 
 # Maven => defined from dotfiles/Environment.app
 #export M2_HOME="/usr/local/Cellar/maven/3.3.1/libexec"

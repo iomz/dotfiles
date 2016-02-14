@@ -65,7 +65,7 @@ nnoremap <space><space> :split<cr> :<C-u>Unite -start-insert file_rec/async<cr>
 :nnoremap <space>r <Plug>(unite_restart)
 " grep
 let g:unite_source_grep_command = 'ag'
-let g:unite_source_grep_default_opts = '--nocolor --nogroup'                                                                                              
+let g:unite_source_grep_default_opts = '--nocolor --nogroup'
 let g:unite_source_grep_max_candidates = 200
 let g:unite_source_grep_recursive_opt = ''
 " unite-grep key map
@@ -249,8 +249,8 @@ endfunction
 
 function! MyFilename()
   return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() : 
-        \  &ft == 'unite' ? unite#get_status_string() : 
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+        \  &ft == 'unite' ? unite#get_status_string() :
         \  &ft == 'vimshell' ? vimshell#get_status_string() :
         \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
         \ ('' != MyModified() ? ' ' . MyModified() : '')
@@ -299,7 +299,7 @@ endif
 " Etiquette {{{1
 "---------------------------------------------
 if (exists('+colorcolumn'))
-    set colorcolumn=80
+    "set colorcolumn=80
     highlight ColorColumn ctermbg=8
 endif
 au BufNewFile,BufRead *.bib set tabstop=2 shiftwidth=2
@@ -383,6 +383,8 @@ inoremap <C-b> <Left>
 inoremap <C-n> <Down>
 inoremap <C-p> <Up>
 inoremap <C-f> <Right>
+noremap <expr> <C-f> max([winheight(0) - 2, 1]) . "\<C-d>" . (line('.') > line('$') - winheight(0) ? 'L' : 'H')
+noremap <expr> <C-b> max([winheight(0) - 2, 1]) . "\<C-u>" . (line('.') < 1 + winheight(0) ? 'H' : 'L')
 "inoremap { {}<LEFT>
 "inoremap [ []<LEFT>
 "inoremap ( ()<LEFT>
@@ -462,3 +464,4 @@ hi Folded ctermbg=232
 " vim: foldcolumn=3
 " vim: foldlevel=0
 
+" Shift + { or Shift } to unfold
