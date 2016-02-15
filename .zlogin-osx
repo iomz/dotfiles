@@ -3,6 +3,9 @@ alias ls='ls -CFG'
 alias diff='colordiff'
 alias kess='less -R'
 
+# C# environment
+alias mdtool='/Applications/Xamarin\ Studio.app/Contents/MacOS/mdtool'
+
 # LANG for OSX
 #export LC_ALL=C
 export LC_CTYPE=UTF-8
