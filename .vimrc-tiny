@@ -199,8 +199,8 @@ endif
 " Key remappings
 "---------------------------------------------
 nnoremap Y y$
-nnoremap - <C-a>
-nnoremap + <C-x>
+nnoremap + <C-a>
+nnoremap - <C-x>
 inoremap <C-b> <Left>
 inoremap <C-n> <Down>
 inoremap <C-p> <Up>
