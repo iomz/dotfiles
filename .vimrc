@@ -203,6 +203,25 @@ au FileType go nmap <leader>b <Plug>(go-build)
 au FileType go nmap <leader>t <Plug>(go-test)
 
 "}}}
+" ctrlp.vim + cpsm {{{2
+"---------------------------------------------
+NeoBundle 'ctrlpvim/ctrlp.vim'
+NeoBundle 'nixprime/cpsm'
+
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlP'
+let g:ctrlp_working_path_mode = 'ra'
+"let g:ctrlp_by_filename = 1
+let g:ctrlp_user_command = 'files %s'               " Full path doesn't work!
+"let g:ctrlp_user_command = 'files -a %s'
+"let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
+let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
+let g:ctrlp_clear_cache_on_exit = 0
+let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
+let g:cpsm_query_inverting_delimiter = ' '
+let g:cpsm_match_empty_query = 0
+
+"}}}
 " vim-yaml {{{2
 "---------------------------------------------
 NeoBundle 'stephpy/vim-yaml'

@@ -2,6 +2,7 @@
 alias ls='ls -CFG'
 alias diff='colordiff'
 alias kess='less -R'
+alias cat='ccat'
 
 # C# environment
 alias mdtool='/Applications/Xamarin\ Studio.app/Contents/MacOS/mdtool'
@@ -59,3 +60,7 @@ export PATH=$PATH:$HOME/.rvm/bin
 # Home bin
 export PATH=$HOME/bin:$PATH
 
+# Ansible hosts
+export ANSIBLE_HOSTS=/etc/ansible/hosts
+export ANSIBLE_SCP_IF_SSH=y
+#source ~/repos/ansible/hacking/env-setup -q
