@@ -109,38 +109,43 @@ for color in {000..255}; do
     FG[$color]="%{\e[38;5;${color}m%}"
     BG[$color]="%{\e[48;5;${color}m%}"
 done
-
-colors=( # colors[0] is default
+# colors[0] is default
+colors=(
+    $'%{\e[38;5;3m%}' # yellow
+    $'%{\e[38;5;9m%}' # brown red
+    $'%{\e[38;5;6m%}' # cyan
+    $'%{\e[38;5;5m%}' # magenta
+    $'%{\e[38;5;4m%}' # blue
+    $'%{\e[38;5;111m%}' # pale purple
+    $'%{\e[38;5;27m%}' # ocean blue
+    $'%{\e[38;5;129m%}' # purple
     $'%{\e[38;5;1m%}' # red
     $'%{\e[38;5;2m%}' # green
-    $'%{\e[38;5;3m%}' # yellow
-    $'%{\e[38;5;4m%}' # blue
-    $'%{\e[38;5;5m%}' # magenta
-    $'%{\e[38;5;6m%}' # cyan
-    $'%{\e[38;5;7m%}' # light yellow
-    $'%{\e[38;5;9m%}' # brown red
-    $'%{\e[38;5;27m%}' # ocean blue
-    $'%{\e[38;5;79m%}' # pale green
-    $'%{\e[38;5;129m%}' # purple
+    $'%{\e[38;5;113m%}' # lime green
 )
 ## Show all 256 colors with color number
 ZSH_SPECTRUM_TEXT=${ZSH_SPECTRUM_TEXT:-Arma virumque cano Troiae qui primus ab oris}
 function spectrum_ls() {
-#  for code in {000..255}; do
   for code in {1..${#colors}}; do
-#    print -P -- "$code: %{$FG[$code]%}$ZSH_SPECTRUM_TEXT%{$reset_color%}"
     print -P -- "$code: $colors[$code]$ZSH_SPECTRUM_TEXT%{$reset_color%}"
   done
 }
-
+function spectrum_all() {
+  for code in {000..255}; do
+    print -P -- "$code: %{$FG[$code]%}$ZSH_SPECTRUM_TEXT%{$reset_color%}"
+  done
+}
 colored_time=%{$fg[cyan]%}%T
-colored_user=%{$fg[red]%}%n
-colored_at=%{$reset_color%}@ # white
+#colored_user=%{$fg[red]%}%n
+colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
+colored_at=%{$fg[white]%}@
 colored_host=$colors[$((`echo "$HOST" | sum | cut -f1 -d' '`%${#colors}))+1]$HOST
-colored_tilda=%{$fg[magenta]%}%~
+colored_colon=%{$reset_color%}:
+colored_path=%{$fg[magenta]%}%~
+colored_prompt=%{$reset_color%}%#
 
 #PROMPT=$'%{\e[0;31m%}%* %n$ '
-PROMPT="${colored_time} ${colored_user}${colored_at}$colored_host ${colored_tilda} %{$reset_color%}%# "
+PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}${colored_path} $colored_prompt "
 #PROMPT="%{$fg[cyan]%}%T %{$fg[red]%}%n%{$fg[green]%}@%{$fg[blue]%}%m %{$fg[magenta]%}%~ %{$reset_color%}%#"
 #RPROMPT=$'%{\e[0;33m%}%/%{\e[m%}'
 #RPROMPT="%{$fg_bold[yellow]%}%/%{$reset_color%}%"
