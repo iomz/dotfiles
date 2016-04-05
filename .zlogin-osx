@@ -63,4 +63,6 @@ export PATH=$HOME/bin:$PATH
 # Ansible hosts
 export ANSIBLE_HOSTS=/etc/ansible/hosts
 export ANSIBLE_SCP_IF_SSH=y
-#source ~/repos/ansible/hacking/env-setup -q
+function load_ansible() {
+    source ~/repos/ansible/hacking/env-setup -q
+}

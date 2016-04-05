@@ -1,6 +1,7 @@
 install aalib
 install ant
 install arp-scan
+install arping
 install aspell
 install astyle
 install atk
@@ -11,10 +12,14 @@ install babl
 install bison
 install boost
 install brew-cask
+install bwm-ng
 install cairo
+install ccat
 install cloc
 install cloog018
+install cmake
 install colordiff
+install coreutils
 install cscope
 install ctags
 install czmq
@@ -45,6 +50,7 @@ install gmp
 install gmp4
 install gnu-tar
 install gnupg2
+install gnuplot
 install go
 install gobject-introspection
 install gpg-agent
@@ -59,6 +65,7 @@ install icu4c
 install imagemagick
 install isl011
 install jbig2dec
+install jhead
 install jpeg
 install jq
 install lame
@@ -75,6 +82,7 @@ install libksba
 install libmagic
 install libmatroska
 install libmpc08
+install libnet
 install libogg
 install libpng
 install librsvg
@@ -117,6 +125,7 @@ install py2cairo
 install pygobject
 install pygtk
 install python
+install qt
 install readline
 install reattach-to-user-namespace
 install rsense
@@ -150,5 +159,8 @@ cask install mactex
 cask install osxfuse
 cask install shapes
 cask install sshfs
+cask install vagrant
+cask install vagrant-manager
+cask install virtualbox
 cask install wireshark
 cask install xquartz
