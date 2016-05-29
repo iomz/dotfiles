@@ -1,0 +1,2 @@
+setenv('GNUTERM', 'aqua')
+PS1('>> ')

@@ -11,7 +11,6 @@ install autossh
 install babl
 install bison
 install boost
-install brew-cask
 install bwm-ng
 install cairo
 install ccat
@@ -27,7 +26,6 @@ install d-bus
 install dirmngr
 install faac
 install ffmpeg
-install fish
 install flac
 install fontconfig
 install fontforge
@@ -96,7 +94,6 @@ install libvorbis
 install libwmf
 install libyaml
 install little-cms2
-install logrotate
 install lsyncd
 install lua
 install lv
@@ -128,7 +125,6 @@ install python
 install qt
 install readline
 install reattach-to-user-namespace
-install rsense
 install rtmpdump
 install ruby
 install scons

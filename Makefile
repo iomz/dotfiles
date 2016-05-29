@@ -25,13 +25,17 @@ osx:
 bsd:
 	echo "Nothing to do for bsd yet..."
 
+.PHONY: msc
+msc:
+	ln -s `pwd`/.octaverc ~/.octaverc
+
 .PHONY: lua-vim
 lua-vim:
 	ln -s `pwd`/.vimrc ~/.vimrc
 	mkdir -p ~/.vim_backup
 	mkdir -p ~/.vim/bundle && cd ~/.vim/bundle && git clone https://github.com/Shougo/neobundle.vim.git
-	ruby ~/.vim/bundle/rsense/etc/config.rb > ~/.rsense
-	
+	#ruby ~/.vim/bundle/rsense/etc/config.rb > ~/.rsense
+
 .PHONY: tiny-vim
 tiny-vim:
 	ln -s `pwd`/.vimrc-tiny ~/.vimrc

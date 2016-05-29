@@ -1,3 +1,5 @@
+" Shift + { or Shift } to unfold
+"
 " Plugins {{{1
 " NeoBundle
 "---------------------------------------------
@@ -230,6 +232,18 @@ NeoBundle 'stephpy/vim-yaml'
 " vim-dispatch {{{2
 "---------------------------------------------
 NeoBundle 'tpope/vim-dispatch'
+
+"}}}
+" nerdtree {{{2
+"---------------------------------------------
+NeoBundle 'scrooloose/nerdtree'
+map <C-n> :NERDTreeToggle<CR>
+
+"}}}
+" vim-indent-guides {{{2
+"---------------------------------------------
+"NeoBundle 'nathanaelkane/vim-indent-guides'
+"let g:indent_guides_enable_on_vim_startup = 1
 
 "}}}
 " lightline.vim {{{2
@@ -482,5 +496,3 @@ hi Folded ctermbg=232
 " vim: foldmethod=marker
 " vim: foldcolumn=3
 " vim: foldlevel=0
-
-" Shift + { or Shift } to unfold

@@ -3,13 +3,17 @@ alias ls='ls -CFG'
 alias diff='colordiff'
 alias kess='less -R'
 alias cat='ccat'
+alias vi='vim'
 
 # C# environment
-alias mdtool='/Applications/Xamarin\ Studio.app/Contents/MacOS/mdtool'
+#alias mdtool='/Applications/Xamarin\ Studio.app/Contents/MacOS/mdtool'
+## For brew installed mono
+export MONO_GAC_PREFIX="/usr/local"
 
 # LANG for OSX
 #export LC_ALL=C
-export LC_CTYPE=UTF-8
+#export LC_CTYPE=UTF-8
+export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 # Python
@@ -64,5 +68,9 @@ export PATH=$HOME/bin:$PATH
 export ANSIBLE_HOSTS=/etc/ansible/hosts
 export ANSIBLE_SCP_IF_SSH=y
 function load_ansible() {
-    source ~/repos/ansible/hacking/env-setup -q
+    #source /opt/ansible/hacking/env-setup -q
+    source /opt/ansible/hacking/env-setup
 }
+
+# Octave PATH
+export FONTCONFIG_PATH=/opt/X11/lib/X11/fontconfig

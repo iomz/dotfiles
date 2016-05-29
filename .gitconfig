@@ -3,12 +3,41 @@
 	email = iori.mizutani@gmail.com
 [alias]
     st = status
+
+    amend = commit --amend
     ci = commit
+    cia = commit -a
+    cam = commit --amend
+    cama = commit --amend -a
+
+    cl = clean
+    cldf = clean -df
+
     br = branch
+    branches = branch -a
+
+    tags = tag
+
+    stashes = stash list
+
+    unstage = reset -q HEAD --
+    uncommit = reset --mixed HEAD~
+    res = reset
+    resa = reset HEAD
+    nevermind = !git reset --hard HEAD && git clean -d -f
+
     co = checkout
+    discard = checkout --
+
     df = diff --color
+    precommit = diff --cached --diff-algorithm=minimal -w
+    unmerged = diff --name-only --diff-filter=U
+
+    remotes = remote -v
+
     lg = log -p
     gg = log --oneline --abbrev-commit --all --graph --decorate --color
+    graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
 [gui]
 	recentrepo = /Users/iomz/Dropbox/auto-id/paper/paper-ieeerfidta2015-multicode
 	recentrepo = /Users/iomz/violin/OH2015-clone
