@@ -167,3 +167,6 @@ zstyle ':completion:*:manuals' separate-sections true
 stty start undef
 stty stop undef
 
+
+# added by travis gem
+[ -f /Users/iomz/.travis/travis.sh ] && source /Users/iomz/.travis/travis.sh

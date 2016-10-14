@@ -1,24 +1,24 @@
 all:
-	ln -s `pwd`/.zshrc ~/.zshrc
-	ln -s `pwd`/.dircolors ~/.dircolors
-	ln -s `pwd`/.gitconfig ~/.gitconfig
-	ln -s `pwd`/.screenrc ~/.screenrc
+	ln -sf `pwd`/.dircolors ~/.dircolors
+	ln -sf `pwd`/.gitconfig ~/.gitconfig
+	ln -sf `pwd`/.screenrc ~/.screenrc
+	ln -sf `pwd`/.zshrc ~/.zshrc
 
 .PHONY: cheat
 cheat:
 	# go get github.com/dufferzafar/cheat
 	git clone https://github.com/jahendrie/cheat.git
-	ln -s `pwd`/cheat/data ~/.cheatsheets
+	ln -sf `pwd`/cheat/data ~/.cheatsheets
 
 .PHONY: linux
 linux:
-	ln -s `pwd`/.zlogin-linux ~/.zlogin
-	ln -s `pwd`/.tmux.conf-linux ~/.tmux.conf
+	ln -sf `pwd`/.tmux.conf-linux ~/.tmux.conf
+	ln -sf `pwd`/.zlogin-linux ~/.zlogin
 
 .PHONY: osx
 osx:
-	ln -s `pwd`/.zlogin-osx ~/.zlogin
-	ln -s `pwd`/.tmux.conf-osx ~/.tmux.conf
+	ln -sf `pwd`/.tmux.conf-osx ~/.tmux.conf
+	ln -sf `pwd`/.zlogin-osx ~/.zlogin
 	#defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "`pwd`/Environment.app"; "Hide" = 0; }'
 
 .PHONY: bsd
@@ -27,27 +27,28 @@ bsd:
 
 .PHONY: msc
 msc:
-	ln -s `pwd`/.octaverc ~/.octaverc
+	ln -sf `pwd`/.octaverc ~/.octaverc
 
 .PHONY: lua-vim
 lua-vim:
-	ln -s `pwd`/.vimrc ~/.vimrc
+	ln -sf `pwd`/.vimrc ~/.vimrc
 	mkdir -p ~/.vim_backup
 	mkdir -p ~/.vim/bundle && cd ~/.vim/bundle && git clone https://github.com/Shougo/neobundle.vim.git
 	#ruby ~/.vim/bundle/rsense/etc/config.rb > ~/.rsense
 
 .PHONY: tiny-vim
 tiny-vim:
-	ln -s `pwd`/.vimrc-tiny ~/.vimrc
+	ln -sf `pwd`/.vimrc-tiny ~/.vimrc
 	mkdir -p ~/.vim_backup
 	mkdir -p ~/.vim/bundle && cd ~/.vim/bundle && git clone https://github.com/Shougo/neobundle.vim.git
 
 .PHONY: clean
 clean:
-	unlink ~/.zshrc
-	unlink ~/.vimrc
-	unlink ~/.zlogin
-	unlink ~/.tmux.conf
-	unlink ~/.dircolors
+	unlink -f ~/.zshrc
+	unlink -f ~/.vimrc
+	unlink -f ~/.zlogin
+	unlink -f ~/.screenrc
+	unlink -f ~/.tmux.conf
+	unlink -f ~/.dircolors
 	rm -fr ~/.vim ~/.vim_backup
 

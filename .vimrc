@@ -35,9 +35,18 @@ NeoBundle 'justinmk/vim-dirvish'
 
 " Unite.vim {{{2
 "---------------------------------------------
-NeoBundle 'Shougo/vimproc.vim'
+NeoBundle 'Shougo/vimproc.vim', {
+\ 'build' : {
+\     'windows' : 'tools\\update-dll-mingw',
+\     'cygwin' : 'make -f make_cygwin.mak',
+\     'mac' : 'make',
+\     'linux' : 'make',
+\     'unix' : 'gmake',
+\    },
+\ }
 " do :VimProcInstall
 NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/unite-outline'
 NeoBundle 'Shougo/neomru.vim'
 
 " List buffers
@@ -192,6 +201,11 @@ augroup END
 " vim-go {{{2
 "---------------------------------------------
 NeoBundle 'fatih/vim-go'
+NeoBundle 'majutsushi/tagbar'
+NeoBundle 'dgryski/vim-godef'
+NeoBundle 'vim-jp/vim-go-extra'
+" vim-ft-go for old vi
+NeoBundle 'google/vim-ft-go'
 
 ":GoInstallBinaries
 exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
@@ -204,6 +218,37 @@ au FileType go nmap <leader>r <Plug>(go-run)
 au FileType go nmap <leader>b <Plug>(go-build)
 au FileType go nmap <leader>t <Plug>(go-test)
 
+"}}}
+" VimFilerTree {{{2
+NeoBundle 'Shougo/vimfiler'
+command! VimFilerTree call VimFilerTree(<f-args>)
+function VimFilerTree(...)
+    let l:h = expand(a:0 > 0 ? a:1 : '%:p:h')
+    let l:path = isdirectory(l:h) ? l:h : ''
+    exec ':VimFiler -buffer-name=explorer -split -simple -winwidth=45 -toggle -no-quit ' . l:path
+    wincmd t
+    setl winfixwidth
+endfunction
+autocmd! FileType vimfiler call g:my_vimfiler_settings()
+"function! g:my_vimfiler_settings()
+"    nmap     <buffer><expr><CR> vimfiler#smart_cursor_map("\<Plug>(vimfiler_expand_tree)", "\<Plug>(vimfiler_edit_file)")
+"    nnoremap <buffer>s          :call vimfiler#mappings#do_action('my_split')<CR>
+"    nnoremap <buffer>v          :call vimfiler#mappings#do_action('my_vsplit')<CR>
+"endfunction
+
+"let my_action = {'is_selectable' : 1}
+"function! my_action.func(candidates)
+"    wincmd p
+"    exec 'split '. a:candidates[0].action__path
+"endfunction
+"call unite#custom_action('file', 'my_split', my_action)
+"
+"let my_action = {'is_selectable' : 1}
+"function! my_action.func(candidates)
+"    wincmd p
+"    exec 'vsplit '. a:candidates[0].action__path
+"endfunction
+"call unite#custom_action('file', 'my_vsplit', my_action)
 "}}}
 " ctrlp.vim + cpsm {{{2
 "---------------------------------------------
@@ -337,7 +382,9 @@ if (exists('+colorcolumn'))
 endif
 au BufNewFile,BufRead *.bib set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.go set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.py set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.tex set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.xml set tabstop=2 shiftwidth=2
@@ -424,6 +471,7 @@ noremap <expr> <C-b> max([winheight(0) - 2, 1]) . "\<C-u>" . (line('.') < 1 + wi
 "inoremap " ""<LEFT>
 "inoremap ' ''<LEFT>
 "inoremap < <><LEFT>
+map <C-a> :Tagbar<CR>
 
 "}}}
 " Options {{{1

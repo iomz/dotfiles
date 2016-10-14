@@ -1,2 +1,3 @@
-setenv('GNUTERM', 'aqua')
+setenv('GNUTERM', 'qt')
+#setenv('GNUTERM', 'aqua')
 PS1('>> ')
