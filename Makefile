@@ -44,11 +44,11 @@ tiny-vim:
 
 .PHONY: clean
 clean:
-	unlink -f ~/.zshrc
-	unlink -f ~/.vimrc
-	unlink -f ~/.zlogin
-	unlink -f ~/.screenrc
-	unlink -f ~/.tmux.conf
-	unlink -f ~/.dircolors
+	rm -f ~/.zshrc
+	rm -f ~/.vimrc
+	rm -f ~/.zlogin
+	rm -f ~/.screenrc
+	rm -f ~/.tmux.conf
+	rm -f ~/.dircolors
 	rm -fr ~/.vim ~/.vim_backup
 
