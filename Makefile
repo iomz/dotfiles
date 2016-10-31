@@ -33,6 +33,8 @@ msc:
 lua-vim:
 	ln -sf `pwd`/.vimrc ~/.vimrc
 	mkdir -p ~/.vim_backup
+	mkdir -p ~/.vim/colors
+	cp molokai.vim ~/.vim/colors/molokai.vim
 	mkdir -p ~/.vim/bundle && cd ~/.vim/bundle && git clone https://github.com/Shougo/neobundle.vim.git
 	#ruby ~/.vim/bundle/rsense/etc/config.rb > ~/.rsense
 

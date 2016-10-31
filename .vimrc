@@ -544,3 +544,6 @@ hi Folded ctermbg=232
 " vim: foldmethod=marker
 " vim: foldcolumn=3
 " vim: foldlevel=0
+
+" Color
+colorscheme molokai
