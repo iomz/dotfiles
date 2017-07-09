@@ -1,33 +1,23 @@
+UNAME_S := $(shell uname -s)
+CANDIDATES := $(wildcard .??*) bin
+EXCLUSIONS := .DS_Store .git .gitignore .tmux.conf.darwin .tmux.conf.linux .vimrc .vimrc-tiny .zsh
+DOTFILES   := $(filter-out $(EXCLUSIONS), $(CANDIDATES))
+
+.DEFAULT_GOAL := init
+
 all:
-	ln -sf `pwd`/.dircolors ~/.dircolors
-	ln -sf `pwd`/.gitconfig ~/.gitconfig
-	ln -sf `pwd`/.screenrc ~/.screenrc
-	ln -sf `pwd`/.zshrc ~/.zshrc
+
+init:
+	@$(foreach val, $(DOTFILES), ln -sfnv $(abspath $(val)) $(HOME)/$(val);)
+
+msc:
+	#defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "`pwd`/Environment.app"; "Hide" = 0; }'
 
 .PHONY: cheat
 cheat:
 	# go get github.com/dufferzafar/cheat
 	git clone https://github.com/jahendrie/cheat.git
 	ln -sf `pwd`/cheat/data ~/.cheatsheets
-
-.PHONY: linux
-linux:
-	ln -sf `pwd`/.tmux.conf-linux ~/.tmux.conf
-	ln -sf `pwd`/.zlogin-linux ~/.zlogin
-
-.PHONY: osx
-osx:
-	ln -sf `pwd`/.tmux.conf-osx ~/.tmux.conf
-	ln -sf `pwd`/.zlogin-osx ~/.zlogin
-	#defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "`pwd`/Environment.app"; "Hide" = 0; }'
-
-.PHONY: bsd
-bsd:
-	echo "Nothing to do for bsd yet..."
-
-.PHONY: msc
-msc:
-	ln -sf `pwd`/.octaverc ~/.octaverc
 
 .PHONY: lua-vim
 lua-vim:
@@ -46,11 +36,10 @@ tiny-vim:
 
 .PHONY: clean
 clean:
-	rm -f ~/.zshrc
-	rm -f ~/.vimrc
-	rm -f ~/.zlogin
-	rm -f ~/.screenrc
-	rm -f ~/.tmux.conf
-	rm -f ~/.dircolors
+	unlink ~/.zshenv
+	unlink ~/.vimrc
+	unlink ~/.screenrc
+	unlink ~/.tmux.conf
+	unlink ~/.dircolors
 	rm -fr ~/.vim ~/.vim_backup
 
