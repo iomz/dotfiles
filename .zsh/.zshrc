@@ -1,21 +1,13 @@
-# default configuration
-if [ -f ${ZDOTDIR}/default.zsh ]; then
-    source ${ZDOTDIR}/default.zsh
-fi
-
-# environmental variables for development
-if [ -f ${ZDOTDIR}/devenv.zsh ]; then
-    source ${ZDOTDIR}/devenv.zsh
-fi
-
-# alias
-if [ -f ${ZDOTDIR}/aliases.zsh ]; then
-    source ${ZDOTDIR}/aliases.zsh
-fi
-
-# setopt
-if [ -f ${ZDOTDIR}/setopts.zsh ]; then
-    source ${ZDOTDIR}/setopts.zsh
+# Attach tmux on login
+if [ ! -z `which tmux` ]; then
+  if [ $SHLVL = 1 ]; then
+    if [ $(( `ps aux | grep tmux | grep $USER | grep -v grep | wc -l` )) != 0 ]; then
+      echo -n 'Attach tmux session? [Y/n]'
+      read YN
+      [[ $YN = '' ]] && YN=y
+      [[ $YN = y ]] && tmux attach
+    fi
+  fi
 fi
 
 # source .profile and .login
@@ -75,15 +67,31 @@ REPORTTIME=3
 stty start undef
 stty stop undef
 
-# Attach tmux on login
-if [ ! -z `which tmux` ]; then
-  if [ $SHLVL = 1 ]; then
-    if [ $(( `ps aux | grep tmux | grep $USER | grep -v grep | wc -l` )) != 0 ]; then
-      echo -n 'Attach tmux session? [Y/n]'
-      read YN
-      [[ $YN = '' ]] && YN=y
-      [[ $YN = y ]] && tmux attach
-    fi
-  fi
+# default configuration
+if [ -f ${ZDOTDIR}/default.zsh ]; then
+    source ${ZDOTDIR}/default.zsh
+fi
+
+# environmental variables for development
+if [ -f ${ZDOTDIR}/devenv.zsh ]; then
+    source ${ZDOTDIR}/devenv.zsh
+fi
+
+# alias
+if [ -f ${ZDOTDIR}/aliases.zsh ]; then
+    source ${ZDOTDIR}/aliases.zsh
+fi
+
+# setopt
+if [ -f ${ZDOTDIR}/setopts.zsh ]; then
+    source ${ZDOTDIR}/setopts.zsh
+fi
+
+# antigen
+if [ -f ${ZDOTDIR}/antigen.zsh ]; then
+    source ${ZDOTDIR}/antigen.zsh
+    antigen bundle b4b4r07/emoji-cli
+    # Tell Antigen that you're done.
+    antigen apply
 fi
 
