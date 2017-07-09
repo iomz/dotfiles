@@ -7,20 +7,21 @@ DOTFILES   := $(filter-out $(EXCLUSIONS), $(CANDIDATES))
 
 all:
 
-init:
+init: ## Symlink dotfiles
 	@$(foreach val, $(DOTFILES), ln -sfnv $(abspath $(val)) $(HOME)/$(val);)
 
-msc:
+.PHONY: osx
+msc: ## for osx to install Environment.app for startup
 	#defaults write loginwindow AutoLaunchedApplicationDictionary -array-add '{ "Path" = "`pwd`/Environment.app"; "Hide" = 0; }'
 
 .PHONY: cheat
-cheat:
+cheat: ## install cheat command
 	# go get github.com/dufferzafar/cheat
 	git clone https://github.com/jahendrie/cheat.git
 	ln -sf `pwd`/cheat/data ~/.cheatsheets
 
 .PHONY: lua-vim
-lua-vim:
+lua-vim: ## setup lua vim with full options
 	ln -sf `pwd`/.vimrc ~/.vimrc
 	mkdir -p ~/.vim_backup
 	mkdir -p ~/.vim/colors
@@ -29,17 +30,19 @@ lua-vim:
 	#ruby ~/.vim/bundle/rsense/etc/config.rb > ~/.rsense
 
 .PHONY: tiny-vim
-tiny-vim:
+tiny-vim: ## vim for a tiny env
 	ln -sf `pwd`/.vimrc-tiny ~/.vimrc
 	mkdir -p ~/.vim_backup
 	mkdir -p ~/.vim/bundle && cd ~/.vim/bundle && git clone https://github.com/Shougo/neobundle.vim.git
 
 .PHONY: clean
-clean:
-	unlink ~/.zshenv
-	unlink ~/.vimrc
-	unlink ~/.screenrc
-	unlink ~/.tmux.conf
-	unlink ~/.dircolors
+clean: ## Unlink dotfiles
+	@-$(foreach val, $(DOTFILES), unlink $(HOME)/$(val);)
 	rm -fr ~/.vim ~/.vim_backup
+
+.PHONY: help
+help: ## Self-documented Makefile
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+    		| sort \
+            | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
