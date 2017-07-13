@@ -2,8 +2,8 @@
 export ANSIBLE_HOSTS=/etc/ansible/hosts
 export ANSIBLE_SCP_IF_SSH=y
 
-# fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# $HOME/bin
+export PATH=$HOME/bin:$PATH
 
 # Golang
 export GOPATH=$HOME/go

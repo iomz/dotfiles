@@ -87,10 +87,20 @@ if [ -f ${ZDOTDIR}/setopts.zsh ]; then
     source ${ZDOTDIR}/setopts.zsh
 fi
 
+# fzf
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # antigen
 if [ -f ${ZDOTDIR}/antigen.zsh ]; then
     source ${ZDOTDIR}/antigen.zsh
+    # Syntax highlighting bundle.
+    antigen bundle zsh-users/zsh-syntax-highlighting
+
+    # emoji lookup
     antigen bundle b4b4r07/emoji-cli
+    # One-liner lookup
+    antigen bundle b4b4r07/easy-oneliner
+
     # Tell Antigen that you're done.
     antigen apply
 fi
