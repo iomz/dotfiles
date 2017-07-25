@@ -14,6 +14,11 @@ call neobundle#begin(expand('~/.vim/bundle'))
 " Manage neobundle itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
+" emoji-vim {{{2
+"---------------------------------------------
+NeoBundle 'mattn/emoji-vim'
+
+
 " vim-easy-align {{{2
 "---------------------------------------------
 NeoBundle 'junegunn/vim-easy-align'
@@ -172,15 +177,15 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 "}}}
 " jedi-vim {{{2
 "---------------------------------------------
-NeoBundle 'davidhalter/jedi-vim'
-autocmd FileType python setlocal completeopt-=preview
-autocmd FileType python setlocal omnifunc=jedi#completions
-let g:jedi#completions_enabled = 0
-let g:jedi#auto_vim_configuration = 0
-if !exists('g:neocomplete#force_omni_input_patterns')
-        let g:neocomplete#force_omni_input_patterns = {}
-endif
-let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*''])'
+"NeoBundle 'davidhalter/jedi-vim'
+"autocmd FileType python setlocal completeopt-=preview
+"autocmd FileType python setlocal omnifunc=jedi#completions
+"let g:jedi#completions_enabled = 0
+"let g:jedi#auto_vim_configuration = 0
+"if !exists('g:neocomplete#force_omni_input_patterns')
+"        let g:neocomplete#force_omni_input_patterns = {}
+"endif
+"let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*''])'
 
 "}}}
 " emmet-vim {{{2
@@ -384,7 +389,7 @@ au BufNewFile,BufRead *.bib set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.go set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.py set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.py set tabstop=4 shiftwidth=4
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.tex set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.xml set tabstop=2 shiftwidth=2
@@ -546,4 +551,4 @@ hi Folded ctermbg=232
 " vim: foldlevel=0
 
 " Color
-colorscheme molokai
+colorscheme adventurous

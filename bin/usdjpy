@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# @(#) usdjpy v0.0.1 2017-07-10
+#
+# usage:
+#   usdjpy
+#
+# description:
+#   show the currency conversion rate (USD->JPY)
+#
+######################################################################
+
+INTERVAL=5
+
+seconds_from_epoch=( $(date +%s) )
+rate=( $(cat /tmp/usdjpy-latest) )
+
+if [[ $rate =~ ^[0-9]+([.][0-9]+)?$ ]]
+then
+    echo -e "$rate JPY/USD"
+fi
+
+if (( $seconds_from_epoch % $INTERVAL == 0 ))
+then
+    yahoo_finance_api="http://download.finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USDJPY=X"
+    curl -s "$yahoo_finance_api" | cut -d, -f2 > /tmp/usdjpy-latest &
+    #yql_usdjpy="https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22USDJPY%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
+    #curl -s "$yql_usdjpy" | jq ".query.results.rate.Rate" | sed -e 's/^"//' -e 's/"$//' > /tmp/usdjpy-latest &
+fi
+
