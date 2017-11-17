@@ -551,6 +551,7 @@ hi Folded ctermbg=232
 " vim: foldlevel=0
 
 " Color
+autocmd ColorScheme * highlight LineNr ctermfg=122
 colorscheme adventurous
 
 set re=1
