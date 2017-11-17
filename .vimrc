@@ -552,3 +552,5 @@ hi Folded ctermbg=232
 
 " Color
 colorscheme adventurous
+
+set re=1

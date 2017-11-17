@@ -7,7 +7,6 @@ export PATH=$HOME/bin:$PATH
 
 # Golang
 export GOPATH=$HOME/go
-export GOROOT=/usr/local/opt/go/libexec
 if [ -f $GOROOT/misc/zsh/go ]; then
     source $GOROOT/misc/zsh/go
 fi
@@ -19,11 +18,6 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 # OS specific
 case ${OSTYPE} in
     darwin*)
-        # Ansible
-        function load_ansible() {
-            #source /opt/ansible/hacking/env-setup -q
-            source /opt/ansible/hacking/env-setup
-        }
         # Octave PATH
         export FONTCONFIG_PATH=/opt/X11/lib/X11/fontconfig
         # Homebrew
@@ -35,6 +29,9 @@ case ${OSTYPE} in
         eval `/usr/libexec/path_helper -s`
         # Python
         export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+	# rbenv
+	export PATH=~/.rbenv/shims:$PATH
+	eval "$(rbenv init -)"
         ;;
     linux*)
         ;;

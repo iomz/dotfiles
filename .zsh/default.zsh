@@ -19,6 +19,14 @@ colors=(
     $'%{\e[38;5;2m%}'   # green
     $'%{\e[38;5;113m%}' # lime green
 )
+## stderr in red
+zmodload zsh/terminfo zsh/system
+color_stderr() {
+  while sysread std_err_color; do
+    syswrite -o 2 "${fg_bold[red]}${std_err_color}${terminfo[sgr0]}"
+  done
+}
+exec 2> >(color_stderr)
 ## Show all 256 colors with color number
 ZSH_SPECTRUM_TEXT=${ZSH_SPECTRUM_TEXT:-Arma virumque cano Troiae qui primus ab oris}
 function spectrum_ls() {
