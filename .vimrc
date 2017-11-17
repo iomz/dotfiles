@@ -215,13 +215,20 @@ NeoBundle 'google/vim-ft-go'
 ":GoInstallBinaries
 exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
 set completeopt=menu,preview
-au FileType go nmap <Leader>i <Plug>(go-info)
-au FileType go nmap <Leader>gd <Plug>(go-doc)
-au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
-au FileType go nmap <Leader>gb <Plug>(go-doc-browser)
-au FileType go nmap <leader>r <Plug>(go-run)
-au FileType go nmap <leader>b <Plug>(go-build)
-au FileType go nmap <leader>t <Plug>(go-test)
+autocmd FileType go nmap <Space>gr <Plug>(go-run)
+autocmd FileType go nmap <Space>gb <Plug>(go-build)
+autocmd FileType go nmap <Space>gt <Plug>(go-test)
+autocmd FileType go nmap <Space>gc <Plug>(go-coverage)
+autocmd FileType go nmap <Space>gd <Plug>(go-doc)
+autocmd FileType go nmap <Space>gi <Plug>(go-import)
+autocmd FileType go nmap <Space>gm <Plug>(go-implements)
+let g:go_highlight_methods = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_build_constraints = 1
+autocmd FileType go setlocal noexpandtab
+autocmd FileType go setlocal tabstop=2
+autocmd FileType go setlocal shiftwidth=2
 
 "}}}
 " VimFilerTree {{{2
@@ -258,7 +265,10 @@ autocmd! FileType vimfiler call g:my_vimfiler_settings()
 " ctrlp.vim + cpsm {{{2
 "---------------------------------------------
 NeoBundle 'ctrlpvim/ctrlp.vim'
-NeoBundle 'nixprime/cpsm'
+NeoBundle 'nixprime/cpsm', {
+  \ 'build': {
+  \   'others': 'sh install.sh'
+  \}}
 
 let g:ctrlp_map = '<c-p>'
 let g:ctrlp_cmd = 'CtrlP'

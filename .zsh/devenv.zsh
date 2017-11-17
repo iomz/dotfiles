@@ -12,9 +12,6 @@ if [ -f $GOROOT/misc/zsh/go ]; then
 fi
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-# RVM
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
 # OS specific
 case ${OSTYPE} in
     darwin*)
@@ -28,10 +25,10 @@ case ${OSTYPE} in
         # MacTeX
         eval `/usr/libexec/path_helper -s`
         # Python
-        export PYTHONPATH=/usr/local/lib/python2.7/site-packages
-	# rbenv
-	export PATH=~/.rbenv/shims:$PATH
-	eval "$(rbenv init -)"
+        #export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+	    # rbenv
+	    export PATH=~/.rbenv/shims:$PATH
+        eval "$(rbenv init -)"
         ;;
     linux*)
         ;;

@@ -9,6 +9,7 @@
     cia = commit -a
     cam = commit --amend
     cama = commit --amend -a
+    pom = push origin master
 
     cl = clean
     cldf = clean -df
@@ -53,12 +54,10 @@
 	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
 	trustexitcode = true
 [push]
-	default = simple
 [core]
 	excludesfile = /Users/iomz/.gitignore_global
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
 [mergetool "sourcetree"]
 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
