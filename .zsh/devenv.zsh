@@ -25,7 +25,8 @@ case ${OSTYPE} in
         # MacTeX
         eval `/usr/libexec/path_helper -s`
         # Python
-        #export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+        export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+        export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 	    # rbenv
 	    export PATH=~/.rbenv/shims:$PATH
         eval "$(rbenv init -)"
