@@ -14,12 +14,8 @@ call neobundle#begin(expand('~/.vim/bundle'))
 " Manage neobundle itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-" emoji-vim {{{2
-"---------------------------------------------
-NeoBundle 'mattn/emoji-vim'
-
-
 " vim-easy-align {{{2
+" alignment
 "---------------------------------------------
 NeoBundle 'junegunn/vim-easy-align'
 
@@ -27,67 +23,22 @@ NeoBundle 'junegunn/vim-easy-align'
 vnoremap <silent> <Enter> :EasyAlign<cr>
 
 " vim-gitgutter {{{2
+" Mark the git diff
 "---------------------------------------------
 NeoBundle 'airblade/vim-gitgutter'
 
 " vim-trailing-whitespace {{{2
+" Mark the trailing whitespaces
 "---------------------------------------------
 NeoBundle 'bronson/vim-trailing-whitespace'
 
 " dirvish.vim {{{2
+" Directory viewer
 "---------------------------------------------
 NeoBundle 'justinmk/vim-dirvish'
 
-" Unite.vim {{{2
-"---------------------------------------------
-NeoBundle 'Shougo/vimproc.vim', {
-\ 'build' : {
-\     'windows' : 'tools\\update-dll-mingw',
-\     'cygwin' : 'make -f make_cygwin.mak',
-\     'mac' : 'make',
-\     'linux' : 'make',
-\     'unix' : 'gmake',
-\    },
-\ }
-" do :VimProcInstall
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/unite-outline'
-NeoBundle 'Shougo/neomru.vim'
-
-" List buffers
-nnoremap <silent> fb :<C-u>Unite buffer<CR>
-" List file_mru as buffer
-nnoremap <silent> fu :<C-u>Unite file_mru buffer<CR>
-" List files
-nnoremap <silent> ff :<C-u>UniteWithBufferDir -buffer-name=dotfiles file<CR>
-" List recent files
-nnoremap <silent> fm :<C-u>Unite file_mru<CR>
-" List registers
-nnoremap <silent> fr :<C-u>Unite -buffer-name=register register<CR>
-" List and set a yank
-let g:unite_source_history_yank_enable = 1
-nnoremap <silent> fy :<C-u>Unite history/yank<CR>
-
-" Configure ag for unite
-let g:unite_source_history_yank_enable = 1
-try
-  let g:unite_source_rec_async_command='ag --nocolor --nogroup -g ""'
-  call unite#filters#matcher_default#use(['matcher_fuzzy'])
-catch
-endtry
-" search a file in the filetree
-nnoremap <space><space> :split<cr> :<C-u>Unite -start-insert file_rec/async<cr>
-" reset not it is <C-l> normally
-:nnoremap <space>r <Plug>(unite_restart)
-" grep
-let g:unite_source_grep_command = 'ag'
-let g:unite_source_grep_default_opts = '--nocolor --nogroup'
-let g:unite_source_grep_max_candidates = 200
-let g:unite_source_grep_recursive_opt = ''
-" unite-grep key map
-vnoremap /g y:Unite grep::-iRn:<C-R>=escape(@", '\\.*$^[]')<CR><CR>
-
 " vim-quickrun {{{2
+" quickrun of script files
 "---------------------------------------------
 NeoBundle 'thinca/vim-quickrun'
 let g:quickrun_no_default_key_mappings = 1
@@ -156,38 +107,6 @@ autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
-"}}}
-" rsense {{{2
-"---------------------------------------------
-"NeoBundleLazy 'marcus/rsense', {
-"    \ 'autoload': {
-"    \   'filetypes': 'ruby'
-"    \ },
-"    \ }
-"NeoBundleLazy 'supermomonga/neocomplete-rsense.vim', {
-"    \ 'depends': ['Shougo/neocomplete.vim', 'marcus/rsense'],
-"    \ }
-"
-"let g:rsenseUseOmniFunc = 1
-"if !exists('g:neocomplete#force_omni_input_patterns')
-"    let g:neocomplete#force_omni_input_patterns = {}
-"endif
-"let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'']'
-
-"}}}
-" jedi-vim {{{2
-"---------------------------------------------
-"NeoBundle 'davidhalter/jedi-vim'
-"autocmd FileType python setlocal completeopt-=preview
-"autocmd FileType python setlocal omnifunc=jedi#completions
-"let g:jedi#completions_enabled = 0
-"let g:jedi#auto_vim_configuration = 0
-"if !exists('g:neocomplete#force_omni_input_patterns')
-"        let g:neocomplete#force_omni_input_patterns = {}
-"endif
-"let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*''])'
-
-"}}}
 " emmet-vim {{{2
 "---------------------------------------------
 NeoBundle 'mattn/emmet-vim'
@@ -207,29 +126,28 @@ augroup END
 "---------------------------------------------
 NeoBundle 'fatih/vim-go'
 NeoBundle 'majutsushi/tagbar'
-NeoBundle 'dgryski/vim-godef'
-NeoBundle 'vim-jp/vim-go-extra'
-" vim-ft-go for old vi
-NeoBundle 'google/vim-ft-go'
 
 ":GoInstallBinaries
 exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
 set completeopt=menu,preview
 autocmd FileType go nmap <Space>gr <Plug>(go-run)
-autocmd FileType go nmap <Space>gb <Plug>(go-build)
+autocmd FileType go nmap <Space>gb :TagbarToggle<CR>
 autocmd FileType go nmap <Space>gt <Plug>(go-test)
 autocmd FileType go nmap <Space>gc <Plug>(go-coverage)
 autocmd FileType go nmap <Space>gd <Plug>(go-doc)
-autocmd FileType go nmap <Space>gi <Plug>(go-import)
+autocmd FileType go nmap <Space>gi <Plug>(go-info)
 autocmd FileType go nmap <Space>gm <Plug>(go-implements)
 autocmd FileType go nmap <Space>gf :GoFmt<CR>
+autocmd FileType go setlocal noexpandtab
+autocmd FileType go setlocal tabstop=2
+autocmd FileType go setlocal shiftwidth=2
+"let g:go_fmt_command = 'gofmt'
+"let g:go_fmt_autosave = 1
+"let g:go_fmt_options = "-tabs=false -tabwidth=2"
 let g:go_highlight_methods = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_functions = 1
 let g:go_highlight_build_constraints = 1
-autocmd FileType go setlocal noexpandtab
-autocmd FileType go setlocal tabstop=2
-autocmd FileType go setlocal shiftwidth=2
 
 "}}}
 " VimFilerTree {{{2
@@ -243,27 +161,10 @@ function VimFilerTree(...)
     setl winfixwidth
 endfunction
 autocmd! FileType vimfiler call g:my_vimfiler_settings()
-"function! g:my_vimfiler_settings()
-"    nmap     <buffer><expr><CR> vimfiler#smart_cursor_map("\<Plug>(vimfiler_expand_tree)", "\<Plug>(vimfiler_edit_file)")
-"    nnoremap <buffer>s          :call vimfiler#mappings#do_action('my_split')<CR>
-"    nnoremap <buffer>v          :call vimfiler#mappings#do_action('my_vsplit')<CR>
-"endfunction
 
-"let my_action = {'is_selectable' : 1}
-"function! my_action.func(candidates)
-"    wincmd p
-"    exec 'split '. a:candidates[0].action__path
-"endfunction
-"call unite#custom_action('file', 'my_split', my_action)
-"
-"let my_action = {'is_selectable' : 1}
-"function! my_action.func(candidates)
-"    wincmd p
-"    exec 'vsplit '. a:candidates[0].action__path
-"endfunction
-"call unite#custom_action('file', 'my_vsplit', my_action)
 "}}}
 " ctrlp.vim + cpsm {{{2
+" CtrlP and cpsm configuration
 "---------------------------------------------
 NeoBundle 'ctrlpvim/ctrlp.vim'
 NeoBundle 'nixprime/cpsm', {
@@ -271,11 +172,13 @@ NeoBundle 'nixprime/cpsm', {
   \   'others': 'sh install.sh'
   \}}
 
+set runtimepath^=~/.vim/bundle/ctrlp.vim
+
 let g:ctrlp_map = '<c-p>'
 let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_working_path_mode = 'ra'
 "let g:ctrlp_by_filename = 1
-let g:ctrlp_user_command = 'files %s'               " Full path doesn't work!
+let g:ctrlp_user_command = '~/go/bin/files %s'               " Full path doesn't work!
 "let g:ctrlp_user_command = 'files -a %s'
 "let g:ctrlp_user_command = 'find %s -type f'       " MacOSX/Linux
 let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
@@ -291,6 +194,7 @@ NeoBundle 'stephpy/vim-yaml'
 
 "}}}
 " vim-dispatch {{{2
+" test dispatcher
 "---------------------------------------------
 NeoBundle 'tpope/vim-dispatch'
 
@@ -299,12 +203,6 @@ NeoBundle 'tpope/vim-dispatch'
 "---------------------------------------------
 NeoBundle 'scrooloose/nerdtree'
 map <C-n> :NERDTreeToggle<CR>
-
-"}}}
-" vim-indent-guides {{{2
-"---------------------------------------------
-"NeoBundle 'nathanaelkane/vim-indent-guides'
-"let g:indent_guides_enable_on_vim_startup = 1
 
 "}}}
 " lightline.vim {{{2
@@ -398,7 +296,7 @@ if (exists('+colorcolumn'))
 endif
 au BufNewFile,BufRead *.bib set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.go set tabstop=2 shiftwidth=2
+"au BufNewFile,BufRead *.go set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
 au BufNewFile,BufRead *.py set tabstop=4 shiftwidth=4
 au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
@@ -535,16 +433,6 @@ augroup InsertHook
     autocmd!
     autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
     autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=ccdc90
-augroup END
-
-augroup BinaryXXD
-	autocmd!
-	autocmd BufReadPre  *.bin let &binary =1
-	autocmd BufReadPost * if &binary | silent %!xxd -g 1
-	autocmd BufReadPost * set ft=xxd | endif
-	autocmd BufWritePre * if &binary | %!xxd -r | endif
-	autocmd BufWritePost * if &binary | silent %!xxd -g 1
-	autocmd BufWritePost * set nomod | endif
 augroup END
 
 augroup swapchoice-readonly
