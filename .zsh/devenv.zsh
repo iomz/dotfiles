@@ -1,5 +1,4 @@
 # Ansible
-export ANSIBLE_HOSTS=/etc/ansible/hosts
 export ANSIBLE_SCP_IF_SSH=y
 
 # $HOME/bin
