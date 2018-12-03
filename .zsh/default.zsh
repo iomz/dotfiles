@@ -26,7 +26,7 @@ color_stderr() {
     syswrite -o 2 "${fg_bold[red]}${std_err_color}${terminfo[sgr0]}"
   done
 }
-exec 2> >(color_stderr)
+#exec 2> >(color_stderr)
 ## Show all 256 colors with color number
 ZSH_SPECTRUM_TEXT=${ZSH_SPECTRUM_TEXT:-Arma virumque cano Troiae qui primus ab oris}
 function spectrum_ls() {

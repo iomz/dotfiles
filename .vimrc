@@ -42,7 +42,7 @@ NeoBundle 'justinmk/vim-dirvish'
 "---------------------------------------------
 NeoBundle 'thinca/vim-quickrun'
 let g:quickrun_no_default_key_mappings = 1
-nnoremap <silent> <C-q> :QuickRun<CR>
+map <C-q> :QuickRun<CR>
 
 let g:quickrun_config = {
 \   "_" : {
@@ -129,11 +129,11 @@ NeoBundle 'majutsushi/tagbar'
 
 ":GoInstallBinaries
 exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
-set completeopt=menu,preview
+set completeopt=menu
 autocmd FileType go nmap <Space>gr <Plug>(go-run)
 autocmd FileType go nmap <Space>gb :TagbarToggle<CR>
 autocmd FileType go nmap <Space>gt <Plug>(go-test)
-autocmd FileType go nmap <Space>gc <Plug>(go-coverage)
+autocmd FileType go nmap <Space>gc :GoCoverageToggle<CR>
 autocmd FileType go nmap <Space>gd <Plug>(go-doc)
 autocmd FileType go nmap <Space>gi <Plug>(go-info)
 autocmd FileType go nmap <Space>gm <Plug>(go-implements)
@@ -169,7 +169,7 @@ autocmd! FileType vimfiler call g:my_vimfiler_settings()
 NeoBundle 'ctrlpvim/ctrlp.vim'
 NeoBundle 'nixprime/cpsm', {
   \ 'build': {
-  \   'others': 'sh install.sh'
+  \   'others': 'env PY3=ON sh install.sh'
   \}}
 
 set runtimepath^=~/.vim/bundle/ctrlp.vim
@@ -186,6 +186,14 @@ let g:ctrlp_clear_cache_on_exit = 0
 let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 let g:cpsm_query_inverting_delimiter = ' '
 let g:cpsm_match_empty_query = 0
+
+"}}}
+" yankround.vim
+"--------------------------------------------
+NeoBundle 'LeafCage/yankround.vim'
+let g:yankround_max_history = 35
+let g:yankround_dir = '~/.cache/yankround'
+map <C-y> :CtrlPYankRound<CR>
 
 "}}}
 " vim-yaml {{{2
