@@ -1,3 +1,5 @@
 .DS_Store
+.config/*
 .zsh/antigen.zsh
 .zsh/.zcompdump
+.zsh/.zshrc.zwc
