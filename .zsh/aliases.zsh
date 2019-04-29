@@ -5,7 +5,8 @@ case ${OSTYPE} in
         alias diff='colordiff'
         alias kess='less -R'
         alias cat='ccat'
-        alias vi='vim'
+        alias vi='nvim'
+        alias vim='nvim'
         ;;
     linux*)
         alias ls='ls --color=always'
