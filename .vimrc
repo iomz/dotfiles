@@ -1,4 +1,4 @@
-"                                _
+"endif                                _
 "                         __   _(_)_ __ ___  _ __ ___
 "                         \ \ / / | '_ ` _ \| '__/ __|
 "                          \ V /| | | | | | | | | (__
@@ -123,6 +123,7 @@ set shiftwidth=4
 set expandtab
 set list
 set listchars=tab:»-
+autocmd FileType go set listchars& | set list&
 
 " Fold
 set foldlevel=100
@@ -226,19 +227,51 @@ noremap <silent> <ScrollWheelUp>   :call comfortable_motion#flick(-40)<CR>
 map R <Plug>(operator-replace)
 
 " Denite
-nnoremap [denite] <Nop>
-nmap <Leader>d [denite]
-nnoremap <silent> [denite]f :<C-u>Denite file/rec<CR>
+autocmd FileType denite call s:denite_settings()
+function! s:denite_settings() abort
+  nnoremap <silent><buffer><expr> <CR>
+        \ denite#do_map('do_action')
+  nnoremap <silent><buffer><expr> <C-v>
+        \ denite#do_map('do_action', 'vsplit')
+  nnoremap <silent><buffer><expr> d
+        \ denite#do_map('do_action', 'delete')
+  nnoremap <silent><buffer><expr> p
+        \ denite#do_map('do_action', 'preview')
+  nnoremap <silent><buffer><expr> <Esc>
+        \ denite#do_map('quit')
+  nnoremap <silent><buffer><expr> q
+        \ denite#do_map('quit')
+  nnoremap <silent><buffer><expr> i
+        \ denite#do_map('open_filter_buffer')
+endfunction
+
+autocmd FileType denite-filter call s:denite_filter_settings()
+
+function! s:denite_filter_settings() abort
+  nmap <silent><buffer> <Esc> <Plug>(denite_filter_quit)
+endfunction
+
+nnoremap <C-p> :<C-u>Denite file_rec<CR>
+nnoremap <leader>s :<C-u>Denite buffer<CR>
+nnoremap <leader>8 :<C-u>DeniteCursorWord grep:.<CR>
+nnoremap <leader>/ :<C-u>Denite grep:.<CR>
+nnoremap <leader><Space>/ :<C-u>DeniteBufferDir grep:.<CR>
+nnoremap <leader>d :<C-u>DeniteBufferDir file/rec -start-filter<CR>
+nnoremap <leader>r :<C-u>Denite -resume -cursor-pos=+1<CR>
+nnoremap <leader><C-r> :<C-u>Denite register:.<CR>
+nnoremap <leader>g :<C-u>Denite gitstatus<CR>
+
+hi link deniteMatchedChar Special
 
 " Go
 augroup key_map
   autocmd!
-  autocmd FileType go nmap <leader>b <Plug>(go-build)
-  autocmd FileType go nmap <leader>r <Plug>(go-run)
-  autocmd FileType go nmap <leader>t <Plug>(go-test)
-  autocmd FileType go nmap <leader>tf <Plug>(go-test-func)
-  autocmd FileType go nmap <leader>c <Plug>(go-coverage-toggle)
-  autocmd FileType go nmap <leader>i <Plug>(go-info)
+  autocmd FileType go nmap <leader>gb <Plug>(go-build)
+  autocmd FileType go nmap <leader>gr <Plug>(go-run)
+  autocmd FileType go nmap <leader>gt <Plug>(go-test)
+  autocmd FileType go nmap <leader>gtf <Plug>(go-test-func)
+  autocmd FileType go nmap <leader>gc <Plug>(go-coverage-toggle)
+  autocmd FileType go nmap <leader>gi <Plug>(go-info)
 augroup END
 " }}}
 
@@ -459,8 +492,10 @@ let g:quickrun_config._ = {
       \ 'outputter/error/success' : 'buffer',
       \ 'outputter/error/error'   : 'buffer',
       \ 'outputter/buffer/close_on_empty' : 1,
+      \ 'outputter/buffer/split' : ':botright vsplit',
       \ }
 nnoremap <Leader>q :<C-u>bw! \[quickrun\ output\]<CR>
+map <C-q> :QuickRun<CR>
 " }}}
 
 " vim-airline/vim-airline {{{
