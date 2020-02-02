@@ -1,0 +1,4 @@
+# Change white background to transparent
+1. Open a png file with GIMP
+2. Image \> Mode \> RGB
+3. Colors \> Color to Alpha

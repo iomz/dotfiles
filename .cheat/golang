@@ -1,0 +1,95 @@
+# To measure a time it took for a (part of) function, use defer and timeTrack function like below.
+```
+import (
+  "fmt"
+  "log"
+  "time"
+)
+
+// Time
+func timeTrack(start time.Time, name string) {
+  elapsed := time.Since(start)
+  log.Printf("%s took %s", name, elapsed)
+}
+
+func doSomething(){
+  parameter := 1
+  defer timeTrack(time.Now(), fmt.Sprintf("doing something with a parameter %v took", parameter))
+  // do something
+}
+```
+
+# Iteration order
+When iterating over a map with a range loop, the iteration order is not specified and is not guaranteed to be the same from one iteration to the next. Since Go 1 the runtime randomizes map iteration order, as programmers relied on the stable iteration order of the previous implementation. If you require a stable iteration order you must maintain a separate data structure that specifies that order. This example uses a separate sorted slice of keys to print a map[int]string in key order:
+```
+import "sort"
+
+var m map[int]string
+var keys []int
+for k := range m {
+    keys = append(keys, k)
+}
+sort.Ints(keys)
+for _, k := range keys {
+    fmt.Println("Key:", k, "Value:", m[k])
+}
+```
+
+# MQTT in Golang
+```
+// MQTT client (publisher)
+// mqtt-pub2.go
+package main
+
+// Reference : http://tdoc.info/blog/2014/09/25/mqtt_golang.html
+
+import (
+    "fmt"
+    "log"
+
+    MQTT "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
+)
+
+func Publish(client *MQTT.MqttClient, cnt int) error {
+    topic := "mqtt/a/b/c"
+    qos := 0
+    message := fmt.Sprintf("MQTT from golang: %d", cnt)
+
+    // https://godoc.org/git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git#MqttClient.Publish
+    // return the Receipt chan
+    result := client.Publish(MQTT.QoS(qos), topic, message)
+    <- result
+
+    return nil
+}
+
+func main() {
+    host := "172.16.75.137"
+    port := 1883
+
+    // read http://www.rabbitmq.com/mqtt.html : Authentication
+    user := "/:guest"
+    password := "guest"
+
+    opts := MQTT.NewClientOptions()
+    opts.SetUsername(user)
+    opts.SetPassword(password)
+
+    brokerUri := fmt.Sprintf("tcp://%s:%d", host, port)
+    opts.AddBroker(brokerUri)
+
+    client := MQTT.NewClient(opts)
+
+    _, err := client.Start()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for i := 0; i < 1000000; i++ {
+        err = Publish(client, i)
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+}
+```

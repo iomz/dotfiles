@@ -1,0 +1,13 @@
+# とりあえずシステムにboot
+grub> linux /boot/vmlinuz-<TAB> root=/dev/sdXN
+grub> initrd /boot/initrd-<TAB>
+grub> boot
+
+ubuntuのインストール先ディスクのblock deviceの名前は勘で
+
+# 起動するようにGRUB2を直す
+
+update-grub
+grub-install /dev/sdX
+grep -E 'svm|vmx' /proc/cpuinfo
+

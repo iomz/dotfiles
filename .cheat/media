@@ -1,0 +1,101 @@
+# Record a live streaming video
+1. List the formats for the video
+youtube-dl --list-formats "https://www.youtube.com/watch\?v\=6aXR-SL5L2o"
+[youtube] 6aXR-SL5L2o: Downloading webpage
+[youtube] 6aXR-SL5L2o: Downloading video info webpage
+[youtube] 6aXR-SL5L2o: Extracting video information
+[youtube] 6aXR-SL5L2o: Downloading formats manifest
+[youtube] 6aXR-SL5L2o: Downloading MPD manifest
+[info] Available formats for 6aXR-SL5L2o:
+format code  extension  resolution note
+91           mp4        144p       HLS , h264, aac  @ 48k
+92           mp4        240p       HLS , h264, aac  @ 48k
+93           mp4        360p       HLS , h264, aac  @128k
+94           mp4        480p       HLS , h264, aac  @128k
+95           mp4        720p       HLS , h264, aac  @256k (best)
+
+2. Pick the format you wish to download, and fetch the HLS m3u8 URL of the video from the manifest. For example, pick 720p(95):
+youtube-dl -f 95 -g "https://www.youtube.com/watch\?v\=6aXR-SL5L2o"
+https://manifest.googlevideo.com/api/manifest/hls_playlist/id/6aXR-SL5L2o.1/itag/95/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/cmbypass/yes/goi/160/sgoap/itag%3D140/sgovp/itag%3D136/hls_chunk_host/r16---sn-ab5l6ne7.googlevideo.com/gcr/us/playlist_type/DVR/mm/32/mn/sn-ab5l6ne7/ms/lv/mv/u/pl/17/dover/3/fexp/9416126,9416891,9419451,9422596,9423554,9427790,9428193,9428398,9428974,9429011,9431012,9431164,9432683,9433096,9433946,9434343,9434833,9434847,9435186,9435741/upn/UNF1TiBtavY/sver/3/mt/1462544320/ip/64.125.177.124/ipbits/0/expire/1462565936/sparams/ip,ipbits,expire,id,itag,source,requiressl,ratebypass,live,cmbypass,goi,sgoap,sgovp,hls_chunk_host,gcr,playlist_type,mm,mn,ms,mv,pl/signature/67EC57CB964D9D944DE2E1AB40F0E496DA2C73B4.8FBEF1974DF9DB1E614B9C96BA0FF8E52076B04F/key/dg_yt0/playlist/index.m3u8
+
+3. Record the HLS playlist
+ffmpeg -i $(youtube-dl -f 95 -g "https://www.youtube.com/watch\?v\=6aXR-SL5L2o") -c copy output.ts
+
+# ffmpeg
+
+# Make a gif from video
+ffmpeg -i in.mp4 -s 600x400 -pix_fmt rgb24 -r 10 -f gif - | gifsicle --optimize=3 --delay=3 > out.gif
+
+# Extract mp3 from mp4
+ffmpeg -i k.mp4 -q:a 0 -map a k.mp3
+
+# Trim mp4
+ffmpeg -i kohaku.m2t -crf 10 -s hd1080 -ss 13230 -t 390 yonezuu.mp4
+
+# Transcode from wmv to mp4
+ffmpeg -i "${f}" -c:v libx264 -crf 23 -strict -2 -c:a aac -q:a 100 "${f%wmv}mp4";
+
+# Concatnate the videos
+for dir in *; do
+    if [ -d "$dir" ]; then
+        ffmpeg -f concat -safe 0 -i <(for f in "$dir/"*.mp4; do echo "file '$PWD/$f'"; done) -c copy "~/${dir}.mp4"
+    fi
+done
+
+# Print file metadata etc.
+ffmpeg -i path/to/file.ext
+
+# Convert all m4a files to mp3
+for f in *.m4a; do ffmpeg -i "$f" -acodec libmp3lame -vn -b:a 320k "${f%.m4a}.mp3"; done
+
+# Convert video from .foo to .bar
+# -g : GOP, for searchability
+ffmpeg -i input.foo -vcodec bar -acodec baz -b:v 21000k -b:a 320k -g 150 -threads 4 output.bar
+
+# Convert image sequence to video
+ffmpeg -r 18 -pattern_type glob -i '*.png' -b:v 21000k -s hd1080 -vcodec vp9 -an -pix_fmt yuv420p -deinterlace output.ext
+
+# Combine video and audio into one file
+ffmpeg -i video.ext -i audio.ext -c:v copy -c:a copy output.ext
+
+# Listen to 10 seconds of audio from a video file
+#
+# -ss : start time
+# -t  : seconds to cut
+# -autoexit : closes ffplay as soon as the audio finishes
+ffmpeg -ss 00:34:24.85 -t 10 -i path/to/file.mp4 -f mp3 pipe:play | ffplay -i pipe:play -autoexit
+
+# Others
+
+# Convert png->pdf
+convert hoge.png hoge.pdf
+
+# Convert eps->pdf
+pstopdf hoge.eps
+
+# Convert pdf->png
+mkdir -p png && sips -s format png *.pdf --out png
+
+# Convert svg->pdf
+Use AffinityDesinger
+
+# Convert png->eps
+convert hoge.png hoge.eps
+
+# Convert pdf->eps
+pdftops -eps hoge.pdf
+
+# Convert img array to pdf
+for f in *.jpg; do convert "$f" "${f%jpg}eps"; pstopdf "${f%jpg}eps"; done
+
+# Format xml string in the clipboard and generate a file
+pbpaste | xmllint --format - > formatted.xml
+
+# Change extension and convert
+for f in *.jpg; do convert $f ../png/${f%.jpg}.png;done
+
+# Rename photos by exif date
+jhead -nf%Y-%m-%d-%H%M%S hoge.jpg
+
+# Removing subtitles from mkv
+for f in *.mkv; do i=`expr ${#f} - 4`; mkvmerge -o ${f:0:$i}.mkv --nosubs $f; done

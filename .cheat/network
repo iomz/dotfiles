@@ -1,0 +1,84 @@
+## Routing table (macOS)
+netstat -nr
+
+## Add a static route (macOS)
+route add -host 192.168.2.22 -interface en5
+
+# Linux
+The main commands that you want to be familiar with net-tools/iproute2
+- ifconfig -> ip [a|l]
+- route -> ip r# For macOS
+Show the routing table and set a specific route for an IP address
+- netstat -> ss
+- netstat -i -> ip -s l
+- arp -> ip n
+
+# List port and connection
+netstat -anp
+nmap -sT -O localhost
+
+# Portscan
+nmap -sV -p <port> <ipaddress>
+
+# Add a port to firewalld
+firewall-cmd --list-all
+firewall-cmd --zone=public --add-port=4380/tcp --permanent
+firewall-cmd --reload
+
+# Add a port to ufw
+ufw status
+ufw allow 5084/tcp
+ufw reload
+
+# Device up
+
+## ifconfig
+ifconfig eth0 up
+
+## ip
+ip l set eth0 up
+
+# Set an address
+ip addr add 192.168.2.2/24 dev eth0
+
+# Show the routing table (route)
+route -n
+
+# Show the routing table (ip)
+ip r
+
+# Add a default gateway (route)
+route add default gw 192.168.2.1 dev eth0
+
+# Add a default gateway (ip)
+ip route add default via 192.168.2.1 dev eth0
+
+# Add a statuc route
+ip route add 192.168.2.0/24 via 192.168.2.1 dev eth0
+
+# List TCP listening sockets
+ss -ltn
+
+# Print process name/pid owns the connection
+ss -ltp
+
+# Networking (networking.service)
+For adding the persistency to a static route, edit `/etc/network/interfaces` as the following
+```
+auto eth0
+iface eth0 inet static
+  address 192.168.50.2
+  netmask 255.255.255.0
+  gateway 192.168.50.100
+  #########{Static Route}###########
+  up ip route add 10.10.20.0/24 via 192.168.50.100 dev eth0
+```
+
+# Networking (Network Manager)
+nmtui
+
+## nmcli #TODO
+...
+
+# Measure network bandwidth
+bwm-ng

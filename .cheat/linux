@@ -1,0 +1,135 @@
+# Locale (Redhat)
+locale -a
+localedef -v -c -i en_US -f UTF-8 en_US.utf8
+```
+# /etc/environment
+LANG=en_US.utf-8
+LANGUAGE="en_US.utf8"
+LC_ALL=en_US.utf-8
+```
+
+# Locale (Debian)
+locale-gen en_US.UTF-8
+dpkg-reconfigure locales
+```
+LANG=en_US.UTF-8
+LANGUAGE="en_US:en"
+LC_CTYPE=UTF-8
+LC_ALL=en_US.UTF-8
+```
+
+# For General Development (Redhat)
+yum groupinstall "Development tools"
+
+# For General Development (Debian)
+apt install build-essential
+
+# CentOS/RHEL config file
+rpm -ql --configfiles clamav-update
+
+# Setup dropbox in Ubuntu (See https://www.dropbox.com/install-linux)
+cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+~/.dropbox-dist/dropboxd
+
+# Send an e-mail
+apt install mailutils
+echo "Test mail from postfix" | mail -s "Test Postfix" iomz@sfc.wide.ad.jp
+
+# Find files owned by user 80 and chown it by apache
+find ./ -user 80 -exec chown apache {} \;
+
+# Create htdigest
+htdigest -c htdigest_file "Valid User" iomz passwd
+
+# Multiple download via html parsing
+wget -q -O - http://scanningtheearth.org/data | grep "href=\"[0-9]\+\"" | sed "s/^.*href=\"//g" | sed "s/\".*$//g" | xargs -I {} wget -O {}.csv
+
+# Copy diff
+/usr/bin/diff -qr fc-server ../fosstrak-ale/fc-server|grep differ| awk '{print $2, $4;}'
+
+# See Command using ports
+lsof -Pnl +M -i4
+lsof -Pnl +M -i6
+
+# Telnet to HTTPS site
+openssl s_client -connect mixi.jp:443
+> GET /
+
+# Find process by used port
+fuser -a 53275/tcp
+
+# Discard stdout and stderr
+cmd >/dev/null 2>&1
+
+# View file with reloading
+lv file
+> Shift+F
+
+# Calculate lines of codes
+cloc ./src
+
+# Recover invalid sudoers file
+pkexec visudo
+
+# Mount qchan as nfs
+mount -t nfs -o proto=tcp,port=2049 qchan.sfc.wide.ad.jp:/auto-id-backup /mnt/auto-id-backup
+
+# dd with progress
+gdd if=XXXX.iso of=/dev/diskX bs=1M status=progress
+
+# View the most recent 10lines of systemd journal message catalog
+journalctl -xn
+
+# Relabeling a File System
+fixfiles restore
+
+# RCS
+rcsdiff csl.sony.co.jp.zone
+co -l csl.sony.co.jp.zone
+ci -u csl.sony.co.jp.zone
+rlog csl.sony.co.jp.zone | less
+
+# Search someone on ldap
+ldapsearch -x -t “uid=hoge"
+
+# unixtimestamp -> date
+date +%s | gawk '{print strftime("%c", $0)}'
+
+# hex conversion
+echo -n "abc あいう" | iconv -f UTF-8 -t SJIS | xxd -p
+> 6162632082a082a282a4
+
+echo 6162632082a082a282a4 | xxd -r -p | iconv -f SJIS -t UTF-8
+>abc あいう
+
+# Count Japanese  characters
+iconv -f UTF-8 -t EUC-JP scholorship.txt | wc -c | xargs echo '0.5*' | bc
+
+# Kill a particular process
+kill -9 $(pgrep COMMAND)
+
+# Send email with mailutils
+mail -s "Test Subject" root@localhost < /dev/null
+
+# Monitor GNU coreutils progress
+progress -w
+
+# Put multiple json into an array
+cat multi.json | jq -s '.' > obj.json
+
+# Split a huge file by lines
+split -l 1000 -d --additional-suffix=.csv large.csv part-
+
+# Generate LaTeX from Markdown
+pandoc test1.md -f markdown -t html -s -o test1.html
+
+# Change editor for visudo
+update-alternatives --config editor
+EDITOR=VI visudo
+
+# Test ntp reflection attack vulnerability
+nmap -sU -pU:123 -Pn -n --script=ntp-monlist.nse <target host>
+
+# Undo the last apt-get install
+awk '!/^Start|^Commandl|^End|^Upgrade:|^Error:/ { gsub( /\([^()]*\)/ ,"" );gsub(/ ,/," ");sub(/^Install:/,""); print}' /var/log/apt/history.log
+apt-get remove [last line]

@@ -1,0 +1,28 @@
+# Remove prefix: linux_file1.mp4 -> file1.mp4
+for file in linux_*.mp4 ; do mv "$file" "${file#linux_}" ; done
+
+# Remove suffix: hoge_foo.txt -> hoge.txt (http://tiswww.case.edu/php/chet/bash/bashref.html#SEC31)
+mv $f ${f/_foo}
+
+# Replace words
+sed -e ’s/hoge/foo/g’
+
+# Rename photos according to Dropbox Camera Upload
+```
+#!/bin/sh
+path=$1
+opt=$2
+for f in $path/*; do
+  time=`stat -f "%m" "$f"`
+  new=`/bin/date -r $time +'%Y-%m-%d %H.%M.%S.jpg'`
+  if [ "$opt" == "-y" ]; then
+    mv "$f" "$new"
+  else
+    echo "$new"
+  fi
+done
+```
+
+# fix digits
+c=1; for f in *; do name=``printf “Video%0.2i.mkv" $c``; c=``expr $c + 1``; mkvmerge -o $name --nosubs $f; done
+
