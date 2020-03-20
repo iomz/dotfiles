@@ -133,3 +133,28 @@ nmap -sU -pU:123 -Pn -n --script=ntp-monlist.nse <target host>
 # Undo the last apt-get install
 awk '!/^Start|^Commandl|^End|^Upgrade:|^Error:/ { gsub( /\([^()]*\)/ ,"" );gsub(/ ,/," ");sub(/^Install:/,""); print}' /var/log/apt/history.log
 apt-get remove [last line]
+
+# Backupninja
+```
+# /etc/cron.d/backupninja -- cron tab entry for package backupninja
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# run backupninja every hour on the hour
+0 * * * * root if [ -x /usr/local/sbin/backupninja ]; then /usr/local/sbin/backupninja; fi
+```
+
+# Letsencrypt
+```
+# /etc/cron.d/certbot: crontab entries for the certbot package
+#
+# Upstream recommends attempting renewal twice a day
+#
+# Eventually, this will be an opportunity to validate certificates
+# haven't been revoked, etc.  Renewal will only occur if expiration
+# is within 30 days.
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+0 */12 * * * root test -x /usr/bin/certbot -a \! -d /run/systemd/system && perl -e 'sleep int(rand(43200))' && certbot -q renew
+```

@@ -1,6 +1,9 @@
 # Ansible
 export ANSIBLE_SCP_IF_SSH=y
 
+# Editor
+export EDITOR=nvim
+
 # $HOME/bin
 export PATH=$PATH:$HOME/bin
 

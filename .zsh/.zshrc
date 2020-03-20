@@ -97,7 +97,8 @@ if [ -f ${ZDOTDIR}/antigen.zsh ]; then
     antigen bundle zsh-users/zsh-syntax-highlighting
 
     # emoji lookup
-    antigen bundle b4b4r07/emoji-cli
+    #antigen bundle b4b4r07/emoji-cli
+    antigen bundle iomz/emoji-cli
     # One-liner lookup
     antigen bundle b4b4r07/easy-oneliner
 
