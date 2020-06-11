@@ -41,6 +41,10 @@ osx: ## for osx to install Environment.app for startup
 	cp -f ~/.fonts/*.ttf ~/Library/Fonts/
 	fc-cache -vf
 
+.PHONY: dot-config
+	mkdir -p ~/.config
+	ln -sfnv `pwd`/.config/cheat ~/.config/cheat
+
 .PHONY: neovim
 neovim:
 	#brew install python2 python3 neovim

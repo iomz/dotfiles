@@ -61,3 +61,7 @@ case ${OSTYPE} in
         ;;
 esac
 
+# Host specific
+if [ -f $HOME/.zlogin ]; then
+    source $HOME/.zlogin
+fi

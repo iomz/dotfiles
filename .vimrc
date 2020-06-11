@@ -48,6 +48,13 @@ endif
 " Use English interface.
 language message C
 
+" Backup
+set backup
+set backupdir=~/.vim_backup//
+set writebackup
+set backupcopy=yes
+au BufWritePre * let &bex = '@' . strftime("%F.%H:%M")
+
 " Use ',' instead of '\'.
 " Use <Leader> in global plugin.
 let g:mapleader = ','
@@ -251,12 +258,13 @@ function! s:denite_filter_settings() abort
   nmap <silent><buffer> <Esc> <Plug>(denite_filter_quit)
 endfunction
 
-nnoremap <C-p> :<C-u>Denite file_rec<CR>
+"nnoremap <C-p> :<C-u>Denite file/rec<CR>
+"nnoremap <C-p> :<C-u>DeniteBufferDir file/rec -start-filter<CR>
+nnoremap <C-p> :<C-u>Denite file/rec -start-filter<CR>
 nnoremap <leader>s :<C-u>Denite buffer<CR>
 nnoremap <leader>8 :<C-u>DeniteCursorWord grep:.<CR>
 nnoremap <leader>/ :<C-u>Denite grep:.<CR>
 nnoremap <leader><Space>/ :<C-u>DeniteBufferDir grep:.<CR>
-nnoremap <leader>d :<C-u>DeniteBufferDir file/rec -start-filter<CR>
 nnoremap <leader>r :<C-u>Denite -resume -cursor-pos=+1<CR>
 nnoremap <leader><C-r> :<C-u>Denite register:.<CR>
 nnoremap <leader>g :<C-u>Denite gitstatus<CR>
@@ -336,8 +344,11 @@ call dein#add('vim-airline/vim-airline-themes')
 call dein#add('vim-jp/vimdoc-ja')
 call dein#add('w0rp/ale')
 call dein#add('yuttie/comfortable-motion.vim')
-call dein#add('camspiers/animate.vim')
-call dein#add('camspiers/lens.vim')
+call dein#add('neomake/neomake')
+call dein#add('qpkorr/vim-renamer')
+" tig
+call dein#add('rbgrouleff/bclose.vim')
+call dein#add('iberianpig/tig-explorer.vim')
 
 "" cloc (removed for vim-lsp)
 "call dein#add('neoclide/coc.nvim', { 'build': './install.sh nightly' })
@@ -348,6 +359,8 @@ call dein#add('prabirshrestha/asyncomplete.vim')
 call dein#add('prabirshrestha/asyncomplete-lsp.vim')
 call dein#add('prabirshrestha/vim-lsp')
 call dein#add('mattn/vim-lsp-settings', {'merged': 0})
+"let g:lsp_log_verbose = 1
+"let g:lsp_log_file = expand('~/vim-lsp.log')
 
 if has('nvim')
   call dein#add('Shougo/deoplete.nvim')
@@ -480,6 +493,16 @@ let g:sonictemplate_vim_template_dir = ['~/.vim/template']
 
 " miyakogi/seiya.vim {{{
 let g:seiya_auto_enable=1
+" }}}
+
+" neomake/neomake {{{
+"" When writing a buffer (no delay).
+"call neomake#configure#automake('w')
+" when to activate neomake
+call neomake#configure#automake('nrw', 50)
+
+" which linter to enable for Python source file linting
+let g:neomake_python_enabled_makers = ['pylint']
 " }}}
 
 " rcmdnk/vim-markdown {{{
