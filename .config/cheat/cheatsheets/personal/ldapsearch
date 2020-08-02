@@ -1,0 +1,5 @@
+# List all the attributes of a user
+ldapsearch -h 130.82.171.3 -D 'cn=admin,dc=interactions,dc=ics,dc=unisg,dc=ch' -W -b 'ou=people,dc=interactions,dc=ics,dc=unisg,dc=ch' -s sub "(objectclass=*)"
+
+# Test logging in
+ldapwhoami -h 130.82.171.3 -D 'uid=iomz,ou=people,dc=interactions,dc=ics,dc=unisg,dc=ch' -W

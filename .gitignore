@@ -1,6 +1,6 @@
 .DS_Store
 bin/*
-.config/*
+.config/cheat/cheatsheets/community
 .zsh/antigen.zsh
 .zsh/.zcompdump
 .zsh/.zshrc.zwc

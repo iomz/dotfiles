@@ -1,0 +1,186 @@
+[[plugins]]
+repo = 'Shougo/dein.vim'
+
+# A collection of language packs for Vim
+[[plugins]]
+repo = 'junegunn/vim-easy-align'
+hook_add = '''
+vnoremap <silent> <Enter> :EasyAlign<cr>
+'''
+
+# Mark the git diff
+[[plugins]]
+repo = 'airblade/vim-gitgutter'
+
+# Mark the trailing whitespaces
+[[plugins]]
+repo = 'bronson/vim-trailing-whitespace'
+
+# Script quickrun
+[[plugins]]
+repo = 'thinca/vim-quickrun'
+hook_add = '''
+let g:quickrun_no_default_key_mappings = 1
+map <C-q> :QuickRun<CR>
+let g:quickrun_config = {
+    \   "_" : {
+    \       "outputter/buffer/split" : ":botright vsplit",
+    \   }
+    \}
+'''
+
+# YankRound
+[[plugins]]
+repo = 'LeafCage/yankround.vim'
+hook_add = '''
+let g:yankround_max_history = 35
+let g:yankround_dir = '~/.cache/yankround'
+map <C-y> :CtrlPYankRound<CR>
+'''
+
+# NerdTree ...
+[[plugins]]
+repo = 'scrooloose/nerdtree'
+hook_add = '''
+map <C-n> :NERDTreeToggle<CR>
+'''
+
+# lightline ...
+[[plugins]]
+repo = 'itchyny/lightline.vim'
+hook_add = '''
+if !has('gui_running')
+  set t_Co=256
+endif
+
+let g:lightline = {
+    \ 'colorscheme': 'solarized',
+    \ 'mode_map': { 'c': 'NORMAL' },
+    \ 'active': {
+    \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
+    \ },
+    \ 'component_function': {
+    \   'modified': 'MyModified',
+    \   'readonly': 'MyReadonly',
+    \   'fugitive': 'MyFugitive',
+    \   'filename': 'MyFilename',
+    \   'fileformat': 'MyFileformat',
+    \   'filetype': 'MyFiletype',
+    \   'fileencoding': 'MyFileencoding',
+    \   'mode': 'MyMode',
+    \ }
+    \ }
+'''
+hook_source = '''
+function! MyModified()
+  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
+
+function! MyReadonly()
+  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '✗' : ''
+endfunction
+
+function! MyFilename()
+  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+        \  &ft == 'unite' ? unite#get_status_string() :
+        \  &ft == 'vimshell' ? vimshell#get_status_string() :
+        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
+        \ ('' != MyModified() ? ' ' . MyModified() : '')
+endfunction
+
+function! MyFugitive()
+  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
+    let _ = fugitive#head()
+    return strlen(_) ? '[Fugitive]'._ : ''
+  endif
+  return ''
+endfunction
+
+function! MyFileformat()
+  return winwidth(0) > 70 ? &fileformat : ''
+endfunction
+
+function! MyFiletype()
+  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'no ft') : ''
+endfunction
+
+function! MyFileencoding()
+  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
+endfunction
+
+function! MyMode()
+  return winwidth(0) > 60 ? lightline#mode() : ''
+endfunction
+'''
+
+# unite
+[[plugins]]
+repo = 'Shougo/unite.vim'
+
+# vimfiler
+[[plugins]]
+repo = 'Shougo/vimfiler.vim'
+depends = 'unite.vim'
+hook_source = '''
+call vimfiler#custom#profile('default', 'context', {
+    \ 'safe' : 0,
+    \ 'auto_expand' : 1,
+    \ 'parent' : 0,
+    \ })
+" Like Textmate icons.
+let g:vimfiler_tree_leaf_icon = ' '
+let g:vimfiler_tree_opened_icon = '▾'
+let g:vimfiler_tree_closed_icon = '▸'
+let g:vimfiler_file_icon = ' '
+let g:vimfiler_readonly_file_icon = '✗'
+let g:vimfiler_marked_file_icon = '✓'
+'''
+
+# ----
+
+# A collection of language packs for Vim
+[[plugins]]
+repo = 'sheerun/vim-polyglot'
+hook_add = '''
+let g:polyglot_disabled = ['markdown']
+'''
+
+# Yet Another Remote Plugin Framework for Neovim
+[[plugins]]
+repo = 'roxma/nvim-yarp'
+
+[[plugins]]
+repo = 'roxma/vim-hug-neovim-rpc'
+on_if = '!has("nvim")'
+
+# Dark powered asynchronous completion framework for neovim/Vim8
+[[plugins]]
+repo = 'Shougo/deoplete.nvim'
+depends = 'context_filetype.vim'
+on_event = 'InsertEnter'
+hook_source = '''
+source ~/.config/nvim/rc/plugins/deoplete.rc.vim
+call deoplete#enable()
+'''
+
+# Deoplete source for TabNine
+[[plugins]]
+repo = 'tbodt/deoplete-tabnine'
+build = './install.sh'
+
+# Deoplete source for Zsh
+[[plugins]]
+repo = 'zchee/deoplete-zsh'
+on_ft = ['zsh', 'sh']
+
+# Freaky fast fuzzy finder for (denite.nvim/CtrlP matcher) for vim/neovim
+[[plugins]]
+repo = 'raghur/fruzzy'
+on_source = ['denite.nvim']
+hook_source = 'let g:fruzzy#sortonempty = 0'
+hook_post_update = 'call fruzzy#install()'
+
+# class outline viewer
+[[plugins]]
+repo = 'majutsushi/tagbar'
