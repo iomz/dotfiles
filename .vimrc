@@ -349,6 +349,8 @@ call dein#add('qpkorr/vim-renamer')
 " tig
 call dein#add('rbgrouleff/bclose.vim')
 call dein#add('iberianpig/tig-explorer.vim')
+" nerdtree
+call dein#add('preservim/nerdtree')
 
 "" cloc (removed for vim-lsp)
 "call dein#add('neoclide/coc.nvim', { 'build': './install.sh nightly' })

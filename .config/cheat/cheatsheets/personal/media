@@ -99,3 +99,8 @@ jhead -nf%Y-%m-%d-%H%M%S hoge.jpg
 
 # Removing subtitles from mkv
 for f in *.mkv; do i=`expr ${#f} - 4`; mkvmerge -o ${f:0:$i}.mkv --nosubs $f; done
+
+# Remove DRM from the eBook
+1. Install Calibre.
+2. Install the plugin "DeDRM_tools" # https://github.com/apprenticeharper/DeDRM_tools/releases/
+3. Open the eBook and extract.
