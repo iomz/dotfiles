@@ -166,6 +166,10 @@ augroup vimrc_filetype
 
   autocmd FileType go :highlight goErr ctermfg=208
   autocmd FileType go :match goErr /\<err\>/
+  " Run gofmt on save
+  "autocmd FileType go autocmd BufWritePre <buffer> GoFmt
+  autocmd BufWritePre *.go :call LanguageClient#textDocument_formatting_sync()
+  autocmd FileType proto setlocal shiftwidth=2 tabstop=2
   autocmd FileType html setlocal shiftwidth=2 tabstop=2
   autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
   autocmd FileType json setlocal shiftwidth=2 tabstop=2
@@ -180,9 +184,9 @@ augroup vimrc_filetype
   autocmd FileType zsh :highlight link FoldComment SpecialComment
   autocmd FileType zsh :match FoldComment /^#.*\({{{\|}}}\)/
   " disable deoplete for lsp
-  autocmd FileType ruby call deoplete#custom#buffer_option('auto_complete', v:false)
-  autocmd FileType python call deoplete#custom#buffer_option('auto_complete', v:false)
-  autocmd FileType python ALEDisable
+  "autocmd FileType ruby call deoplete#custom#buffer_option('auto_complete', v:false)
+  "autocmd FileType python call deoplete#custom#buffer_option('auto_complete', v:false)
+  "autocmd FileType python ALEDisable
 augroup END
 " }}}
 
@@ -355,24 +359,46 @@ call dein#add('preservim/nerdtree')
 "" cloc (removed for vim-lsp)
 "call dein#add('neoclide/coc.nvim', { 'build': './install.sh nightly' })
 
-" vim-lsp
-call dein#add('prabirshrestha/async.vim')
-call dein#add('prabirshrestha/asyncomplete.vim')
-call dein#add('prabirshrestha/asyncomplete-lsp.vim')
-call dein#add('prabirshrestha/vim-lsp')
-call dein#add('mattn/vim-lsp-settings', {'merged': 0})
-"let g:lsp_log_verbose = 1
-"let g:lsp_log_file = expand('~/vim-lsp.log')
+"" vim-lsp
+"call dein#add('prabirshrestha/async.vim')
+"call dein#add('prabirshrestha/asyncomplete.vim')
+"call dein#add('prabirshrestha/asyncomplete-lsp.vim')
+"call dein#add('prabirshrestha/vim-lsp')
+"call dein#add('mattn/vim-lsp-settings', {'merged': 0})
+"call dein#add('lighttiger2505/deoplete-vim-lsp')
+""let g:lsp_log_verbose = 1
+""let g:lsp_log_file = expand('~/vim-lsp.log')
+call dein#add('autozimu/LanguageClient-neovim', { 'build': 'bash install.sh', 'rev': 'next'})
+set hidden
+let g:LanguageClient_serverCommands = {
+    \ 'go': ['gopls']
+    \ }
+let g:LanguageClient_loadSettings = 1
+nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+
+" go
+"call dein#add('darrikonn/vim-gofmt')
+
+" python
+call dein#add('Chiel92/vim-autoformat')
 
 if has('nvim')
-  call dein#add('Shougo/deoplete.nvim')
+  call dein#add('Shougo/deoplete.nvim', {'on_event': 'InsertEnter'})
+  let g:deoplete#enable_at_startup = 1
 endif
 
 " " some other plugins no longer required thanks to vim-lsp
 " " ansible
 " call dein#add('pearofducks/ansible-vim', {'on_ft' : 'yaml.ansible'})
 " " go
-" call dein#add('fatih/vim-go', {'on_ft' : 'go'})
+call dein#add('fatih/vim-go', {'on_ft' : 'go'})
+" Insert required imports when saving
+"let g:go_fmt_command = "goimports"
+" Off the feature taken over by LSP
+let g:go_def_mapping_enabled = 0
+let g:go_doc_keywordprg_enabled = 0
+
 " " js
 " call dein#add('pangloss/vim-javascript', {'on_ft' : 'javascript'})
 " " markdown
@@ -437,9 +463,9 @@ call denite#custom#map('insert', '<C-p>', '<denite:move_to_previous_line>', 'nor
 let g:deoplete#enable_at_startup = 1
 " Set minimum syntax keyword length.
 let g:deoplete#auto_complete_start_length = 3
-call deoplete#custom#var('omni', 'input_patterns', {
-    \ 'ruby': ['[^. *\t]\.\w*', '[a-zA-Z_]\w*::'],
-\})
+"call deoplete#custom#var('omni', 'input_patterns', {
+"    \ 'ruby': ['[^. *\t]\.\w*', '[a-zA-Z_]\w*::'],
+"\})
 " Define dictionary.
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<TAB>"

@@ -9,7 +9,7 @@
     cia = commit -a
     cam = commit --amend
     cama = commit --amend -a
-    pom = push origin master
+    pom = push -u origin main
 
     cl = clean
     cldf = clean -df
