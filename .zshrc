@@ -265,6 +265,10 @@ case ${OSTYPE} in
         export PATH="$PATH:/opt/gcc-arm-none-eabi-8-2019-q3-update/bin"
         # yarn
         export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+        # pyenv
+        if command -v pyenv 1>/dev/null 2>&1; then
+            eval "$(pyenv init -)"
+        fi
         ;;
     linux*)
         ;;

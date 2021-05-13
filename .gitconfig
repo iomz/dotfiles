@@ -1,6 +1,6 @@
 [user]
-	name = Iori Mizutani
-	email = iori.mizutani@gmail.com
+    name = Iori Mizutani
+    email = iori.mizutani@gmail.com
 [alias]
     st = status
 
@@ -9,7 +9,7 @@
     cia = commit -a
     cam = commit --amend
     cama = commit --amend -a
-    pom = push -u origin main
+    pom = push -u origin main --tags
 
     cl = clean
     cldf = clean -df
@@ -40,8 +40,8 @@
     gg = log --oneline --abbrev-commit --all --graph --decorate --color
     graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
 [gui]
-	recentrepo = /Users/iomz/Dropbox/auto-id/paper/paper-ieeerfidta2015-multicode
-	recentrepo = /Users/iomz/violin/OH2015-clone
+    recentrepo = /Users/iomz/Dropbox/auto-id/paper/paper-ieeerfidta2015-multicode
+    recentrepo = /Users/iomz/violin/OH2015-clone
 [mergetool "Kaleidoscope"]
 [merge]
 [difftool "Kaleidoscope"]
@@ -49,24 +49,26 @@
 [mergetool]
 [diff]
 [difftool "Kaleidoscope"]
-	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+    cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
 [mergetool "Kaleidoscope"]
-	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-	trustexitcode = true
+    cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+    trustexitcode = true
 [push]
 [core]
-	excludesfile = /Users/iomz/.gitignore_global
+    excludesfile = /Users/iomz/.gitignore_global
 [difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+    cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 [mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+    cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+    trustExitCode = true
 [diff]
-	tool = diffmerge
+    tool = diffmerge
 [difftool "diffmerge"]
-	cmd = diffmerge \"$LOCAL\" \"$REMOTE\"
+    cmd = diffmerge \"$LOCAL\" \"$REMOTE\"
 [merge]
-	tool = diffmerge
+    tool = diffmerge
 [mergetool "diffmerge"]
-	cmd = "diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$(if test -f \"$BASE\"; then echo \"$BASE\"; else echo \"$LOCAL\"; fi)\" \"$REMOTE\""
-	trustExitCode = true
+    cmd = "diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$(if test -f \"$BASE\"; then echo \"$BASE\"; else echo \"$LOCAL\"; fi)\" \"$REMOTE\""
+    trustExitCode = true
+[init]
+    defaultBranch = main
