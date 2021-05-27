@@ -1,4 +1,3 @@
-"endif                                _
 "                         __   _(_)_ __ ___  _ __ ___
 "                         \ \ / / | '_ ` _ \| '__/ __|
 "                          \ V /| | | | | | | | | (__
@@ -81,21 +80,6 @@ endif
 "  execute 'source' expand('~/.secret_vimrc')
 "endif
 "
-"" Load dein.
-"let s:dein_dir = finddir('dein.vim', '.;')
-"if s:dein_dir != '' || &runtimepath !~ '/dein.vim'
-"  if s:dein_dir == '' && &runtimepath !~ '/dein.vim'
-"    let s:dein_dir = expand('$CACHE/dein')
-"          \. '/repos/github.com/Shougo/dein.vim'
-"    if !isdirectory(s:dein_dir)
-"      execute '!git clone https://github.com/Shougo/dein.vim' s:dein_dir
-"    endif
-"  endif
-"  execute 'set runtimepath^=' . substitute(
-"        \ fnamemodify(s:dein_dir, ':p') , '/$', '', '')
-"endif
-"
-"
 ""---------------------------------------------------------------------------
 "" Disable default plugins
 "
@@ -122,41 +106,6 @@ endif
 "let g:loaded_vimballPlugin     = 1
 "let g:loaded_zipPlugin         = 1
 
-
-" General {{{
-" Indent
-set tabstop=4
-set shiftwidth=4
-set expandtab
-set list
-set listchars=tab:»-
-autocmd FileType go set listchars& | set list&
-
-" Fold
-set foldlevel=100
-
-" Encoding
-set encoding=utf-8
-scriptencoding utf-8
-set fileencodings=utf-8,ucs-bom,iso-2022-jp-3,iso-2022-jp,eucjp-ms,euc-jisx0213,euc-jp,sjis,cp932
-
-" Font
-set guifont=Ricty-Regular-nerd-Powerline\ 11
-
-" Search
-set inccommand=split
-
-" Clipboard
-set clipboard=unnamed,unnamedplus
-
-" Other
-set cursorline
-set title
-set number
-set noshowmode
-" }}}
-
-
 " File Types {{{
 augroup vimrc_filetype
   autocmd!
@@ -174,6 +123,7 @@ augroup vimrc_filetype
   autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
   autocmd FileType json setlocal shiftwidth=2 tabstop=2
   autocmd FileType ruby setlocal shiftwidth=2 tabstop=2
+  autocmd FileType typescript setlocal shiftwidth=4 tabstop=4
   autocmd FileType vim setlocal shiftwidth=2 tabstop=2 foldmethod=marker
   autocmd FileType vim :highlight link FoldComment SpecialComment
   autocmd FileType vim :match FoldComment /^".*\({{{\|}}}\)/
@@ -183,59 +133,28 @@ augroup vimrc_filetype
   autocmd FileType zsh setlocal foldmethod=marker
   autocmd FileType zsh :highlight link FoldComment SpecialComment
   autocmd FileType zsh :match FoldComment /^#.*\({{{\|}}}\)/
-  " disable deoplete for lsp
-  "autocmd FileType ruby call deoplete#custom#buffer_option('auto_complete', v:false)
-  "autocmd FileType python call deoplete#custom#buffer_option('auto_complete', v:false)
-  "autocmd FileType python ALEDisable
 augroup END
 " }}}
 
-
 " KeyMap {{{
 let g:mapleader = "\<Space>"
-
-" jj is Esc
-inoremap <silent> jj <ESC>
 
 " Home / End
 noremap <Leader>h ^
 noremap <Leader>H 0
 noremap <Leader>l $
-
-" Move windows
-nnoremap <Leader><Tab> <C-w>w
-nnoremap sh <C-w>h
-nnoremap sj <C-w>j
-nnoremap sk <C-w>k
-nnoremap sl <C-w>l
-
-" Unhighlight search result
-nnoremap <Esc><Esc> :<C-u>nohlsearch<CR>
-
-" Show outline
-nnoremap <Leader>o :<C-u>Unite -vertical -winwidth=30 -no-quit outline<CR>
-
-" Buffer
-nnoremap <Leader>bp :bprevious<CR>
-nnoremap <Leader>bn :bnext<CR>
-nnoremap <Leader>bb :b#<CR>
-nnoremap <Leader>bd :bdelete<CR>
-
-" QuickFix
-noremap <C-n> :cnext<CR>
-noremap <C-p> :cprevious<CR>
-
-" snippets
-imap <C-k> <Plug>(neosnippet_expand_or_jump)
-smap <C-k> <Plug>(neosnippet_expand_or_jump)
-xmap <C-k> <Plug>(neosnippet_expand_target)
-
-" scroll
-noremap <silent> <ScrollWheelDown> :call comfortable_motion#flick(40)<CR>
-noremap <silent> <ScrollWheelUp>   :call comfortable_motion#flick(-40)<CR>
-
-" paste
-map R <Plug>(operator-replace)
+"" Buffer
+"nnoremap <Leader>bp :bprevious<CR>
+"nnoremap <Leader>bn :bnext<CR>
+"nnoremap <Leader>bb :b#<CR>
+"nnoremap <Leader>bd :bdelete<CR>
+"" QuickFix
+"noremap <C-n> :cnext<CR>
+"noremap <C-p> :cprevious<CR>
+"" snippets
+"imap <C-k> <Plug>(neosnippet_expand_or_jump)
+"smap <C-k> <Plug>(neosnippet_expand_or_jump)
+"xmap <C-k> <Plug>(neosnippet_expand_target)
 
 " Denite
 autocmd FileType denite call s:denite_settings()
@@ -248,7 +167,7 @@ function! s:denite_settings() abort
         \ denite#do_map('do_action', 'delete')
   nnoremap <silent><buffer><expr> p
         \ denite#do_map('do_action', 'preview')
-  nnoremap <silent><buffer><expr> <Esc>
+  nnoremap <silent><buffer><expr> <C-c>
         \ denite#do_map('quit')
   nnoremap <silent><buffer><expr> q
         \ denite#do_map('quit')
@@ -259,11 +178,12 @@ endfunction
 autocmd FileType denite-filter call s:denite_filter_settings()
 
 function! s:denite_filter_settings() abort
-  nmap <silent><buffer> <Esc> <Plug>(denite_filter_quit)
+  nmap <silent><buffer> <C-c> <Plug>(denite_filter_quit)
 endfunction
 
 "nnoremap <C-p> :<C-u>Denite file/rec<CR>
 "nnoremap <C-p> :<C-u>DeniteBufferDir file/rec -start-filter<CR>
+nnoremap <C-y> :<C-u>Denite neoyank<CR>
 nnoremap <C-p> :<C-u>Denite file/rec -start-filter<CR>
 nnoremap <leader>s :<C-u>Denite buffer<CR>
 nnoremap <leader>8 :<C-u>DeniteCursorWord grep:.<CR>
@@ -294,7 +214,8 @@ augroup END
 "" Python path
 if IsMac()
   let g:python_host_prog  = '/usr/local/bin/python2'
-  let g:python3_host_prog = '/usr/local/bin/python3'
+  "let g:python3_host_prog = '/usr/local/bin/python3'
+  let g:python3_host_prog = '/Users/iomz/.pyenv/shims/python3'
 else
   let g:python_host_prog  = '/usr/bin/python2'
   let g:python3_host_prog = '/usr/bin/python3'
@@ -306,6 +227,7 @@ call dein#begin(expand('~/.vim/dein'))
 
 call dein#add('Shougo/dein.vim')
 call dein#add('Shougo/denite.nvim')
+call dein#add('Shougo/deoplete.nvim', {'on_event': 'InsertEnter'})
 call dein#add('Shougo/neomru.vim')
 call dein#add('Shougo/neosnippet')
 call dein#add('Shougo/neosnippet-snippets')
@@ -317,6 +239,7 @@ call dein#add('airblade/vim-gitgutter')
 call dein#add('basyura/TweetVim')
 call dein#add('basyura/twibill.vim')
 call dein#add('bronson/vim-trailing-whitespace')
+call dein#add('chriskempson/base16-vim')
 call dein#add('dhruvasagar/vim-table-mode')
 call dein#add('editorconfig/editorconfig-vim')
 call dein#add('fatih/molokai')
@@ -381,12 +304,7 @@ nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
 "call dein#add('darrikonn/vim-gofmt')
 
 " python
-call dein#add('Chiel92/vim-autoformat')
-
-if has('nvim')
-  call dein#add('Shougo/deoplete.nvim', {'on_event': 'InsertEnter'})
-  let g:deoplete#enable_at_startup = 1
-endif
+"call dein#add('Chiel92/vim-autoformat')
 
 " " some other plugins no longer required thanks to vim-lsp
 " " ansible
@@ -398,7 +316,6 @@ call dein#add('fatih/vim-go', {'on_ft' : 'go'})
 " Off the feature taken over by LSP
 let g:go_def_mapping_enabled = 0
 let g:go_doc_keywordprg_enabled = 0
-
 " " js
 " call dein#add('pangloss/vim-javascript', {'on_ft' : 'javascript'})
 " " markdown
@@ -457,12 +374,16 @@ command! Dprev execute(":Denite -resume -buffer-name=grep-buffer-denite -select=
 call denite#custom#map('insert', '<C-n>', '<denite:move_to_next_line>', 'noremap')
 call denite#custom#map('insert', '<C-p>', '<denite:move_to_previous_line>', 'noremap')
 " }}}
+"
+" Shougo/neoyank.nvim {{{
+
+" }}}
 
 " Shougo/deoplete.nvim {{{
 " Use deoplete
 let g:deoplete#enable_at_startup = 1
 " Set minimum syntax keyword length.
-let g:deoplete#auto_complete_start_length = 3
+autocmd VimEnter * call deoplete#custom#option('auto_complete_start_length', 3)
 "call deoplete#custom#var('omni', 'input_patterns', {
 "    \ 'ruby': ['[^. *\t]\.\w*', '[a-zA-Z_]\w*::'],
 "\})
@@ -562,6 +483,14 @@ nnoremap <Leader>q :<C-u>bw! \[quickrun\ output\]<CR>
 map <C-q> :QuickRun<CR>
 " }}}
 
+" Color Theme
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
+autocmd BufEnter * colorscheme default
+"autocmd BufEnter *.tex,*.bib colorscheme base16-monokai
+
 " vim-airline/vim-airline {{{
 let g:airline_theme = 'night_owl'
 "let g:airline_left_sep = '⮀'
@@ -622,7 +551,6 @@ endif
 " }}}
 " }}}
 
-
 " Color {{{
 " Custom
 augroup color_scheme
@@ -657,5 +585,48 @@ if filereadable(expand($HOME.'/.vimrc_local'))
 endif
 " }}}
 
+" General {{{
+" Remove all trailing whitespace
+"autocmd BufWritePre * %s/\s\+$//e
+
+" Newline
+:set nofixendofline
+
+" Indent
+set expandtab
+autocmd FileType typescript set noexpandtab
+set tabstop=4
+set shiftwidth=4
+set list
+set listchars=tab:»-
+autocmd FileType go set listchars& | set list&
+
+" Fold
+set foldlevel=100
+
+" Encoding
+set encoding=utf-8
+scriptencoding utf-8
+set fileencodings=utf-8,ucs-bom,iso-2022-jp-3,iso-2022-jp,eucjp-ms,euc-jisx0213,euc-jp,sjis,cp932
+
+" Font
+set guifont=Ricty-Regular-nerd-Powerline\ 11
+
+" Search
+set inccommand=split
+
+" Clipboard
+set clipboard=unnamed,unnamedplus
+
+" Other
+set cursorline
+set title
+set number
+set noshowmode
+" }}}
+
 " Custom commands
 command! Clean7mm execute(':%s/]\(\S\)/] \1/g')
+"nnoremap <C-m> :<C-u>NextColorScheme<CR>
+
+

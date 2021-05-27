@@ -231,9 +231,18 @@ if [ -f ${DOTFILES}/antigen.zsh ]; then
     # One-liner lookup
     antigen bundle b4b4r07/easy-oneliner
 
+    # Base16-shell
+    antigen bundle chriskempson/base16-shell
+
     # Tell Antigen that you're done.
     antigen apply
 fi
+
+## Base16 Shell
+#BASE16_SHELL="$HOME/.config/base16-shell/"
+#[ -n "$PS1" ] && \
+#    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
+#        eval "$("$BASE16_SHELL/profile_helper.sh")"
 
 # Ansible
 export ANSIBLE_SCP_IF_SSH=y
