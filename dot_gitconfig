@@ -1,0 +1,52 @@
+[user]
+    name = Iori Mizutani
+    email = iori.mizutani@gmail.com
+[alias]
+    st = status
+
+    ls-untracked = ls-files --others --exclude-standard
+
+    amend = commit --amend
+    ci = commit
+    cama = commit --amend -a
+    pom = push -u origin main --tags
+
+    clear = clean -df
+
+    br = branch -a
+
+    stashes = stash list
+
+    unstage = reset -q HEAD --
+    uncommit = reset --mixed HEAD~
+    resa = reset HEAD
+    nevermind = !git reset --hard HEAD && git clean -d -f
+
+    co = checkout
+    discard = checkout --
+
+    df = diff --color
+    precommit = diff --cached --diff-algorithm=minimal -w
+    unmerged = diff --name-only --diff-filter=U
+
+    remotes = remote -v
+
+    lg = log -p
+    gg = log --oneline --abbrev-commit --all --graph --decorate --color
+    graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+[diff]
+    tool = nvimdiff
+[merge]
+	tool = nvimdiff
+	conflictstyle = diff3
+[init]
+    defaultBranch = main
+[pull]
+	rebase = false
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+[credential]
+	helper = osxkeychain

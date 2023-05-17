@@ -1,0 +1,39 @@
+# ----------------------
+# Key binding
+# ----------------------
+# Set prefix key to C-u
+unbind C-b
+set -g prefix C-u
+# Send C-u inside tmux by C-u*2
+bind C-u send-prefix
+# Vertical window split
+unbind %
+bind - split-window -v
+# Horizontal window split
+unbind '"'
+bind | split-window -h
+# Move panes like ivm
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+# Toggle last window like screen
+bind-key C-b last-window
+
+# ----------------------
+# Display setting
+# ----------------------
+# Reduce keystroke delay
+set -sg escape-time 1
+# Use 256colors terminal
+set -g default-terminal "screen-256color"
+# Status bar colors
+set-option -g status on
+set-option -g status-bg red
+
+# ----------------------
+# Copy-mode
+# ----------------------
+## Use keybindings of vi
+setw -g mode-keys vi
+
