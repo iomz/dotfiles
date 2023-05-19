@@ -64,28 +64,3 @@ mason_lspconfig.setup_handlers({
 })
 
 mason_lspconfig.setup {automatic_installation = true}
-
--- local lspconfig = require('lspconfig')
--- mason_lspconfig.setup_handlers({
---  function(server_name)
---    lspconfig[server_name].setup(opts)
---  end,
---  ["lua_ls"] = function ()
---      lspconfig.lua_ls.setup {
---          settings = {
---    Lua = {
---      diagnostics = {
---        -- Get the language server to recognize the `vim` global
---        globals = { 'vim' },
---      },
---
---      workspace = {
---        -- Make the server aware of Neovim runtime files
---        library = vim.api.nvim_get_runtime_file("", true),
---        checkThirdParty = false
---      },
---    },
---          }
---      }
---  end,
--- })

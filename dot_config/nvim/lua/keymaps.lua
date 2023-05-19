@@ -31,7 +31,7 @@ keymap('', 'H', '^', {noremap = true})
 -- move cursor to the end of the line
 keymap('', 'L', '$', {noremap = true})
 keymap('', '<Leader>a', 'gg0vG$', {noremap = true})
-keymap('', '<Leader>c', 'gg0vG$y', {noremap = true})
+-- keymap('', '<Leader>c', 'gg0vG$y', {noremap = true})
 keymap('', '<Leader>m', ':MinimapToggle<CR>', {noremap = true})
 -- move cursor to the beginning of the line (hard)
 keymap('', '<Leader>H', '0', {noremap = true})
@@ -47,8 +47,8 @@ keymap('', '<Leader>H', '0', {noremap = true})
 -- unhighlight search result
 keymap('n', '<Esc><Esc>', ':<C-u>nohlsearch<CR>', {noremap = true})
 -- reload config
-keymap('n', '<Leader><Leader>', '<cmd>lua ReloadConfig()<CR>', {noremap = true})
-keymap('n', '<Leader><Leader>', ':source $MYVIMRC<CR>', {noremap = true})
+-- keymap('n', '<Leader><Leader>', '<cmd>lua ReloadConfig()<CR>', {noremap = true})
+-- keymap('n', '<Leader><Leader>', ':source $MYVIMRC<CR>', {noremap = true})
 -- move window
 -- keymap('n', '<Leader><Tab>', '<C-w>w', { noremap=true })
 -- buffer

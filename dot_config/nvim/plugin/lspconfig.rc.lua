@@ -89,8 +89,26 @@ lspconfig.tailwindcss.setup(coq.lsp_ensure_capabilities({}))
 
 -- lua
 lspconfig.lua_ls.setup(coq.lsp_ensure_capabilities({
-    settings = {Lua = {completion = {callSnippet = "Replace"}}}
+    settings = {
+        Lua = {
+            completion = {callSnippet = "Replace"},
+            diagnostics = {
+                -- Get the language server to recognize the `vim` global
+                globals = {'vim'}
+            },
+            workspace = {
+                -- Make the server aware of Neovim runtime files
+                library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false
+            }
+        }
+    }
 }))
 
 -- python
 lspconfig.pyright.setup(coq.lsp_ensure_capabilities({filetypes = {"python"}}))
+
+-- yaml
+lspconfig.yamlls.setup(coq.lsp_ensure_capabilities({
+    settings = {yaml = {keyOrdering = false}}
+}))

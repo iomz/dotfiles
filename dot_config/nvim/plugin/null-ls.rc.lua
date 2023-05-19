@@ -22,6 +22,7 @@ null_ls.setup {
         --
         -- formatting
         --
+        null_ls.builtins.formatting.beautysh, -- bash/zsh
         null_ls.builtins.formatting.black.with({
             extra_args = {"--line-length=120"}
         }), -- python
