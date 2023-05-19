@@ -67,7 +67,7 @@ bind-key h select-pane -L
 bind-key l select-pane -R
 
 # Open current directory
-bind o run-shell "open #{pane_current_path}"
+#bind o run-shell "open #{pane_current_path}"
 bind -r e kill-pane -a
 
 # Rotate active pane
