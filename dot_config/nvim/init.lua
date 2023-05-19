@@ -4,6 +4,7 @@
 vim.cmd("autocmd!")
 vim.scriptencoding = 'utf-8'
 vim.wo.number = true
+vim.g.python3_host_prog = '~/.pyenv/versions/3.11.3/bin/python3.11'
 
 -- base16 color
 local current_theme_name = os.getenv('BASE16_THEME')

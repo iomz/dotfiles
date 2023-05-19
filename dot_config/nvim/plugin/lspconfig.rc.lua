@@ -3,6 +3,7 @@
 -- require("neodev").setup()
 local status, lspconfig = pcall(require, "lspconfig")
 if (not status) then return end
+local util = require('lspconfig/util')
 
 local protocol = require('vim.lsp.protocol')
 protocol.CompletionItemKind = {
@@ -106,7 +107,31 @@ lspconfig.lua_ls.setup(coq.lsp_ensure_capabilities({
 }))
 
 -- python
-lspconfig.pyright.setup(coq.lsp_ensure_capabilities({filetypes = {"python"}}))
+local function get_python_path(workspace)
+    -- Use activated virtualenv.
+    if vim.env.VIRTUAL_ENV then
+        return util.path.join(vim.env.VIRTUAL_ENV, 'bin', 'python')
+    end
+
+    -- Find and use virtualenv in workspace directory.
+    for _, pattern in ipairs({'*', '.*'}) do
+        local match = vim.fn.glob(util.path.join(workspace, pattern,
+                                                 'pyvenv.cfg'))
+        if match ~= '' then
+            return util.path.join(util.path.dirname(match), 'bin', 'python')
+        end
+    end
+
+    -- Fallback to system Python.
+    return exepath('python3') or exepath('python') or 'python'
+end
+lspconfig.pyright.setup(coq.lsp_ensure_capabilities({
+    before_init = function(_, config)
+        config.settings.python.pythonPath = get_python_path(config.root_dir)
+    end,
+    filetypes = {"python"}
+    -- python = {pythonPath = "~/.pyenv/shims/python"}
+}))
 
 -- yaml
 lspconfig.yamlls.setup(coq.lsp_ensure_capabilities({
