@@ -1,19 +1,26 @@
-## OS-Specific
-#case ${OSTYPE} in
-#    darwin*)
-#        ;;
-#    linux*)
-#        ;;
-#esac
+#!/usr/bin/env zsh
 
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
-[ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
-[ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
-source "${ZINIT_HOME}/zinit.zsh"
+#------------------------------------
+# start zprof
+[ -z "$ZPROF" ] || zmodload zsh/zprof
+#------------------------------------
 
-# zsh-autosuggestions
-zinit ice depth=1
-zinit light zsh-users/zsh-autosuggestions
+#0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"
+#0="${${(M)0:#/*}:-$PWD/$0}"
+#print -- "${0:h}"
+#local ZDOTDIR="${0:h}"
+local ZDOTDIR=${XDG_CONFIG_HOME:=~/.config}/zsh
+for f in ${ZDOTDIR}/rc.d/<->-*zsh(N); do
+    source "$f"
+    #print -- "$f"
+done
+
+#------------------------------------
+# end zprof
+[ -z "$ZPROF" ] || zprof | $PAGER
+#------------------------------------
+
+############### -------------
 
 #zinit ice lucid
 #zinit light woefe/git-prompt.zsh
@@ -21,222 +28,29 @@ zinit light zsh-users/zsh-autosuggestions
 #zinit ice lucid
 #zinit light romkatv/zsh-prompt-benchmark
 
-# fuzzy finder
-# install fzf + fzf-tmux
-zinit pack for fzf
-
-# highlight
-zinit ice lucid
-zinit light zdharma-continuum/fast-syntax-highlighting
-
 # --- load with wait ---
 
-# zeno
-zinit ice lucid depth=1 blockf
-zinit light yuki-yano/zeno.zsh
+#\zinit ice lucid wait"!0" depth"1" atinit"zpcompinit; zpcdreplay" atload"set_fast_theme"
+#zinit ice lucid wait"!0" depth"1" atinit"zpcompinit; zpcdreplay"
 
-#zinit ice lucid wait"!0" depth"1" atinit"zpcompinit; zpcdreplay" atload"set_fast_theme"
-zinit ice lucid wait"!0" depth"1" atinit"zpcompinit; zpcdreplay"
-
-# completion
-zinit ice lucid wait"0" depth"1" blockf
-zinit light zsh-users/zsh-completions
-
-zinit ice lucid wait"0" depth"1" blockf
-zinit light yuki-yano/zsh-completions-anyenv
-
-zinit ice lucid wait"0" as"completion"
-zinit snippet OMZ::plugins/docker/_docker
-
-zinit ice lucid wait"0" as"completion"
-zinit snippet OMZ::plugins/docker-compose/_docker-compose
-
-# git
-# zinit ice lucid wait"0" as"program" pick"$ZPFX/bin/git-*" src"etc/git-extras-completion.zsh" make"PREFIX=$ZPFX"
-# zinit light tj/git-extras
-#zinit ice lucid wait"0" depth"1" as"program"
-#zinit light yuki-yano/zsh-git-sync
-
-# [skip]
-#zinit ice lucid wait"0" depth"1" as"program" src"tms.plugin.zsh" pick"tms"
-#zinit light yuki-yano/tms
-#
-#zinit ice lucid wait"0" depth"1" as"program" src"tmk.plugin.zsh" pick"tmk"
-#zinit light yuki-yano/tmk
+#zinit ice lucid wait"0" depth"1" blockf
+#zinit light yuki-yano/zsh-completions-anyenv
 
 # skip
 #zinit ice lucid wait"0" depth"1"
 #zinit light yukiycino-dotfiles/fancy-ctrl-z
-
 
 #-----------------------
 
 # zsh-autosuggestions
 ZSH_AUTOSUGGEST_USE_ASYNC=1
 ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line)
-#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bg=cyan,bold,underline"
+#\ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bg=cyan,bold,underline"
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bold,underline"
 
-# [skip]
-# fast-syntax-highlighting
-#function set_fast_theme() {
-#    FAST_HIGHLIGHT_STYLES[alias]='fg=blue'
-#    FAST_HIGHLIGHT_STYLES[suffix-alias]='fg=blue'
-#    FAST_HIGHLIGHT_STYLES[builtin]='fg=blue'
-#    FAST_HIGHLIGHT_STYLES[function]='fg=blue'
-#    FAST_HIGHLIGHT_STYLES[command]='fg=blue'
-#    FAST_HIGHLIGHT_STYLES[precommand]='fg=blue,underline'
-#    FAST_HIGHLIGHT_STYLES[hashed-command]='fg=blue'
-#    FAST_HIGHLIGHT_STYLES[path]='fg=green'
-#    FAST_HIGHLIGHT_STYLES[globbing]='fg=green,bold'
-#    FAST_HIGHLIGHT_STYLES[history-expansion]='fg=green,bold'
-#}
-
-
 #-----------------------
-
-#zinit ice depth=1; zinit light romkatv/powerlevel10k
-#zinit load b4b4r07/easy-oneliner
-#zinit load zdharma-continuum/history-search-multi-word
-
-zinit ice depth=1
-zinit light chriskempson/base16-shell
-
-zinit ice depth=1
-zinit light iomz/emoji-cli
-
-zinit ice depth=1
-zinit light agkozak/zsh-z
-
-#FZF_DEFAULT_COMMAND='find .'
-export FZF_DEFAULT_COMMAND='find .'
-#export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "\!.git/*"'
-export FZF_DEFAULT_OPTS='--reverse'
-#export FZF_DEFAULT_OPTS='--reverse --color=hl:#81A1C1,hl+:#81A1C1,info:#EACB8A,prompt:#81A1C1,pointer:#B48DAC,marker:#A3BE8B,spinner:#B48DAC,header:#A3BE8B'
-#export FZF_COMPLETION_TRIGGER=';'
-
-#-----------------------
-
-
-
-# Alias
-## ccat
-if whence ccat > /dev/null; then
-    alias cat='ccat'
-fi
-if whence colordiff > /dev/null; then
-    alias diff='colordiff'
-fi
-## exa
-if whence exa > /dev/null; then
-    alias ls="exa"
-    alias ll="exa -lh  --git --time-style long-iso"
-    alias la="exa -alh --git --time-style long-iso"
-elif whence gls > /dev/null; then
-    alias ls='gls --color=auto'
-    alias ll='ls -lh'
-    alias la='ls -alh'
-else
-    alias ll='ls -lh'
-    alias la='ls -alh'
-fi
-## sed
-if whence gsed > /dev/null; then
-    alias sed='gsed'
-fi
-## misc
-alias ghqgs='ghq get --shallow'
-alias p8='ping 8.8.8.8'
-
-
-# Disable commands
-#disable r
-
-# <C-q> and <C-s> in Vim with iTerm2
-stty start undef
-stty stop undef
-
-# Options
-setopt auto_cd # do cd if not command
-setopt auto_pushd # make cd push to stack
-unsetopt beep # I don't want beep
-setopt print_eight_bit # display CJK characters just right
-setopt rm_star_silent # confirm rm *
-unsetopt prompt_cr # don't print a CR just before zle
-setopt notify # report the status of background jobs
-
-## Completion
-setopt auto_list # list ambiguous completion
-setopt auto_menu # menu after the second consecutive cmp
-setopt auto_name_dirs # make dir name as parameters
-unsetopt auto_remove_slash # don't remove trailing slash
-setopt brace_ccl # expand expressions in braces
-setopt complete_aliases # prevent alias for completion
-setopt complete_in_word # stay the cursor (not to the end)
-setopt correct # try to correct the spelling
-setopt glob_dots # don't require leading `.' in a filename
-setopt hash_list_all # make sure the entire command path hashed
-setopt numeric_glob_sort # sort filenames numerically
-setopt list_ambiguous # silent cmp
-unsetopt list_beep # no cmp beep
-setopt list_packed # make completion list smaller
-setopt list_types # show trailing identifying mark
-setopt menu_complete # cycle through the candidates
-
-## History
-setopt append_history # don't replace the history file
-setopt extended_history # record timestamp
-setopt hist_find_no_dups # don't display dups
-#setopt hist_ignore_all_dups # remove the old history entires
-setopt hist_ignore_dups # don't record contiguous dups
-setopt hist_ignore_space # ignore commands starts with space
-setopt hist_reduce_blanks # shrink history removing blanks
-#setopt hist_verify
-setopt share_history # always import commands from the history
-LISTMAX=20 # in ZLE, the number of matches to list immediately
-HISTFILE=$HOME/.zsh_history # file to save history when exits
-HISTSIZE=10000
-SAVEHIST=100000
-# display process taken longer than 1 second
-REPORTTIME=1
 
 bindkey "$terminfo[kcbt]" reverse-menu-complete
-
-## Completion
-autoload -U compinit && compinit
-zmodload zsh/complist
-zmodload zsh/computil
-#bindkey -M menuselect '^g' .send-break
-#bindkey -M menuselect '^i' forward-char
-#bindkey -M menuselect '^j' .accept-line
-#bindkey -M menuselect '^k' accept-and-infer-next-history
-
-bindkey -M menuselect '^n' down-line-or-history
-bindkey -M menuselect '^p' up-line-or-history
-#bindkey -M menuselect '^h' undo
-
-# View matchings by groups
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
-
-zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
-zstyle ':completion:*' group-name ''
-zstyle ':completion:*' list-colors 'di=36' 'ln=35'
-zstyle ':completion:*' list-separator '-->'
-zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' '+m:{A-Z}={a-z}'
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([%0-9]#)*=0=01;31'
-zstyle ':completion:*:default' menu select=1
-zstyle ':completion:*:descriptions' format '%F{YELLOW}completing %B%d%b'$DEFAULT
-zstyle ':completion:*:descriptions' format '%F{yellow}Completing %B%d%b%f'$DEFAULT
-zstyle ':completion:*:manuals' separate-sections true
-zstyle ':completion:*:messages' format '%F{YELLOW}%d'$DEFAULT
-zstyle ':completion:*:options' description 'yes'
-zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
-zstyle ':completion:*:warnings' format '%F{RED}No matches for:''%F{YELLOW} %d'$DEFAULT
-zstyle ':completion::complete:*' use-cache true
 
 # edit command line with $EDITOR
 zle -N edit-command-line
@@ -254,11 +68,6 @@ bindkey '^x^e' edit-command-line
 #colored_path=%{$fg[magenta]%}%~
 #colored_prompt=%{$reset_color%}%#
 #PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}${colored_path} $colored_prompt "
-
-#------------------
-# start zprof
-#zmodload zsh/zprof
-#------------------
 
 # Functions
 ## edit-command-line
@@ -291,22 +100,16 @@ zle -N history-beginning-search-forward-end history-search-end
 bindkey '^P' history-beginning-search-backward-end
 bindkey '^N' history-beginning-search-forward-end
 
-# zeno
-if [[ -n $ZENO_LOADED ]]; then
-    bindkey ' '  zeno-auto-snippet
-    bindkey '^m' zeno-auto-snippet-and-accept-line
-    bindkey '^i' zeno-completion
-    bindkey '^g' zeno-ghq-cd # switch ghq dir
-    bindkey '^r' zeno-history-selection # search history
-    bindkey '^x^s' zeno-insert-snippet # search snippets
-    bindkey '^x ' zeno-insert-space # insert space
-fi
-
-# ---------
-if whence zprof > /dev/null ;then
-    zprof | less
-fi
-#----------
+## zeno
+#if [[ -n $ZENO_LOADED ]]; then
+#    bindkey ' '  zeno-auto-snippet
+#    bindkey '^m' zeno-auto-snippet-and-accept-line
+#    bindkey '^i' zeno-completion
+#    bindkey '^g' zeno-ghq-cd # switch ghq dir
+#    bindkey '^r' zeno-history-selection # search history
+#    bindkey '^x^s' zeno-insert-snippet # search snippets
+#    bindkey '^x ' zeno-insert-space # insert space
+#fi
 
 # zcompile
 #if [[ ! -f ~/.zshrc.zwc ]] || [[ "$(readlink ~/.zshrc)" -nt ~/.zshrc.zwc ]]; then
@@ -314,12 +117,9 @@ fi
 #fi
 
 # source local
-#[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-#[[ -s ~/.profile ]] && source ~/.profile
-#[[ -s ~/.login ]] && source ~/.login
-
-#export ZENO_ENABLE_FZF_TMUX=1
-#export ZENO_FZF_TMUX_OPTIONS="-p"
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+[[ -s ~/.profile ]] && source ~/.profile
+[[ -s ~/.login ]] && source ~/.login
 
 # starship
 command -v starship &> /dev/null && eval "$(starship init zsh)"

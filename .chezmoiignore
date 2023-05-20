@@ -4,3 +4,8 @@
 
 # nvim packer
 .config/nvim/plugin/packer_compiled.lua
+
+# zsh
+.config/zsh/.zcompdump
+.config/zsh/functions/**
+.config/zsh/completions/**
