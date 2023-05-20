@@ -25,14 +25,12 @@ local keymap = vim.api.nvim_set_keymap
 --
 
 -- move cursor to the beginning of the line (soft)
-keymap('', 'H', '^', {noremap = true})
+keymap('', 'H', '^', { noremap = true })
 -- move cursor to the end of the line
-keymap('', 'L', '$', {noremap = true})
-keymap('', '<Leader>a', 'gg0vG$', {noremap = true})
+keymap('', 'L', '$', { noremap = true })
 -- keymap('', '<Leader>c', 'gg0vG$y', {noremap = true})
-keymap('', '<Leader>m', ':MinimapToggle<CR>', {noremap = true})
 -- move cursor to the beginning of the line (hard)
-keymap('', '<Leader>H', '0', {noremap = true})
+keymap('', '<Leader>H', '0', { noremap = true })
 -- scroll up
 -- keymap('n', '<C-b>', ':call comfortable_motion#flick(-40)<CR>', { noremap=true })
 -- scroll down
@@ -43,57 +41,61 @@ keymap('', '<Leader>H', '0', {noremap = true})
 --
 
 -- unhighlight search result
-keymap('n', '<Esc><Esc>', ':<C-u>nohlsearch<CR>', {noremap = true})
+keymap('n', '<Esc><Esc>', ':<C-u>nohlsearch<CR>', { noremap = true })
 -- reload config
 -- keymap('n', '<Leader><Leader>', '<cmd>lua ReloadConfig()<CR>', {noremap = true})
 -- keymap('n', '<Leader><Leader>', ':source $MYVIMRC<CR>', {noremap = true})
 -- move window
 -- keymap('n', '<Leader><Tab>', '<C-w>w', { noremap=true })
 -- buffer
-keymap('n', '<Leader>bp', ':bprevious<CR>', {noremap = true})
-keymap('n', '<Leader>bn', ':bnext<CR>', {noremap = true})
-keymap('n', '<Leader>bd', ':bdelete<CR>', {noremap = true})
+keymap('n', '<Leader>bp', ':bprevious<CR>', { noremap = true })
+keymap('n', '<Leader>bn', ':bnext<CR>', { noremap = true })
+keymap('n', '<Leader>bd', ':bdelete<CR>', { noremap = true })
 -- telescope
 keymap('n', '<Leader>fb', "<cmd>lua require('telescope.builtin').buffers()<cr>",
-       {noremap = true})
+  { noremap = true })
 keymap('n', '<Leader>ff',
-       "<cmd>lua require('telescope.builtin').find_files()<CR>",
-       {noremap = true})
+  "<cmd>lua require('telescope.builtin').find_files()<CR>",
+  { noremap = true })
 keymap('n', '<Leader>fg',
-       "<cmd>lua require('telescope.builtin').live_grep()<CR>", {noremap = true})
+  "<cmd>lua require('telescope.builtin').live_grep()<CR>", { noremap = true })
 keymap('n', '<Leader>fh',
-       "<cmd>lua require('telescope.builtin').help_tags()<CR>", {noremap = true})
+  "<cmd>lua require('telescope.builtin').help_tags()<CR>", { noremap = true })
 -- g
-keymap('n', '<Leader>gn', ':lnext<CR>', {noremap = true})
-keymap('n', '<Leader>gp', ':lprevious<CR>', {noremap = true})
+keymap('n', '<Leader>gn', ':lnext<CR>', { noremap = true })
+keymap('n', '<Leader>gp', ':lprevious<CR>', { noremap = true })
 -- open tig with current file
-keymap('n', '<Leader>T', ':TigOpenCurrentFile<CR>', {noremap = true})
+keymap('n', '<Leader>T', ':TigOpenCurrentFile<CR>', { noremap = true })
 -- open tig with Project root path
-keymap('n', '<Leader>tt', ':TigOpenProjectRootDir<CR>', {noremap = true})
+keymap('n', '<Leader>tt', ':TigOpenProjectRootDir<CR>', { noremap = true })
 -- open tig grep
-keymap('n', '<Leader>tg', ':TigGrep<CR>', {noremap = true})
+keymap('n', '<Leader>tg', ':TigGrep<CR>', { noremap = true })
 -- resume from last grep
-keymap('n', '<Leader>tr', ':TigGrepResume<CR>', {noremap = true})
+keymap('n', '<Leader>tr', ':TigGrepResume<CR>', { noremap = true })
 -- open tig grep with the word under the cursor
 keymap('n', '<Leader>tc', ':<C-u>:TigGrep<Space><C-R><C-W><CR>',
-       {noremap = true})
+  { noremap = true })
 -- open tig blame with current file
-keymap('n', '<Leader>tb', ':TigBlame<CR>', {noremap = true})
+keymap('n', '<Leader>tb', ':TigBlame<CR>', { noremap = true })
+-- select all
+keymap('n', '<C-a>', 'gg0vG$', { noremap = true })
 -- tagbar
-keymap('n', '<C-l>', ':Tagbar<CR>', {noremap = true})
+keymap('n', '<C-l>', ':Tagbar<CR>', { noremap = true })
+-- minimap
+keymap('n', '<C-m>', ':MinimapToggle<CR>', { noremap = true })
 -- telescope ff
 keymap('n', '<C-p>', "<cmd>lua require('telescope.builtin').find_files()<CR>",
-       {noremap = true})
+  { noremap = true })
 -- quickrun
-keymap('n', '<C-q>', ':QuickRun<CR>', {noremap = true})
+keymap('n', '<C-q>', ':QuickRun<CR>', { noremap = true })
 -- reload init.lua
 -- keymap('n', '<C-s>', ':so $MYVIMRC<CR>', { noremap=true })
-keymap('n', '<C-t>', ':NERDTreeToggle<CR>', {noremap = true})
+keymap('n', '<C-t>', ':NERDTreeToggle<CR>', { noremap = true })
 -- yankring
 -- keymap('n', '<C-y>', ':YRShow<CR>', {noremap = true})
-keymap('n', 'Y', 'y$', {noremap = true})
-keymap('n', '+', '<C-a>', {noremap = true})
-keymap('n', '-', '<C-x>', {noremap = true})
+keymap('n', 'Y', 'y$', { noremap = true })
+keymap('n', '+', '<C-a>', { noremap = true })
+keymap('n', '-', '<C-x>', { noremap = true })
 
 --
 -- Insert mode
@@ -108,7 +110,7 @@ keymap('n', '-', '<C-x>', {noremap = true})
 --       {noremap = true})
 
 -- Visual and Select mode
-keymap('v', '<Enter>', ':EasyAlign<CR>', {noremap = true})
+keymap('v', '<Enter>', ':EasyAlign<CR>', { noremap = true })
 
 --
 -- Visual mode
