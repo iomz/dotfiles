@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
 
-emulate zsh
+skip_global_compinit=1
+
+ZDOTDIR=${XDG_CONFIG_HOME:=~/.config}/zsh
 
 # extended globbing
 setopt EXTENDED_GLOB

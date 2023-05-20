@@ -115,7 +115,12 @@ zinit wait'0a' lucid for \
     @OMZ::plugins/history-substring-search \
     atpull'zinit creinstall -q .' blockf \
     @zsh-users/zsh-completions \
-    atinit"bindkey '^_' autosuggest-execute;bindkey '^ ' autosuggest-accept;" \
+    atinit" \
+    ZSH_AUTOSUGGEST_USE_ASYNC=1; \
+    ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line); \
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#ff00ff,bg=cyan,bold,underline' \
+    bindkey '^_' autosuggest-execute; \
+    bindkey '^ ' autosuggest-accept;" \
     atload"_zsh_autosuggest_start" \
     @zsh-users/zsh-autosuggestions \
     atclone'(){local f;cd -q →*;for f (*~*.zwc){zcompile -Uz -- ${f}};}' \
@@ -131,6 +136,9 @@ zi lucid wait'0b' for \
 zinit light-mode for \
     @chriskempson/base16-shell \
     @iomz/emoji-cli \
+    @yukiycino-dotfiles/fancy-ctrl-z \
+    @woefe/git-prompt.zsh \
+    @romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z
 #=== ZENO =============================================
 zinit lucid wait'0c' depth'1' blockf for \

@@ -135,7 +135,6 @@ builtin zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' ignored-patterns '
 #bindkey -M menuselect 'j' vi-down-line-or-history
 #bindkey -M menuselect 'k' vi-up-line-or-history
 #bindkey -M menuselect 'l' vi-forward-char
-#
 #zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
 #zstyle ':completion:*' group-name ''
 #zstyle ':completion:*' list-colors 'di=36' 'ln=35'

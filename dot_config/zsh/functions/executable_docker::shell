@@ -1,0 +1,117 @@
+#autoload
+
+emulate -L zsh
+zmodload zsh/zutil || return
+
+local help \
+  docker_verbosity='auto' verbose \
+  file=() docker_file \
+  tag=(dev-sandbox) container_tag
+
+zparseopts -D -F -K -- \
+  {h,-help}=help \
+  {v,-verbose}=verbose \
+  {f,-file}:=file \
+  {t,-tag}:=tag || return
+
+(( ! $+commands[docker] )) && {
+  builtin print -P -- '%F{red}Error: docker command not found %f'
+  return 1
+}
+
+(( $#help )) && {
+  builtin print -rC1 -- \
+    "$0 [-h|--help]" \
+    "$0 [-f|--file] [-t|--tag=<tag>] [-v|--verbose]"
+  return 0
+}
+
+(( $#verbose )) && {
+  docker_verbosity='plain'
+}
+
+container_tag=${(q+)tag[-1]}
+builtin print -P -- "%F{green}===>%f Building ${container_tag} container"
+
+docker_file=${(q+)file[-1]}
+(( $#docker_file )) && {
+  docker buildx build \
+    --build-arg "USER=${USER}" \
+    --file "$(realpath $docker_file)" \
+    --load \
+    --platform linux/x86_64 \
+    --progress=$docker_verbosity \
+    --tag ${container_tag}:latest \
+    .
+} && {
+  builtin print -P -- "%F{green}===>%f Starting shell in ${tag} container"
+  docker run \
+    --hostname "$container_tag" \
+    --interactive \
+    --mount source=$container_tag,destination=/home \
+    --platform linux/x86_64 \
+    --tty \
+    --user $USER \
+    --security-opt seccomp=unconfined \
+    ${container_tag}:latest
+} || {
+  builtin print -P -- "%F{red}Error: Failed to build ${docker_file} %f"
+  return 1
+}
+
+local REPLY
+read -q ${(%):-"?%s%F{cyan}==>%f%s Build Ubuntu container? [y/N]: "} && REPLY=y
+print ''
+[[ $REPLY == y ]] && {
+  docker buildx build --load --platform linux/x86_64 --progress=$docker_verbosity --tag ${container_tag}:latest -<<'EOF'
+  FROM amd64/ubuntu
+  ENV USER docker-user
+  ENV HOME /home/$USER
+  ENV DEBIAN_FRONTEND noninteractive
+  RUN apt-get update --quiet=2 \
+   && apt-get install --assume-yes --no-install-recommends --quiet=2 \
+      autoconf autogen automake \
+      build-essential \
+      ca-certificates cmake coreutils curl \
+      file \
+      git \
+      make \
+      openssl \
+      stow subversion sudo \
+      texinfo \
+      wget \
+      unzip \
+      zsh
+  RUN useradd \
+    --create-home \
+    --gid root --groups sudo \
+    --home-dir /home/${USER} \
+    --shell "$(which zsh)" \
+    --uid 1001 \
+    ${USER} \
+   && mkdir -p /home/${USER}/.config \
+   && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers \
+   && passwd --delete ${USER} \
+   && chown --recursive ${USER} /home/${USER}
+  USER ${USER}
+  WORKDIR ${HOME}
+  RUN git clone https://github.com/vladdoster/dotfiles.git .config/dotfiles
+  ENTRYPOINT ["zsh"]
+  CMD ["-l"]
+EOF
+} && {
+  builtin print -P -- "%F{green}===>%f Starting shell in ${tag} container"
+  docker run \
+    --hostname "$container_tag" \
+    --interactive \
+    --mount source=${container_tag},destination=/home \
+    --platform linux/x86_64 \
+    --tty \
+    ${container_tag}:latest
+} || {
+  builtin print -P -- "%F{red}Error: Failed to build ${container_tag} %f"
+  return 1
+}
+
+
+# vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:

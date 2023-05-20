@@ -50,14 +50,11 @@ setopt no_print_exit_value  # Alert if something failed
 FPATH="${HOME}"/.config/zsh/completions:${FPATH}
 
 ######## -------default
-#
 ## Disable commands
 #disable r
-##
 ## <C-q> and <C-s> in Vim with iTerm2
 #stty start undef
 #stty stop undef
-#
 ## Options
 #setopt auto_cd # do cd if not command
 #setopt auto_pushd # make cd push to stack
@@ -66,7 +63,6 @@ FPATH="${HOME}"/.config/zsh/completions:${FPATH}
 #setopt rm_star_silent # confirm rm *
 #unsetopt prompt_cr # don't print a CR just before zle
 #setopt notify # report the status of background jobs
-#
 ### History
 #setopt append_history # don't replace the history file
 #setopt extended_history # record timestamp
@@ -81,5 +77,6 @@ FPATH="${HOME}"/.config/zsh/completions:${FPATH}
 #HISTFILE=$HOME/.zsh_history # file to save history when exits
 #HISTSIZE=10000
 #SAVEHIST=100000
-## display process taken longer than 1 second
-#REPORTTIME=1
+
+# display process taken longer than 1 second
+REPORTTIME=1
