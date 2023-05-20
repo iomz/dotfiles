@@ -12,8 +12,6 @@
 -- ====================================================================================
 -- local keymap = vim.keymap
 local keymap = vim.api.nvim_set_keymap
--- Remap space as leader key
-vim.g.mapleader = ' '
 
 --
 -- nmap
@@ -68,9 +66,6 @@ keymap('n', '<Leader>fh',
 -- g
 keymap('n', '<Leader>gn', ':lnext<CR>', {noremap = true})
 keymap('n', '<Leader>gp', ':lprevious<CR>', {noremap = true})
--- packer
-keymap('n', '<Leader>pc', ':PackerClean<CR>', {noremap = true})
-keymap('n', '<Leader>ps', ':PackerSync<CR>', {noremap = true})
 -- open tig with current file
 keymap('n', '<Leader>T', ':TigOpenCurrentFile<CR>', {noremap = true})
 -- open tig with Project root path

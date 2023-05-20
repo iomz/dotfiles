@@ -28,7 +28,7 @@ null_ls.setup {
         }), -- python
         null_ls.builtins.formatting.isort, -- python
         null_ls.builtins.formatting.gofmt, -- gofmt
-        null_ls.builtins.formatting.lua_format, -- lua
+        -- null_ls.builtins.formatting.lua_format, -- lua
         null_ls.builtins.formatting.prettierd -- web
     },
     on_attach = function(client, bufnr)

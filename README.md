@@ -1,6 +1,30 @@
-## dotfiles
+# dotfiles powered by [chezmoi](https://www.chezmoi.io/)
 
-# Zsh: order of executions
+<!--toc:start-->
+
+- [synopsis](#synopsis)
+- [memo](#memo)
+  - [zsh: order of executions](#zsh-order-of-executions)
+
+<!--toc:end-->
+
+# synopsis
+
+```console
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
+```
+
+# memo
+
+## zsh: order of executions
+
+My setup loads
+
+```
+$HOME/.zshenv → $HOME/.config/zsh/.zshrc → $ZDOTDIR/rc.d/**
+```
+
+while the default is
 
 ```
 .zshenv → .zprofile → .zshrc → .zlogin → .zlogout
