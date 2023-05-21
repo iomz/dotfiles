@@ -48,29 +48,30 @@ case ${OSTYPE} in
             $'%{\e[38;5;2m%}'   # green
             $'%{\e[38;5;113m%}' # lime green
         )
-        colored_time=%{$fg[cyan]%}%T
-        colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
-        colored_at=%{$fg[white]%}@
-        host_name=`hostname | cut -d. -f1`
-        colored_host=$colors[$((`echo "$host_name" | sum | cut -f1 -d' '`%${#colors}))+1]$host_name
-        #colored_host=%{$fg[blue]%}$host_name
-        colored_colon=%{$reset_color%}:
-        colored_path=%{$fg[magenta]%}%~
-        #colored_prompt=%{$reset_color%}%#
-        PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}$PROMPT"
-        ;;
-esac
+            colored_time=%{$fg[cyan]%}%T
+            colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
+            colored_at=%{$fg[white]%}@
+            host_name=`hostname | cut -d. -f1`
+            colored_host=$colors[$((`echo "$host_name" | sum | cut -f1 -d' '`%${#colors}))+1]$host_name
+            #colored_host=%{$fg[blue]%}$host_name
+            colored_colon=%{$reset_color%}:
+            colored_path=%{$fg[magenta]%}%~
+            #colored_prompt=%{$reset_color%}%#
+            newline=$'\n'
+            PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}${PROMPT/ /"$newline"}"
+            ;;
+    esac
 
-# Attach tmux on login
-#if [ ! -z `which tmux` ]; then
-#  if [ $SHLVL = 1 ]; then
-#    if [ $(( `ps aux | grep tmux | grep $USER | grep -v grep | wc -l` )) != 0 ]; then
-#      echo -n 'Attach tmux session? [Y/n]'
-#      read YN
-#      [[ $YN = '' ]] && YN=y
-#      [[ $YN = y ]] && tmux attach
-#    #else
-#    #  tmux
-#    fi
-#  fi
-#fi
+    # Attach tmux on login
+    #if [ ! -z `which tmux` ]; then
+    #  if [ $SHLVL = 1 ]; then
+    #    if [ $(( `ps aux | grep tmux | grep $USER | grep -v grep | wc -l` )) != 0 ]; then
+    #      echo -n 'Attach tmux session? [Y/n]'
+    #      read YN
+    #      [[ $YN = '' ]] && YN=y
+    #      [[ $YN = y ]] && tmux attach
+    #    #else
+    #    #  tmux
+    #    fi
+    #  fi
+    #fi
