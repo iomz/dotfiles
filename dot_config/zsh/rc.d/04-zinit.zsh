@@ -143,14 +143,7 @@ zinit light-mode for \
 #=== ZENO =============================================
 zinit lucid wait'0c' depth'1' blockf for \
     atinit"export ZENO_ENABLE_FZF_TMUX=1; \
-    export ZENO_FZF_TMUX_OPTIONS='-p'; \
-    bindkey ' '  zeno-auto-snippet; \
-    bindkey '^m' zeno-auto-snippet-and-accept-line; \
-    bindkey '^i' zeno-completion; \
-    bindkey '^g' zeno-ghq-cd; # switch ghq dir \
-    bindkey '^r' zeno-history-selection; # search history \
-    bindkey '^x^s' zeno-insert-snippet; # search snippets \
-    bindkey '^x ' zeno-insert-space; # insert space" \
+    export ZENO_FZF_TMUX_OPTIONS='-p';" \
     @yuki-yano/zeno.zsh
 
 # vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:

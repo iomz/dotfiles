@@ -26,7 +26,7 @@ setopt no_inc_append_history     # Write to the history file immediately, not wh
 setopt share_history             # Disable shared history between terminals / sessions (auto-importing)
 # DFL: HISTFILE="${ZDOTDIR:-$HOME}/.zhistory"
 [[ -z $HISTFILE ]] && HISTFILE=${XDG_DATA_HOME:-$HOME/.local/share}/zsh/history
-HISTSIZE=9999999
+[[ ! -x $HISTFILE ]] && mkdir -p ${XDG_DATA_HOME:-$HOME/.local/share}/zsh
 SAVEHIST=9999999
 # BET:(audit,transient): prevent frequently changing file to pollute BTRFS snapshots
 # HISTFILE=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/history
