@@ -20,7 +20,8 @@ export EDITOR=nvim
 export VISUAL=nvim
 
 # Pager
-export PAGER=most
+export PAGER=less
+#export PAGER=most
 
 # Program options
 export \
@@ -40,7 +41,7 @@ export \
 # for $HOME in each $path entry.
 typeset -gU FPATH PATH fpath path
 # path=( /{opt,usr/local}/Homebrew/bin(N) /home/linuxbrew/.linuxbrew/bin(N) $path )
-fpath=( ~/.config/zsh/(func|comple)tions(N) $fpath )
+fpath=( $HOME/.config/zsh/(func|comple)tions(N) $fpath )
 autoload -Uz ~/.config/zsh/functions/**/*
 
 path=(
@@ -84,7 +85,7 @@ fi
 
 # Deno
 if whence deno > /dev/null; then
-    path=(~/.deno/bin(N-/) $path)
+    path=($HOME/.deno/bin(N-/) $path)
 else
     brew install deno
 fi

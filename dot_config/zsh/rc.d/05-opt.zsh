@@ -37,13 +37,12 @@ setopt share_history             # Disable shared history between terminals / se
 # DFL: HISTFILE="${ZDOTDIR:-$HOME}/.zhistory"
 [[ -z $HISTFILE ]] && HISTFILE=${XDG_DATA_HOME:-$HOME/.local/share}/zsh/history
 [[ ! -x $HISTFILE ]] && mkdir -p ${XDG_DATA_HOME:-$HOME/.local/share}/zsh
-SAVEHIST=9999999
+HISTSIZE=9999999                 # The maximum number of events to save in the internal history.
+SAVEHIST=9999999                 # The maximum number of events to save in the history file.
 # BET:(audit,transient): prevent frequently changing file to pollute BTRFS snapshots
 # HISTFILE=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/history
 # # INFO: <avg>=20000cmds/year OR: use logrotate-esque way to store old history in archive
 # # SRC: https://unix.stackexchange.com/questions/273861/unlimited-history-in-zsh
-# HISTSIZE=1000000                 # The maximum number of events to save in the internal history.
-# SAVEHIST=1000000                 # The maximum number of events to save in the history file.
 # Jobs
 # WARN: zsh you have running jobs
 # If I exit again, my jobs are killed. But zsh accept some useful option to overide this : nohup nocheckjobs
@@ -57,12 +56,7 @@ setopt no_print_exit_value  # Alert if something failed
 { # New options (may be unavailable)
     setopt pipe_fail        # Exit pipe with rightmost non-zero code
 } 2>/dev/null
-fpath=($HOME/.config/zsh/completions $fpath)
 
-######## -------default
-## Disable commands
-#disable r
-## <C-q> and <C-s> in Vim with iTerm2
 #stty start undef
 #stty stop undef
 #LISTMAX=20 # in ZLE, the number of matches to list immediately
