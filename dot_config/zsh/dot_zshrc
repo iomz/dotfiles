@@ -34,30 +34,30 @@ case ${OSTYPE} in
         ;;
     linux*)
         # classic prompt
-        #autoload -U colors && colors
-        #colors=(
-        #    $'%{\e[38;5;3m%}'   # yellow
-        #    $'%{\e[38;5;9m%}'   # brown red
-        #    $'%{\e[38;5;6m%}'   # cyan
-        #    $'%{\e[38;5;5m%}'   # magenta
-        #    $'%{\e[38;5;4m%}'   # blue
-        #    $'%{\e[38;5;111m%}' # pale purple
-        #    $'%{\e[38;5;27m%}'  # ocean blue
-        #    $'%{\e[38;5;129m%}' # purple
-        #    $'%{\e[38;5;1m%}'   # red
-        #    $'%{\e[38;5;2m%}'   # green
-        #    $'%{\e[38;5;113m%}' # lime green
-        #)
+        autoload -U colors && colors
+        colors=(
+            $'%{\e[38;5;3m%}'   # yellow
+            $'%{\e[38;5;9m%}'   # brown red
+            $'%{\e[38;5;6m%}'   # cyan
+            $'%{\e[38;5;5m%}'   # magenta
+            $'%{\e[38;5;4m%}'   # blue
+            $'%{\e[38;5;111m%}' # pale purple
+            $'%{\e[38;5;27m%}'  # ocean blue
+            $'%{\e[38;5;129m%}' # purple
+            $'%{\e[38;5;1m%}'   # red
+            $'%{\e[38;5;2m%}'   # green
+            $'%{\e[38;5;113m%}' # lime green
+        )
         colored_time=%{$fg[cyan]%}%T
         colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
         colored_at=%{$fg[white]%}@
         host_name=`hostname | cut -d. -f1`
-        #colored_host=$colors[$((`echo "$host_name" | sum | cut -f1 -d' '`%${#colors}))+1]$host_name
-        colored_host=%{$fg[blue]%}$host_name
+        colored_host=$colors[$((`echo "$host_name" | sum | cut -f1 -d' '`%${#colors}))+1]$host_name
+        #colored_host=%{$fg[blue]%}$host_name
         colored_colon=%{$reset_color%}:
         colored_path=%{$fg[magenta]%}%~
-        colored_prompt=%{$reset_color%}%#
-        PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}${colored_path} $colored_prompt "
+        #colored_prompt=%{$reset_color%}%#
+        PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}$PROMPT"
         ;;
 esac
 
