@@ -2,16 +2,6 @@
 -- plugins for lazy.vim
 --
 return {
-  -- aerial
-  {
-    'stevearc/aerial.nvim',
-    opts = {},
-    -- Optional dependencies
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons"
-    },
-  },
   -- bclose: for tig-explorer
   'rbgrouleff/bclose.vim',
   -- snazzy buffer line

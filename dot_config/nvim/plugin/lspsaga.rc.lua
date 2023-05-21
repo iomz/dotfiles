@@ -9,8 +9,7 @@ lspsaga.setup({
         border = 'rounded',
         expand = "",
         collapse = "",
-        colors = {normal_bg = '#002b36'}, --
-        -- code_action = "💡",
+        colors = {normal_bg = '#002b36'},
         code_action = "󱧡",
         incoming = " ",
         outgoing = " ",
@@ -25,14 +24,11 @@ lspsaga.setup({
 })
 
 local opts = {noremap = true, silent = true}
-vim.keymap.set('n', '<C-j>', '<Cmd>Lspsaga diagnostic_jump_next<CR>', opts)
-vim.keymap.set('n', 'gl', '<Cmd>Lspsaga show_line_diagnostics<CR>', opts)
-vim.keymap.set('n', 'K', '<Cmd>Lspsaga hover_doc<CR>', opts)
-vim.keymap.set('n', 'gd', '<Cmd>Lspsaga lsp_finder<CR>', opts)
-vim.keymap.set('n', 'gp', '<Cmd>Lspsaga peek_definition<CR>', opts)
-vim.keymap.set('n', 'gr', '<Cmd>Lspsaga rename<CR>', opts)
-vim.keymap.set('i', '<C-k>', '<Cmd>Lspsaga signature_help<CR>', opts)
--- vim.keymap.set('i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-
--- code action
+vim.keymap.set('n', '<c-j>', '<cmd>Lspsaga diagnostic_jump_next<CR>', opts)
+vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc<CR>', opts)
+vim.keymap.set('n', 'gl', '<cmd>Lspsaga show_line_diagnostics<CR>', opts)
+vim.keymap.set('n', 'gp', '<cmd>Lspsaga peek_definition<CR>', opts)
+vim.keymap.set('n', 'gs', '<cmd>Lspsaga lsp_finder<CR>', opts)
+vim.keymap.set('n', 'gR', '<cmd>Lspsaga rename<CR>', opts)
+vim.keymap.set('i', '<c-K>', '<cmd>Lspsaga signature_help<CR>', opts)
 vim.keymap.set({"n", "v"}, "<leader>ca", "<cmd>Lspsaga code_action<CR>")

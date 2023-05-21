@@ -6,7 +6,7 @@ README.md
 **/*.bak
 
 # nvim packer
-.config/nvim/plugin/packer_compiled.lua
+.config/nvim/lazy-lock.json
 
 # zsh
 **/*.zwc
