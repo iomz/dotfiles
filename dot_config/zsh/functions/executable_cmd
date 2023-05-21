@@ -1,0 +1,8 @@
+#!autoload
+#
+# cmd
+#
+
+builtin cd ${XDG_DATA_HOME:-~/.local/share/}/chezmoi
+
+# vim: set expandtab filetype=zsh shiftwidth=4 softtabstop=4 tabstop=4:

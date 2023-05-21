@@ -1,0 +1,28 @@
+#!autoload
+#
+# it2prof
+#
+# set iTerm2 profile
+#
+local flag_help flag_verbose
+local -a arg_extension=()
+local -a usage=(
+    "it2prof [-h|--help]"
+    "it2prof [<profile-name>]"
+)
+
+zmodload zsh/zutil
+zparseopts -D -F -K -- \
+    {h,-help}=flag_help  ||
+return 1
+
+[[ -z "$flag_help" ]] || { print -l $usage && return }
+if (( $#@ )); then
+    echo -e "\033]50;SetProfile=$1\a"
+    return 0
+else
+    echo $ITERM_PROFILE
+    return 0
+fi
+
+# vim: set expandtab filetype=zsh shiftwidth=4 softtabstop=4 tabstop=4:
