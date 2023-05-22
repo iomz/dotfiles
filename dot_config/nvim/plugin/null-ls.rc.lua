@@ -21,7 +21,6 @@ mason_null_ls.setup({
         "clang_format", -- c++
         "eslint_d",     -- eslint_d
         "golines",      -- go
-        "pylint",       -- python
         "prettierd"     -- web
     }
 })
@@ -33,10 +32,9 @@ null_ls.setup({
         --
         null_ls.builtins.diagnostics.eslint_d.with({
             diagnostics_format = '[eslint_d] #{m}\n(#{c})'
-        }),                                  -- eslint_d
+        }),                                         -- eslint_d
         null_ls.builtins.diagnostics.golangci_lint, -- go
-        null_ls.builtins.diagnostics.pylint, -- python
-        null_ls.builtins.diagnostics.zsh,    -- zsh
+        null_ls.builtins.diagnostics.zsh,           -- zsh
         --
         -- formatting
         --

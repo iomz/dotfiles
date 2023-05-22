@@ -107,6 +107,8 @@ zinit from'gh-r' lbin'!' light-mode no'compile' for \
     lbin'!fzf;!fzf-tmux;' \
     src'key-bindings.zsh' \
     @junegunn/fzf \
+    @Songmu/ghg \
+    @x-motemen/ghq \
     @sharkdp/hyperfine \
     lbin'!nvim' \
     ver'nightly' \
