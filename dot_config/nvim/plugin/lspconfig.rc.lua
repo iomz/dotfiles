@@ -19,7 +19,18 @@ if (not mason_lspconfig_status) then return end
 
 mason_lspconfig.setup({
     automatic_installation = true,
-    ensure_installed = { "jsonls", "lua_ls", "pyright", "tsserver", "yamlls" },
+    ensure_installed = {
+        "cssls",         -- css
+        "tailwindcss",   -- css
+        "gopls",         -- go
+        "lua_ls",        -- lua
+        "marksman",      -- markdown
+        "pyright",       -- python
+        "rust_analyzer", -- rust
+        "tsserver",      -- typescript
+        "yamlls",        -- yaml
+        "lemminx"        -- xml
+    },
 })
 
 local coq_status, coq = pcall(require, "coq")
