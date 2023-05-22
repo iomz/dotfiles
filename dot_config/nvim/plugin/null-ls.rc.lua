@@ -17,8 +17,9 @@ null_ls.setup {
         --
         null_ls.builtins.diagnostics.eslint_d.with({
             diagnostics_format = '[eslint] #{m}\n(#{c})'
-        }),                               -- eslint
-        null_ls.builtins.diagnostics.zsh, -- zsh
+        }),                                         -- eslint
+        null_ls.builtins.diagnostics.golangci_lint, -- go
+        null_ls.builtins.diagnostics.zsh,           -- zsh
         --
         -- formatting
         --
@@ -27,7 +28,7 @@ null_ls.setup {
             extra_args = { "--line-length=120" }
         }),                                   -- python
         null_ls.builtins.formatting.isort,    -- python
-        null_ls.builtins.formatting.gofmt,    -- gofmt
+        null_ls.builtins.formatting.golines,  -- go
         null_ls.builtins.formatting.prettierd -- web
     },
     on_attach = function(client, bufnr)

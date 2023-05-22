@@ -20,6 +20,9 @@ return {
     {
         'ms-jpq/coq_nvim',
         branch = 'coq',
+        build = function()
+            vim.cmd [[:COQdeps]]
+        end,
         dependencies = { 'neovim/nvim-lspconfig' }
     },
     -- 9000+ Snippets
@@ -55,10 +58,10 @@ return {
         'williamboman/mason.nvim',
         build = function() require('mason.api.command').MasonUpdate() end,
         dependencies = {
-            'neovim/nvim-lspconfig',      -- nvim-lspconfig
+            'neovim/nvim-lspconfig',            -- nvim-lspconfig
             'williamboman/mason-lspconfig.nvim' -- mason-lspconfig
         }
-    },                                    --
+    },                                          --
     -- minimap
     { 'wfxr/minimap.vim',   build = 'cargo install --locked code-minimap' },
     -- molokai colorscheme

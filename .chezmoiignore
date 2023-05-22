@@ -5,10 +5,14 @@ README.md
 *.bak
 **/*.bak
 
+# old
+**/*.old
+
 # nvim packer
 .config/nvim/lazy-lock.json
 
 # zsh
 **/*.zwc
+**/.zcompcache/**
 .config/zsh/.zcompdump
 .config/zsh/completions/**

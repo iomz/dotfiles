@@ -19,7 +19,7 @@ if (not mason_lspconfig_status) then return end
 
 mason_lspconfig.setup({
     automatic_installation = true,
-    ensure_installed = { "beautysh", "eslint", "jsonls", "lua_ls", "pyright", "tsserver", "yamlls" },
+    ensure_installed = { "jsonls", "lua_ls", "pyright", "tsserver", "yamlls" },
 })
 
 local coq_status, coq = pcall(require, "coq")
@@ -89,8 +89,22 @@ mason_lspconfig.setup_handlers({
         }))
     end,
     -- css
-    --lspconfig.cssls.setup({})
-    --lspconfig.tailwindcss.setup({})
+    ["cssls"] = function()
+        lspconfig.cssls.setup(coq.lsp_ensure_capabilities({
+            on_attach = on_attach
+        }))
+    end,
+    ["tailwindcss"] = function()
+        lspconfig.tailwindcss.setup(coq.lsp_ensure_capabilities({
+            on_attach = on_attach
+        }))
+    end,
+    -- go
+    ["gopls"] = function()
+        lspconfig.gopls.setup(coq.lsp_ensure_capabilities({
+            on_attach = on_attach,
+        }))
+    end,
     -- lua
     ["lua_ls"] = function()
         lspconfig.lua_ls.setup(coq.lsp_ensure_capabilities({
