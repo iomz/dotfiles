@@ -2,17 +2,18 @@
 
 #------------------------------------
 # start zprof
-[ -z "$ZPROF" ] || zmodload zsh/zprof
+[[ -z "$ZPROF" ]] || zmodload zsh/zprof
 #------------------------------------
-# start logging
-## diagnose afterward: `sort-time-zsh-profile /tmp/zsh_profile.* | head`
-#rm -f /tmp/zsh_profile.*
-#zmodload zsh/datetime
-#setopt PROMPT_SUBST
-#PS4='+$EPOCHREALTIME %N:%i> '
-#logfile=$(mktemp /tmp/zsh_profile.XXXXXXXX)
-#exec 3>&2 2>$logfile
-#setopt XTRACE
+# zproftime
+## diagnose afterward: `zproftime-sort /tmp/zproftime.* | head`
+if [[ -n "${ENABLE_ZPROFTIME}" ]]; then
+    zmodload zsh/datetime
+    setopt PROMPT_SUBST
+    PS4='+$EPOCHREALTIME %N:%i> '
+    logfile=$(mktemp /tmp/zproftime.XXXX)
+    exec 3>&2 2>$logfile
+    setopt XTRACE
+fi
 #------------------------------------
 
 #0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"
@@ -26,12 +27,14 @@ for f in ${ZDOTDIR}/rc.d/<->-*zsh(N); do
 done
 
 #------------------------------------
-# end logging
-#unsetopt XTRACE
-#exec 2>&3 3>&-
+# zproftime end
+if [[ -n "${ENABLE_ZPROFTIME}" ]]; then
+    unsetopt XTRACE
+    exec 2>&3 3>&-
+fi
 #------------------------------------
 # end zprof
-[ -z "$ZPROF" ] || zprof | $PAGER
+[[ -z "$ZPROF" ]] || zprof | $PAGER
 #------------------------------------
 
 ############### -------------

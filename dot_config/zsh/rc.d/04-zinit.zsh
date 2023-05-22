@@ -1,16 +1,17 @@
 #!/usr/bin/env zsh
 #
-# Based on https://github.com/vladdoster/dotfiles/blob/master/zsh/.config/zsh/rc.d/04-zinit.zsh
+# Zinit
 #
 
-#=== ZINIT ============================================
-# OPTIMIZE_OUT_OF_DISK_ACCESSES "1"
-typeset -gAH ZI=(HOME_DIR "$HOME/.local/share/zinit")
+# Initialize Zinit {{{
+#
+typeset -gAH ZI=(HOME_DIR "${XDG_DATA_HOME}/zinit")
 ZI+=(
     BIN_DIR "$ZI[HOME_DIR]"/zinit.git
     BRANCH 'main'
     COMPINIT_OPTS '-C'
     COMPLETIONS_DIR "$ZI[HOME_DIR]"/completions
+    # OPTIMIZE_OUT_OF_DISK_ACCESSES "1"
     PLUGINS_DIR "$ZI[HOME_DIR]"/plugins
     SNIPPETS_DIR "$ZI[HOME_DIR]"/snippets
     SRC 'zdharma-continuum'
@@ -40,24 +41,39 @@ if [[ -e ${ZI[BIN_DIR]}/zinit.zsh ]]; then
 else
     log::error 'failed to find zinit installation'
 fi
+# }}}
 
-#=== STATIC ZSH BINARY ======================================
-# zi for atpull"%atclone" depth"1" lucid nocompile nocompletions as"null" \
+# Static zsh binary {{{
+#
+# zinit for atpull"%atclone" depth"1" lucid nocompile nocompletions as"null" \
     #     atclone"./install -e no -d ~/.local" atinit"export PATH=$HOME/.local/bin:$PATH" \
     #   @romkatv/zsh-bin
+# }}}
 
-#=== COMPLETIONS ======================================
+# Snippets {{{
+#
 local GH_RAW_URL='https://raw.githubusercontent.com'
-znippet() { zi for  as'completion' has"${1}" depth'1' light-mode nocompile is-snippet "${GH_RAW_URL}/${2}/_${1}"; }
+znippet() {
+    zinit for \
+        as'completion' \
+        depth'1' \
+        has"${1}" \
+        is-snippet \
+        light-mode \
+        nocompile \
+        "${GH_RAW_URL}/${2}/_${1}";
+}
 znippet 'brew'   'Homebrew/brew/master/completions/zsh'
 znippet 'docker' 'docker/cli/master/contrib/completion/zsh'
 znippet 'exa'    'ogham/exa/master/completions/zsh'
 znippet 'fd'     'sharkdp/fd/master/contrib/completion'
-zi as'completion' id-as'auto' is-snippet light-mode for \
+zinit as'completion' id-as'auto' is-snippet light-mode for \
     "${GH_RAW_URL}/git/git/master/contrib/completion/git-completion.zsh" \
     "${GH_RAW_URL}/Homebrew/homebrew-services/master/completions/zsh/_brew_services"
+# }}}
 
-#=== PROMPT ===========================================
+# Prompt {{{
+# For a minmal prompt
 #(( MINIMAL )) || {
 #    eval "MODE_CURSOR_"{'SEARCH="#ff00ff blinking underline"','VICMD="green block"','VIINS="#ffff00  bar"'}";"
 #    zinit for light-mode compile'(async|pure).zsh' multisrc'(async|pure).zsh' atinit"
@@ -70,44 +86,40 @@ zi as'completion' id-as'auto' is-snippet light-mode for \
 #    zstyle ':prompt:pure:prompt:success' color 'green'" \
     #        @sindresorhus/pure
 #}
+# }}}
 
-#=== ANNEXES ==========================================
-zi id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods','binary-symlink','bin-gem-node'}
+# Annexes {{{
+# Load zinit-annex
+zinit id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods','binary-symlink','bin-gem-node'}
+# }}}
 
-#=== OH-MY-ZSH & PREZTO PLUGINS =======================
-#(( $+commands[svn] )) && (){
-#    local -a f=({functions,git,history,key-bindings,termsupport}'.zsh')
-#    zi ice atinit'typeset -grx HIST{FILE=${XDG_DATA_HOME}/zsh/history,SIZE=9999999}' compile'(k|g|h)*.zsh' light-mode multisrc'$f[@]' svn
-#    zi snippet OMZ::lib
-#
-#    zi ice submods'zsh-users/zsh-history-substring-search -> external' svn load
-#    zi snippet OMZP::history-substring-search
-#}
-
-# GitHub binaries
-zi from'gh-r' lbin'!' light-mode no'compile' for \
+# GitHub binaries {{{
+# Download and link binaries available on GitHub
+zinit from'gh-r' lbin'!' light-mode no'compile' for \
     @sharkdp/bat \
     lbin'!bat-modules;!batdiff;!batgrep;!batman;!batpipe;!batwatch;!prettybat;' \
     @eth-p/bat-extras \
     @dandavison/delta \
     cp'**/exa.zsh->_exa' \
     @ogham/exa \
-    src'key-bindings.zsh' \
     compile'key-bindings.zsh' \
     dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \
     lbin'!fzf;!fzf-tmux;' \
+    src'key-bindings.zsh' \
     @junegunn/fzf \
     @sharkdp/hyperfine \
     lbin'!nvim' \
     ver'nightly' \
     @neovim/neovim \
     @r-darwish/topgrade
+# }}}
 
-# zeno.zsh
+# zeno.zsh {{{
 zinit lucid depth'1' blockf for \
     @yuki-yano/zeno.zsh
+# }}}
 
-# unit testing
+# unit testing {{{
 zinit light-mode for \
     compile \
     @vladdoster/plugin-zinit-aliases \
@@ -117,12 +129,13 @@ zinit light-mode for \
     lbin'!build/zsd*' \
     make'--always-make' \
     @zdharma-continuum/zshelldoc \
-    as'null' \
     atclone'./build.zsh' \
+    as'null' \
     lbin'!' \
     @zdharma-continuum/zunit
+# }}}
 
-# miscellaneous
+# Highlight {{{
 zle_highlight=('paste:fg=white,bg=black')
 zinit wait'0a' lucid for \
     has'svn' svn submods'zsh-users/zsh-history-substring-search -> external' \
@@ -142,9 +155,10 @@ zinit wait'0a' lucid for \
     compile'.*fast*~*.zwc' \
     nocompletions \
     @zdharma-continuum/fast-syntax-highlighting
+# }}}
 
-# null
-zi lucid wait'0b' for \
+# null {{{
+zinit lucid wait'0b' for \
     as'null' atload'zicompinit; zicdreplay' \
     id-as'init-zinit' \
     nocd \
@@ -156,3 +170,4 @@ zinit light-mode for \
     @woefe/git-prompt.zsh \
     @romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z
+# }}}

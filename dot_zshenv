@@ -2,6 +2,9 @@
 
 skip_global_compinit=1
 
+# uncomment to analyze init time
+ENABLE_ZPROFTIME=true
+
 ZDOTDIR=${XDG_CONFIG_HOME:=~/.config}/zsh
 
 # extended globbing
