@@ -21,5 +21,3 @@ else
     log::info 'Restarting Zsh...'
     exec zsh -l
 fi
-
-# vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:

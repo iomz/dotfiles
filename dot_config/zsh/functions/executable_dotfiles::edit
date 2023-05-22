@@ -1,5 +1,4 @@
 #autoload
 
-find "$(chezmoi source-path)" -type f | fzfp | xargs "$EDITOR"
-
-# vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:
+#find "$(chezmoi source-path)" -type f | fzfp | xargs "$EDITOR"
+find ${XDG_DATA_HOME:-~/.local/share/}/chezmoi -type f | fzfp | xargs "$EDITOR"

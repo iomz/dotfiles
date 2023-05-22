@@ -24,5 +24,3 @@ else
     echo $ITERM_PROFILE
     return 0
 fi
-
-# vim: set expandtab filetype=zsh shiftwidth=4 softtabstop=4 tabstop=4:

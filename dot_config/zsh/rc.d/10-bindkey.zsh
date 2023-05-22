@@ -1,3 +1,9 @@
+#!/usr/bin/env zsh
+#
+# Sets bindkeys
+#
+
+# back-tab key
 bindkey "$terminfo[kcbt]" reverse-menu-complete
 
 # edit command line with $EDITOR
@@ -6,15 +12,27 @@ zle -N edit-command-line
 bindkey '^xe'  edit-command-line
 bindkey '^x^e' edit-command-line
 
-# Key bindings
+# emacs style (instead of -v)
 bindkey -e
 
 # open nvim with fzf
-bindkey -s '^o' 'nvim $(fzf)^M'
+bindkey -s '^o' 'nvim $(fzf)^J'
 
-zle -N history-beginning-search-backward-end history-search-end
-zle -N history-beginning-search-forward-end history-search-end
-bindkey '^P' history-beginning-search-backward-end
-bindkey '^N' history-beginning-search-forward-end
+# history search
+bindkey '^p' history-search-backward
+bindkey '^n' history-search-forward
 
+# resume with fg (often to nvim)
 bindkey '^z' fancy-ctrl-z
+
+# zeno.zsh
+#print -- "ZENO_LOADED: ${ZENO_LOADED}"
+if [[ -n $ZENO_LOADED ]]; then
+    bindkey '^c' zeno-auto-snippet
+    bindkey '^i' zeno-completion
+    bindkey '^g' zeno-ghq-cd # switch ghq dir
+    bindkey '^m' zeno-auto-snippet-and-accept-line
+    #bindkey '^r' zeno-history-selection # search history
+    bindkey '^x^s' zeno-insert-snippet # search snippets
+    bindkey '^x ' zeno-insert-space # insert space
+fi

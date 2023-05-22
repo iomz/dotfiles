@@ -1,0 +1,7 @@
+#!autoload
+#
+# p8
+#
+
+builtin emulate -L zsh -o EXTENDED_GLOB
+ping 8.8.8.8

@@ -10,10 +10,8 @@ zparseopts -D -F -K -- {h,-help}=flag_help || return 1
 
 [[ -z "$flag_help" ]] || { print -l $usage && return }
 if (( $#@ )); then
-  echo -e "\e[1;96m $(figlet -c -w$COLUMNS $@) \e[0m"
-  return 0
+    echo -e "\e[1;96m $(figlet -c -w$COLUMNS $@) \e[0m"
+    return 0
 else
-  print -l $usage && return 1
+    print -l $usage && return 1
 fi
-
-# vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:

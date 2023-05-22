@@ -1,4 +1,7 @@
 #!/usr/bin/env zsh
+#
+# Options for zsh setopt
+#
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic
 # General

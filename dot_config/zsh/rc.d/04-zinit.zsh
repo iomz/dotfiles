@@ -2,6 +2,7 @@
 #
 # Based on https://github.com/vladdoster/dotfiles/blob/master/zsh/.config/zsh/rc.d/04-zinit.zsh
 #
+
 #=== ZINIT ============================================
 # OPTIMIZE_OUT_OF_DISK_ACCESSES "1"
 typeset -gAH ZI=(HOME_DIR "$HOME/.local/share/zinit")
@@ -39,10 +40,12 @@ if [[ -e ${ZI[BIN_DIR]}/zinit.zsh ]]; then
 else
     log::error 'failed to find zinit installation'
 fi
+
 #=== STATIC ZSH BINARY ======================================
 # zi for atpull"%atclone" depth"1" lucid nocompile nocompletions as"null" \
     #     atclone"./install -e no -d ~/.local" atinit"export PATH=$HOME/.local/bin:$PATH" \
     #   @romkatv/zsh-bin
+
 #=== COMPLETIONS ======================================
 local GH_RAW_URL='https://raw.githubusercontent.com'
 znippet() { zi for  as'completion' has"${1}" depth'1' light-mode nocompile is-snippet "${GH_RAW_URL}/${2}/_${1}"; }
@@ -53,6 +56,7 @@ znippet 'fd'     'sharkdp/fd/master/contrib/completion'
 zi as'completion' id-as'auto' is-snippet light-mode for \
     "${GH_RAW_URL}/git/git/master/contrib/completion/git-completion.zsh" \
     "${GH_RAW_URL}/Homebrew/homebrew-services/master/completions/zsh/_brew_services"
+
 #=== PROMPT ===========================================
 #(( MINIMAL )) || {
 #    eval "MODE_CURSOR_"{'SEARCH="#ff00ff blinking underline"','VICMD="green block"','VIINS="#ffff00  bar"'}";"
@@ -66,8 +70,10 @@ zi as'completion' id-as'auto' is-snippet light-mode for \
 #    zstyle ':prompt:pure:prompt:success' color 'green'" \
     #        @sindresorhus/pure
 #}
+
 #=== ANNEXES ==========================================
 zi id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods','binary-symlink','bin-gem-node'}
+
 #=== OH-MY-ZSH & PREZTO PLUGINS =======================
 #(( $+commands[svn] )) && (){
 #    local -a f=({functions,git,history,key-bindings,termsupport}'.zsh')
@@ -77,24 +83,31 @@ zi id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods','bi
 #    zi ice submods'zsh-users/zsh-history-substring-search -> external' svn load
 #    zi snippet OMZP::history-substring-search
 #}
-#=== GITHUB BINARIES ==================================
+
+# GitHub binaries
 zi from'gh-r' lbin'!' light-mode no'compile' for \
+    @sharkdp/bat \
+    lbin'!bat-modules;!batdiff;!batgrep;!batman;!batpipe;!batwatch;!prettybat;' \
+    @eth-p/bat-extras \
     @dandavison/delta \
-    @r-darwish/topgrade \
-    @sharkdp/hyperfine \
     cp'**/exa.zsh->_exa' \
-    atinit"alias l='exa -blF'; alias la='exa -abghilmu'; alias ll='exa -al'; alias ls='exa --git --group-directories-first'" \
     @ogham/exa \
     src'key-bindings.zsh' \
     compile'key-bindings.zsh' \
     dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \
     lbin'!fzf;!fzf-tmux;' \
     @junegunn/fzf \
-    atinit'for i (v vi vim); do alias $i="nvim"; done' \
+    @sharkdp/hyperfine \
     lbin'!nvim' \
     ver'nightly' \
-    @neovim/neovim
-#=== UNIT TESTING =====================================
+    @neovim/neovim \
+    @r-darwish/topgrade
+
+# zeno.zsh
+zinit lucid depth'1' blockf for \
+    @yuki-yano/zeno.zsh
+
+# unit testing
 zinit light-mode for \
     compile \
     @vladdoster/plugin-zinit-aliases \
@@ -108,7 +121,8 @@ zinit light-mode for \
     atclone'./build.zsh' \
     lbin'!' \
     @zdharma-continuum/zunit
-#=== MISC. ============================================
+
+# miscellaneous
 zle_highlight=('paste:fg=white,bg=black')
 zinit wait'0a' lucid for \
     has'svn' svn submods'zsh-users/zsh-history-substring-search -> external' \
@@ -128,6 +142,8 @@ zinit wait'0a' lucid for \
     compile'.*fast*~*.zwc' \
     nocompletions \
     @zdharma-continuum/fast-syntax-highlighting
+
+# null
 zi lucid wait'0b' for \
     as'null' atload'zicompinit; zicdreplay' \
     id-as'init-zinit' \
@@ -140,18 +156,3 @@ zinit light-mode for \
     @woefe/git-prompt.zsh \
     @romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z
-#=== ZENO =============================================
-zinit lucid wait'0c' depth'1' blockf for \
-    atinit"export ZENO_ENABLE_FZF_TMUX=1; \
-    export ZENO_FZF_TMUX_OPTIONS='-p'; \
-    bindkey ' '  zeno-auto-snippet; \
-    bindkey '^m' zeno-auto-snippet-and-accept-line; \
-    bindkey '^i' zeno-completion; \
-    bindkey '^g' zeno-ghq-cd; # switch ghq dir \
-    bindkey '^r' zeno-history-selection; # search history \
-    bindkey '^x^s' zeno-insert-snippet; # search snippets \
-    bindkey '^x ' zeno-insert-space; # insert space \
-    " \
-    @yuki-yano/zeno.zsh
-
-# vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:

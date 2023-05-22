@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
-###
-## Commands, funtions and aliases
+#
+# Commands, funtions and aliases
 ## Always set aliases _last,_ so they don't get used in function definitions.
 ###
 ## type '-' to return to your previous dir.
@@ -184,17 +184,20 @@
 # +─────────+
 # │ DEFAULT │
 # +─────────+
-if whence ccat > /dev/null; then
-    alias cat='ccat'
+# cat
+if whence bat > /dev/null; then
+    alias cat='bat --color=always --paging=never'
 fi
-if whence colordiff > /dev/null; then
-    alias diff='colordiff'
-fi
-#if whence exa > /dev/null; then
-#    alias ls="exa"
-#    alias ll="exa -lh  --git --time-style long-iso"
-#    alias la="exa -alh --git --time-style long-iso"
-if whence gls > /dev/null; then
+# ls
+if whence exa > /dev/null; then
+    alias l='exa -blF'
+    alias la='exa -abghilmu'
+    #alias la="exa -alh --git --time-style long-iso"
+    alias ll="exa -lh  --git --time-style long-iso"
+    #alias ll='exa -al'
+    alias ls='exa --git --group-directories-first'
+    #alias ls="exa"
+elif whence gls > /dev/null; then
     alias ls='gls --color=auto'
     alias ll='ls -lh'
     alias la='ls -alh'
@@ -202,8 +205,18 @@ else
     alias ll='ls -lh'
     alias la='ls -alh'
 fi
+
+# nvim
+for i (v vi vim); do
+    alias $i="nvim"
+done
+
+# sed
 if whence gsed > /dev/null; then
     alias sed='gsed'
 fi
-alias ghqgs='ghq get --shallow'
-alias p8='ping 8.8.8.8'
+
+# tree
+if whence exa > /dev/null; then
+    alias tree='exa --tree'
+fi

@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
-
+#
+# Widget
+#
 zmodload -i zsh/parameter
 autoload -Uz zkbd
 
@@ -48,5 +50,3 @@ function reset_broken_terminal() {
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook -Uz precmd reset_broken_terminal
-
-# vim: set expandtab filetype=zsh shiftwidth=2 softtabstop=2 tabstop=2:
