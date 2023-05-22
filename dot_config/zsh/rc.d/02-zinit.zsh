@@ -4,7 +4,6 @@
 #
 
 # Initialize Zinit {{{
-#
 typeset -gAH ZI=(HOME_DIR "${XDG_DATA_HOME}/zinit")
 ZI+=(
     BIN_DIR "$ZI[HOME_DIR]"/zinit.git
@@ -43,12 +42,14 @@ else
 fi
 # }}}
 
+
 # Static zsh binary {{{
 #
 # zinit for atpull"%atclone" depth"1" lucid nocompile nocompletions as"null" \
     #     atclone"./install -e no -d ~/.local" atinit"export PATH=$HOME/.local/bin:$PATH" \
     #   @romkatv/zsh-bin
 # }}}
+
 
 # Snippets {{{
 #
@@ -72,6 +73,7 @@ zinit as'completion' id-as'auto' is-snippet light-mode for \
     "${GH_RAW_URL}/Homebrew/homebrew-services/master/completions/zsh/_brew_services"
 # }}}
 
+
 # Prompt {{{
 # For a minmal prompt
 #(( MINIMAL )) || {
@@ -88,38 +90,18 @@ zinit as'completion' id-as'auto' is-snippet light-mode for \
 #}
 # }}}
 
+
 # Annexes {{{
 # Load zinit-annex
 zinit id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods','binary-symlink','bin-gem-node'}
 # }}}
 
-# GitHub binaries {{{
-# Download and link binaries available on GitHub
-zinit from'gh-r' lbin'!' light-mode no'compile' for \
-    @sharkdp/bat \
-    lbin'!bat-modules;!batdiff;!batgrep;!batman;!batpipe;!batwatch;!prettybat;' \
-    @eth-p/bat-extras \
-    @dandavison/delta \
-    cp'**/exa.zsh->_exa' \
-    @ogham/exa \
-    compile'key-bindings.zsh' \
-    dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \
-    lbin'!fzf;!fzf-tmux;' \
-    src'key-bindings.zsh' \
-    @junegunn/fzf \
-    @Songmu/ghg \
-    @x-motemen/ghq \
-    @sharkdp/hyperfine \
-    lbin'!nvim' \
-    ver'nightly' \
-    @neovim/neovim \
-    @r-darwish/topgrade
-# }}}
 
 # zeno.zsh {{{
 zinit lucid depth'1' blockf for \
     @yuki-yano/zeno.zsh
 # }}}
+
 
 # unit testing {{{
 zinit light-mode for \
@@ -137,19 +119,12 @@ zinit light-mode for \
     @zdharma-continuum/zunit
 # }}}
 
+
 # Highlight {{{
 zle_highlight=('paste:fg=white,bg=black')
 zinit wait'0a' lucid for \
-    has'svn' svn submods'zsh-users/zsh-history-substring-search -> external' \
-    @OMZ::plugins/history-substring-search \
     atpull'zinit creinstall -q .' blockf \
     @zsh-users/zsh-completions \
-    atinit" \
-    ZSH_AUTOSUGGEST_USE_ASYNC=1; \
-    ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line); \
-    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#ff00ff,bg=cyan,bold,underline' \
-    bindkey '^_' autosuggest-execute; \
-    bindkey '^ ' autosuggest-accept;" \
     atload"_zsh_autosuggest_start" \
     @zsh-users/zsh-autosuggestions \
     atclone'(){local f;cd -q →*;for f (*~*.zwc){zcompile -Uz -- ${f}};}' \
@@ -159,17 +134,22 @@ zinit wait'0a' lucid for \
     @zdharma-continuum/fast-syntax-highlighting
 # }}}
 
-# null {{{
+
+# compinit {{{
 zinit lucid wait'0b' for \
-    as'null' atload'zicompinit; zicdreplay' \
+    as'null' atload'zpcompinit; zpcdreplay' \
     id-as'init-zinit' \
     nocd \
     @zdharma-continuum/null
+# }}}
+
+
+# miscellaneous {{{
 zinit light-mode for \
     @chriskempson/base16-shell \
     @iomz/emoji-cli \
     @yukiycino-dotfiles/fancy-ctrl-z \
-    @woefe/git-prompt.zsh \
-    @romkatv/zsh-prompt-benchmark \
+    #@woefe/git-prompt.zsh \
+    #@romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z
 # }}}

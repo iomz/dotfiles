@@ -2,8 +2,6 @@
 #
 # Environmental values not in .zshenv
 #
-# no-ops
-#
 
 # fzf {{{
 # default command
@@ -21,24 +19,32 @@ export FZF_DEFAULT_OPTS="--info inline --layout reverse"
 export FZF_COMPLETION_TRIGGER=';'
 # }}}
 
+
 # zeno.zsh {{{
-# if defined load the configuration file from there
+# fallback if snippet not matched (default: self-insert)
+export ZENO_AUTO_SNIPPET_FALLBACK=self-insert
+
+# fallback if completion not matched
+# (default: fzf-completion if exists; otherwise expand-or-complete)
+export ZENO_COMPLETION_FALLBACK=expand-or-complete
+
+# zeno config path
 export ZENO_HOME=${XDG_CONFIG_HOME}/zeno
 
-# if disable zeno cache command when plugin loaded
+# disable zeno cache command when plugin loaded
 export ZENO_DISABLE_EXECUTE_CACHE_COMMAND=1
 
-# if enable fzf-tmux
-export ZENO_ENABLE_FZF_TMUX=1
+# enable fzf-tmux
+#export ZENO_ENABLE_FZF_TMUX=1
 
-# if setting fzf-tmux options
-export ZENO_FZF_TMUX_OPTIONS="-p"
+# set fzf-tmux options
+#export ZENO_FZF_TMUX_OPTIONS="-p"
 
-# Experimental: Use UNIX Domain Socket
+# experimental: use UNIX Domain Socket
 #export ZENO_ENABLE_SOCK=1
 
-# if disable builtin completion
-#export ZENO_DISABLE_BUILTIN_COMPLETION=1
+# disable builtin completion
+export ZENO_DISABLE_BUILTIN_COMPLETION=1
 
 # default
 #export ZENO_GIT_CAT="cat"
@@ -49,4 +55,11 @@ export ZENO_GIT_CAT="bat --color=always"
 #export ZENO_GIT_TREE="tree"
 # git folder preview with color
 export ZENO_GIT_TREE="exa --tree"
+# }}}
+
+
+# zsh-autosuggestions {{{
+export ZSH_AUTOSUGGEST_USE_ASYNC=1
+export ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line)
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#ff00ff,bg=cyan,bold,underline'
 # }}}

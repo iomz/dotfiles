@@ -78,4 +78,4 @@ cf. [How to profile your zsh startup time by Benjamin Esham](https://esham.io/20
 
 [Zinit](https://github.com/zdharma-continuum/zinit) automatically downloads some binaries and creates links in `$ZPFX/bin` (i.e., `~/.local/share/zinit/polaris/bin`) with the [zinit-annex-binary-symlink](https://github.com/zdharma-continuum/zinit-annex-binary-symlink).
 
-See the section `# GitHub binaries` in https://github.com/iomz/dotfiles/blob/main/dot_config/zsh/rc.d/04-zinit.zsh
+See the config file at https://github.com/iomz/dotfiles/blob/main/dot_config/zsh/rc.d/03-polaris.zsh

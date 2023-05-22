@@ -2,8 +2,6 @@
 #
 # Named directories
 #
-# Set these early as it affects how dirs are displayed and printed.
-#
 # hash -d to create the directory shortcuts for ~<name>
 #
 hash -d zsh=$ZDOTDIR # cd ~zsh

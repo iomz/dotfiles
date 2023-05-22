@@ -2,6 +2,11 @@
 #
 # Widget
 #
+
+# url quote magic
+autoload -Uz url-quote-magic
+zle -N self-insert url-quote-magic
+
 zmodload -i zsh/parameter
 autoload -Uz zkbd
 
