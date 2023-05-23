@@ -149,7 +149,7 @@ zinit light-mode for \
     @chriskempson/base16-shell \
     @iomz/emoji-cli \
     @yukiycino-dotfiles/fancy-ctrl-z \
-    #@woefe/git-prompt.zsh \
-    #@romkatv/zsh-prompt-benchmark \
+    @woefe/git-prompt.zsh \
+    @romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z
 # }}}

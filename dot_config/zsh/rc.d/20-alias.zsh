@@ -184,10 +184,6 @@
 # +─────────+
 # │ DEFAULT │
 # +─────────+
-# cat
-if whence bat > /dev/null; then
-    alias cat='bat --color=always --paging=never'
-fi
 # ls
 if whence exa > /dev/null; then
     alias l='exa -blF'

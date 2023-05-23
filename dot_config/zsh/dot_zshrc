@@ -66,7 +66,7 @@ case ${OSTYPE} in
         command -v starship &> /dev/null && eval "$(starship init zsh)"
         ;;
     linux*)
-        colored_time=%{$fg[cyan]%}%T
+        colored_time=%{$fg[cyan]%}%t
         colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
         colored_at=%{$fg[white]%}@
         host_name=`hostname | cut -d. -f1`
