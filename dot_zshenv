@@ -87,10 +87,11 @@ if (( ! $+commands[brew] )); then
 fi
 
 # Deno
-if whence deno > /dev/null; then
-    path=($HOME/.deno/bin(N-/) $path)
-else
-    brew install deno
+export DENO_INSTALL=$HOME/.deno
+path=(${DENO_INSTALL}/bin(N-/) $path)
+if ! whence deno > /dev/null; then
+    echo "Install Deno to ${DENO_INSTALL}"
+    curl -fsSL https://deno.land/install.sh | sh
 fi
 
 # Go

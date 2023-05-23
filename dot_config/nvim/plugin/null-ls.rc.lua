@@ -16,12 +16,14 @@ if (not mason_null_ls_status) then return end
 mason_null_ls.setup({
     automatic_setup = true,
     ensure_installed = {
-        "beautysh",     -- bash/zsh
-        "black",        -- python
-        "clang_format", -- c++
-        "eslint_d",     -- eslint_d
-        "golines",      -- go
-        "prettierd"     -- web
+        "beautysh",      -- bash/zsh
+        "black",         -- python
+        "clang_format",  -- c++
+        "eslint_d",      -- eslint_d
+        "golangci_lint", -- go
+        "golines",       -- go
+        "prettierd",     -- web
+        "yamlfmt"        -- yaml
     }
 })
 
@@ -44,7 +46,8 @@ null_ls.setup({
         }),                                       -- python
         null_ls.builtins.formatting.clang_format, -- c++
         null_ls.builtins.formatting.golines,      -- go
-        null_ls.builtins.formatting.prettierd     -- web
+        null_ls.builtins.formatting.prettierd,    -- web
+        null_ls.builtins.formatting.yamlfmt       -- yaml
     },
     on_attach = function(client, bufnr)
         if client.supports_method("textDocument/formatting") then

@@ -20,16 +20,18 @@ if (not mason_lspconfig_status) then return end
 mason_lspconfig.setup({
     automatic_installation = true,
     ensure_installed = {
-        "cssls",         -- css
-        "tailwindcss",   -- css
-        "gopls",         -- go
-        "lua_ls",        -- lua
-        "marksman",      -- markdown
-        "pyright",       -- python
-        "rust_analyzer", -- rust
-        "tsserver",      -- typescript
-        "yamlls",        -- yaml
-        "lemminx"        -- xml
+        "cssls",                           -- css
+        "tailwindcss",                     -- css
+        "docker_compose_language_service", -- docker compose
+        "dockerls",                        -- docker
+        "gopls",                           -- go
+        "lua_ls",                          -- lua
+        "marksman",                        -- markdown
+        "pyright",                         -- python
+        "rust_analyzer",                   -- rust
+        "tsserver",                        -- typescript
+        "yamlls",                          -- yaml
+        "lemminx"                          -- xml
     },
 })
 
@@ -112,8 +114,20 @@ mason_lspconfig.setup_handlers({
     end,
     -- go
     ["gopls"] = function()
+        local util = require('lspconfig/util')
         lspconfig.gopls.setup(coq.lsp_ensure_capabilities({
             on_attach = on_attach,
+            cmd = { "gopls", "serve" },
+            filetypes = { "go", "gomod" },
+            root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+            settings = {
+                gopls = {
+                    analyses = {
+                        unusedparams = true,
+                    },
+                    staticcheck = true,
+                },
+            },
         }))
     end,
     -- lua
