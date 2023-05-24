@@ -70,13 +70,14 @@ if (( ! $+commands[brew] )); then
         BREW_LOCATION="/home/linuxbrew/.linuxbrew/bin/brew"
     elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
         BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
-    fi
-    if [[ "$(uname -m)" != "aarch64" ]]; then
+    elif [[ "$(uname -m)" != "aarch64" ]]; then
         # install brew
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)";
         eval "$("$BREW_LOCATION" shellenv)"
         unset BREW_LOCATION
-        r       path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
+    fi
+    if [[ "$(uname -m)" != "aarch64" ]]; then
+        path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
         fpath=( $HOMEBREW_PREFIX/share/zsh/site-functions(/N) $fpath )
         # brew curl
         if [[ -x /opt/homebrew/opt/curl/bin/curl ]]; then
