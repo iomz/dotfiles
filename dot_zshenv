@@ -43,7 +43,6 @@ export \
 # Note that each value in an array is expanded separately. Thus, we can use ~
 # for $HOME in each $path entry.
 typeset -gU FPATH PATH fpath path
-# path=( /{opt,usr/local}/Homebrew/bin(N) /home/linuxbrew/.linuxbrew/bin(N) $path )
 fpath=( $HOME/.config/zsh/(func|comple)tions(N) $fpath )
 autoload -Uz ~/.config/zsh/functions/**/*
 
@@ -72,9 +71,10 @@ if (( ! $+commands[brew] )); then
     elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
         BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
     else
-        # install brew
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        return
+        if [[ "$(uname -m)" != "aarch64" ]]; then
+            # install brew
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)";
+        fi
     fi
     eval "$("$BREW_LOCATION" shellenv)"
     unset BREW_LOCATION
