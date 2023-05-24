@@ -13,9 +13,7 @@ if [[ -e /etc/rpi-issue ]]; then
         src'key-bindings.zsh' \
         @junegunn/fzf \
         @x-motemen/ghq
-    return
-fi
-
+else
 # GitHub {{{
 zinit from'gh-r' lbin'!' light-mode no'compile' for \
     @sharkdp/bat \
@@ -37,3 +35,4 @@ zinit from'gh-r' lbin'!' light-mode no'compile' for \
     @neovim/neovim \
     @r-darwish/topgrade
 # }}}
+fi

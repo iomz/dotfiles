@@ -18,14 +18,6 @@ setopt NO_GLOBAL_RCS
 (( ${+XDG_CONFIG_HOME} )) || export XDG_CONFIG_HOME="${HOME}/.config"
 (( ${+XDG_DATA_HOME} )) || export XDG_DATA_HOME="${HOME}/.local/share"
 
-# Editor
-export EDITOR=nvim
-export VISUAL=nvim
-
-# Pager
-export PAGER=less
-#export PAGER=most
-
 # Program options
 export \
     ANSIBLE_SCP_IF_SSH=y \
@@ -168,5 +160,23 @@ if whence rbenv > /dev/null; then
     eval "$(rbenv init - zsh)"
 fi
 
+# Snap
+if [[ -d /snap/bin ]]; then
+    path=(/snap/bin(N-/) $path)
+fi
+
 # $HOME/bin
 path=($HOME/bin(N-/) $path)
+
+# Editor
+if whence nvim > /dev/null; then
+    export EDITOR=nvim
+    export VISUAL=nvim
+elif whence vim > /dev/null; then
+    export EDITOR=vim
+    export VISUAL=vim
+fi
+
+# Pager
+export PAGER=less
+#export PAGER=most

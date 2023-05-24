@@ -16,11 +16,22 @@ if [[ -n "${ENABLE_ZPROFTIME}" ]]; then
 fi
 #------------------------------------
 
-#0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"
-#0="${${(M)0:#/*}:-$PWD/$0}"
-#print -- "${0:h}"
-#local ZDOTDIR="${0:h}"
-local ZDOTDIR=${XDG_CONFIG_HOME:=~/.config}/zsh
+# do stuff for rpi
+if [[ -e /etc/rpi-issue ]]; then
+    # nvim {{{
+    #sudo apt install -y snapd
+    #sudo snap install --beta nvim --classic
+    # }}}
+    # vim {{{
+    if [[ ! -d ${XDG_DATA_HOME}/vim/bundle ]]; then
+        mkdir -p ${XDG_DATA_HOME}/vim/backup
+        mkdir -p ${XDG_DATA_HOME}/vim/bundle
+        git clone https://github.com/Shougo/neobundle.vim.git ${XDG_DATA_HOME}/vim/bundle/neobundle.vim
+    fi
+    # }}}
+fi
+
+local ZDOTDIR=${XDG_CONFIG_HOME}/zsh
 for f in ${ZDOTDIR}/rc.d/<->-*zsh(N); do
     source "$f"
     #print -- "$f"

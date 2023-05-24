@@ -46,15 +46,17 @@ export ZENO_DISABLE_EXECUTE_CACHE_COMMAND=1
 # disable builtin completion
 export ZENO_DISABLE_BUILTIN_COMPLETION=1
 
-# default
-#export ZENO_GIT_CAT="cat"
-# git file preview with color
-export ZENO_GIT_CAT="bat --color=always"
+if whence bat > /dev/null; then
+    export ZENO_GIT_CAT="bat --color=always"
+else
+    export ZENO_GIT_CAT="cat"
+fi
 
-# default
-#export ZENO_GIT_TREE="tree"
-# git folder preview with color
-export ZENO_GIT_TREE="exa --tree"
+if whence exa > /dev/null; then
+    export ZENO_GIT_TREE="exa --tree"
+else
+    export ZENO_GIT_TREE="tree"
+fi
 # }}}
 
 

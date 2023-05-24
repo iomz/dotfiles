@@ -1,321 +1,287 @@
-"                     _       _ _         _
-"                    (_)_ __ (_) |___   _(_)_ __ ___
-"                    | | '_ \| | __\ \ / / | '_ ` _ \ 
-"                    | | | | | | |_ \ V /| | | | | | |
-"                    |_|_| |_|_|\__(_)_/ |_|_| |_| |_|
-" ====================================================================================
-" Initialization
-" ====================================================================================
-"language message C|   " use English interface
-scriptencoding utf-8| " the character encoding used in the script
-syntax on
-
-" ====================================================================================
-" Options
-" :set to show all modified options.
-" ====================================================================================
-set clipboard=unnamed,unnamedplus
-set completeopt=menuone,noinsert,noselect
-set cursorline|            " highlight the screen line
-set encoding=utf-8|        " string-encoding used internally and for RPC communication
-set expandtab|             " use spaces to inseart a <Tab> -- C-V<Tab> to insert a real tab
-set guifont=Ricty-Regular-nerd-Powerline\ 11
-set fileencodings=utf-8,ucs-bom,iso-2022-jp-3,iso-2022-jp,eucjp-ms,euc-jisx0213,euc-jp,sjis,cp932| " encodings to consider
-set foldlevel=100
-set inccommand=split
-if has('multi_byte_ime')
-  set iminsert=0 imsearch=0
+"       _       _ _         _
+"      (_)_ __ (_) |___   _(_)_ __ ___
+"      | | '_ \| | __\ \ / / | '_ ` _ \ 
+"      | | | | | | |_ \ V /| | | | | | |
+"      |_|_| |_|_|\__(_)_/ |_|_| |_| |_|
+"=============================================
+"---------------------------------------------
+" NeoBundle configuration
+"---------------------------------------------
+if has('vim_starting')
+    set nocompatible
+    set runtimepath+=~/.local/share/vim/bundle/neobundle.vim
 endif
-set laststatus=2
-" set list listchars=tab:»-| " strings to use in 'list' mode
-set number|                " precede each line with its line number
-set shiftwidth=4|          " number of spaces to use for each step of indent
-set tabstop=4|             " number of spaces that a <Tab> counts for
-" set termguicolors|         " enable 24-bit RGB color
-set title|                 " set title of the window to 'titlestring'
 
+"---------------------------------------------
+" Install and configure vim plugins
+"---------------------------------------------
+call neobundle#begin(expand('~/.local/share/vim/bundle'))
 
-" ====================================================================================
-" Automatic commands
-" ====================================================================================
-"autocmd BufEnter * lua require'completion'.on_attach()
-"autocmd BufWritePre *.go :silent! lua require('go.format').gofmt()
-autocmd ColorScheme * highlight Pmenu ctermfg=white ctermbg=darkcyan|  " change Pmenu color
-autocmd ColorScheme * highlight PmenuSel ctermfg=white ctermbg=darkmagenta|  " change Pmenu color
-autocmd ColorScheme * highlight link mkdListItem Statement|       " change list symbol color
-autocmd ColorScheme * highlight link htmlH1 PreProc|              " change header color
-autocmd ColorScheme * highlight Search ctermfg=255 ctermbg=24|    " change search result color
+" Manage neobundle itself
+NeoBundleFetch 'Shougo/neobundle.vim'
 
-autocmd BufRead,BufNewFile *.tex :FixWhitespace
-autocmd FileType tex TagbarOpen
-"autocmd BufRead,BufNewFile *.tex set filetype=latex
+"---------------------------------------------
+" Unite.vim
+"---------------------------------------------
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/neomru.vim'
 
-autocmd BufRead,BufNewFile *.md set filetype=markdown
-autocmd BufRead,BufNewFile *.jenkinsfile set filetype=groovy
-autocmd BufRead,BufNewFile *.css,*.scss,*.less setlocal foldmethod=marker foldmarker={,}
-autocmd FileType go :highlight goErr ctermfg=208
-autocmd FileType go :match goErr /\<err\>/
-autocmd FileType go nmap <leader>gb <Plug>(go-build)
-autocmd FileType go nmap <leader>gr <Plug>(go-run)
-autocmd FileType go nmap <leader>gt <Plug>(go-test)
-autocmd FileType go nmap <leader>gtf <Plug>(go-test-func)
-autocmd FileType go nmap <leader>gc <Plug>(go-coverage-toggle)
-autocmd FileType go nmap <leader>gi <Plug>(go-info)
-autocmd FileType html setlocal shiftwidth=2 tabstop=2
-autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
-autocmd FileType json setlocal shiftwidth=2 tabstop=2
-autocmd FileType python nnoremap <S-f> :call Autopep8()<CR>
-autocmd FileType ruby setlocal shiftwidth=2 tabstop=2
-autocmd FileType vim setlocal shiftwidth=2 tabstop=2 foldmethod=marker
-autocmd FileType vim :highlight link FoldComment SpecialComment
-autocmd FileType vim :match FoldComment /^".*\({{{\|}}}\)/
-autocmd FileType vue setlocal shiftwidth=2 tabstop=2
-autocmd FileType xml setlocal shiftwidth=2 tabstop=2
-autocmd FileType yaml setlocal shiftwidth=2 tabstop=2
-autocmd FileType zsh setlocal foldmethod=marker
-autocmd FileType zsh :highlight link FoldComment SpecialComment
-autocmd FileType zsh :match FoldComment /^#.*\({{{\|}}}\)/
+" List buffers
+nnoremap <silent> fb :<C-u>Unite buffer<CR>
+" List file_mru as buffer
+nnoremap <silent> fu :<C-u>Unite file_mru buffer<CR>
+" List files
+nnoremap <silent> ff :<C-u>UniteWithBufferDir -buffer-name=dotfiles file<CR>
+" List recent files
+nnoremap <silent> fm :<C-u>Unite file_mru<CR>
+" List registers
+nnoremap <silent> fr :<C-u>Unite -buffer-name=register register<CR>
+" List and set a yank
+let g:unite_source_history_yank_enable = 1
+nnoremap <silent> fy :<C-u>Unite history/yank<CR>
 
-autocmd BufWinEnter quickfix nnoremap <silent> <buffer> q :cclose<CR>:lclose<CR>
-autocmd BufEnter * if (winnr('$') == 1 && &buftype ==# 'quickfix' ) |
-                \   bd|
-                \   q | endif
+"---------------------------------------------
+" vim-renamer
+"---------------------------------------------
+NeoBundle 'qpkorr/vim-renamer'
 
-" ====================================================================================
-" Plugins
-" see https://github.com/junegunn/vim-plug
-"
-" ====================================================================================
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+"---------------------------------------------
+" vim-quickrun
+"---------------------------------------------
+NeoBundle 'thinca/vim-quickrun'
+let g:quickrun_no_default_key_mappings = 1
+nnoremap <silent> <C-q> :QuickRun<CR>
+
+"---------------------------------------------
+" lightline.vim
+"---------------------------------------------
+NeoBundle 'itchyny/lightline.vim'
+
+if !has('gui_running')
+  set t_Co=256
 endif
-call plug#begin()
-Plug 'w0rp/ale'| " Asynchronous Lint Engine
-Plug 'rbgrouleff/bclose.vim'| " for tig-explorer
-Plug 'neoclide/coc.nvim', {'branch': 'release'}| " conquer of completion
-Plug 'yuttie/comfortable-motion.vim'| " smooth scroll
-Plug 'nvim-lua/completion-nvim'
-"Plug 'github/copilot.vim'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }| " fzf
-" Plug 'glepnir/galaxyline.nvim' , {'branch': 'main'}
-"Plug 'ray-x/go.nvim'
-Plug 'junegunn/gv.vim'| " git commit browser
-Plug 'glepnir/lspsaga.nvim'| " pretty lsp UI
-Plug 'wfxr/minimap.vim', {'do': ':!cargo install --locked code-minimap'}
-Plug 'tomasr/molokai'
-"Plug 'vim-scripts/n3.vim'
-Plug 'scrooloose/nerdtree'
-Plug 'mfussenegger/nvim-dap'
-Plug 'rcarriga/nvim-dap-ui'
-Plug 'theHamsta/nvim-dap-virtual-text'
-Plug 'neovim/nvim-lspconfig'
-Plug 'williamboman/nvim-lsp-installer'
-Plug 'kassio/neoterm'| " access terminal with :T
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}| " TreeSitter
-" Plug 'kyazdani42/nvim-web-devicons'| " <-> vim-devicons
-Plug 'nvim-lua/plenary.nvim'| " lua modules for nvim
-Plug 'mattn/sonictemplate-vim'| " quick template with :Template
-Plug 'preservim/tagbar'| " tagbar
-Plug 'nvim-telescope/telescope.nvim'| " telescope
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }| " telescope fzf plugin
-Plug 'iberianpig/tig-explorer.vim'| " tig git client
-"Plug 'SirVer/ultisnips'| " snippet
-Plug 'xolox/vim-easytags'| " automated tag generation
-Plug 'martinduartemore/vim_agentspeak_jason'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'alvan/vim-closetag'| " set closetag
-Plug 'tpope/vim-commentary'| " comment stuff out with gcc/gc
-Plug 'ryanoasis/vim-devicons'| " <-> nvim-web-devicons
-Plug 'junegunn/vim-easy-align'| " align with ga
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-Plug 'airblade/vim-gitgutter'| " show git diff
-Plug 'xolox/vim-misc'| " for vim-easytags
-Plug 'prettier/vim-prettier', {
-  \ 'do': 'yarn install',
-  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'svelte', 'yaml', 'html'] }
-Plug 'thinca/vim-quickrun'
-Plug 'niklasl/vim-rdf'
-"Plug 'epitzer/vim-rdf-turtle'
-Plug 'qpkorr/vim-renamer'
-Plug 'tpope/vim-sensible'| " starting point config
-"Plug 'honza/vim-snippets'
-Plug 'tpope/vim-surround'| " parentheses, brackets, quotes, XML tags, and more
-Plug 'bronson/vim-trailing-whitespace'| " mark trailing whitespace
-Plug 'bronson/vim-trailing-whitespace'| " mark trailing whitespace
-Plug 'Shougo/vimproc.vim', {'do' : 'make'}
-Plug 'simeji/winresizer'| " can resize windows
-Plug 'vim-scripts/YankRing.vim'| " clipboard history
-call plug#end()
 
-" ====================================================================================
-" Plugin options
-" ====================================================================================
-"colorscheme koehler
-colorscheme molokai
-"colorscheme peachpuff
-"colorscheme slate
-
-let spc = ' '
-
-let g:airline_theme = 'molokai'
-let g:airline_section_c = '%t'
-let g:airline_section_x = '%{&filetype}'
-let g:airline_section_z = airline#section#create(['%3p%%'.spc, 'linenr',  ':%3v'])
-let g:airline#extensions#ale#error_symbol = ' '
-let g:airline#extensions#ale#warning_symbol = ' '
-let g:airline#extensions#branch#enabled = 1
-let g:airline#extensions#default#layout = [['a', 'b', 'c'], ['x', 'y', 'z']]
-let g:airline#extensions#default#section_truncate_width = {}
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#show_buffers = 1
-let g:airline#extensions#tabline#tab_nr_type = 1
-let g:airline#extensions#wordcount#enabled = 1
-let g:airline#extensions#whitespace#enabled = 1
-
-"let g:completion_enable_snippet = 'UltiSnips'
-
-let g:fzf_action = {
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-x': 'split',
-  \ 'ctrl-v': 'vsplit' }
-
-let g:mapleader = "\<Space>"| " <Space> as <Leader>
-let g:maplocalleader = 'm'
-
-let g:minimap_width = 10
-let g:minimap_auto_start = 0
-let g:minimap_auto_start_win_enter = 0
-
-let g:rehash256 = 1|          " color scheme 256
-
-"let g:tagbar_type_tex = {
-"    \ 'ctagstype' : 'latex',
-"    \ 'kinds'     : [
-"        \ 's:sections',
-"        \ 'g:graphics:0:0',
-"        \ 'l:labels',
-"        \ 'r:refs:1:0',
-"        \ 'p:pagerefs:1:0'
-"    \ ],
-"    \ 'sort'    : 0,
-"\ }
-let g:tagbar_width = 60
-
-let g:tig_explorer_keymap_edit_e  = 'e'
-let g:tig_explorer_keymap_edit    = '<C-o>'
-let g:tig_explorer_keymap_tabedit = '<C-t>'
-let g:tig_explorer_keymap_split   = '<C-s>'
-let g:tig_explorer_keymap_vsplit  = '<C-v>'
-let g:tig_explorer_keymap_commit_edit    = '<ESC>o'
-let g:tig_explorer_keymap_commit_tabedit = '<ESC>t'
-let g:tig_explorer_keymap_commit_split   = '<ESC>s'
-let g:tig_explorer_keymap_commit_vsplit  = '<ESC>v'
-
-"let g:UltiSnipsExpandTrigger="<C-U>"
-"let g:UltiSnipsJumpForwardTrigger="<C-J>"
-"let g:UltiSnipsJumpBackwardTrigger="<C-K>"
-
-let g:quickrun_config = get(g:, 'quickrun_config', {})
-let g:quickrun_config._ = {
-      \ 'runner'    : 'vimproc',
-      \ 'runner/vimproc/updatetime' : 60,
-      \ 'outputter' : 'error',
-      \ 'outputter/error/success' : 'buffer',
-      \ 'outputter/error/error'   : 'buffer',
-      \ 'outputter/buffer/close_on_empty' : 1,
-      \ 'outputter/buffer/split' : ':botright vsplit',
+let g:lightline = {
+      \ 'colorscheme': 'solarized',
+      \ 'mode_map': { 'c': 'NORMAL' },
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
+      \ },
+      \ 'component_function': {
+      \   'modified': 'MyModified',
+      \   'readonly': 'MyReadonly',
+      \   'fugitive': 'MyFugitive',
+      \   'filename': 'MyFilename',
+      \   'fileformat': 'MyFileformat',
+      \   'filetype': 'MyFiletype',
+      \   'fileencoding': 'MyFileencoding',
+      \   'mode': 'MyMode',
+      \ }
       \ }
 
-let g:winresizer_start_key = '<Nop>'
-let g:winresizer_gui_start_key = '<Nop>'
+function! MyModified()
+  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
 
-let g:yankring_history_dir = '$HOME/.cache/nvim'
-let g:yankring_replace_n_pkey = '<A-p>'| " don't use <C-p>
+function! MyReadonly()
+  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '[ReadOnly]' : ''
+endfunction
 
-" ====================================================================================
-" KeyMap
-" ':map' is recursive
-" ':noremap' is non-recursive
-" n  Normal mode map. Defined using ':nmap' or ':nnoremap'.
-" i  Insert mode map. Defined using ':imap' or ':inoremap'.
-" v  Visual and select mode map. Defined using ':vmap' or ':vnoremap'.
-" x  Visual mode map. Defined using ':xmap' or ':xnoremap'.
-" s  Select mode map. Defined using ':smap' or ':snoremap'.
-" c  Command-line mode map. Defined using ':cmap' or ':cnoremap'.
-" o  Operator pending mode map. Defined using ':omap' or ':onoremap'.
-" ====================================================================================
-"map <C-i> :PlugInstall<CR>
+function! MyFilename()
+  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() : 
+        \  &ft == 'unite' ? unite#get_status_string() : 
+        \  &ft == 'vimshell' ? vimshell#get_status_string() :
+        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
+        \ ('' != MyModified() ? ' ' . MyModified() : '')
+endfunction
 
-" Start interactive EasyAlign for a motion/text object (e.g. gaip)
-nmap ga <Plug>(EasyAlign)
+function! MyFugitive()
+  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
+    let _ = fugitive#head()
+    return strlen(_) ? ''._ : ''
+  endif
+  return ''
+endfunction
 
-noremap H ^| " move cursor to the beginning of the line (soft)
-noremap L $| " move cursor to the end of the line
-noremap <Leader>c gg0vG$y
-noremap <Leader>m :MinimapToggle<CR>
-noremap <Leader>H 0| " move cursor to the beginning of the line (hard)
-" noremap <C-b> :call comfortable_motion#flick(-40)<CR>| " scroll up
-" noremap <C-f> :call comfortable_motion#flick(40)<CR>|  " scroll down
+function! MyFileformat()
+  return winwidth(0) > 70 ? &fileformat : ''
+endfunction
 
-"" Normal mode
-nnoremap <Esc><Esc> :<C-u>nohlsearch<CR>| " unhighlight search result
-nnoremap <Leader> <Tab> <C-w>w| " move window
-nnoremap <Leader>bp :bprevious<CR>| " buffer
-nnoremap <Leader>bn :bnext<CR>|     " buffer
-nnoremap <Leader>bd :bdelete<CR>|   " buffler delete
-nnoremap <Leader>fb <cmd>lua require('telescope.builtin').buffers()<cr>
-nnoremap <Leader>ff <cmd>lua require('telescope.builtin').find_files({hidden=true,prompt_prefix="🔍 "})<CR>
-nnoremap <Leader>fg <cmd>lua require('telescope.builtin').live_grep()<CR>
-nnoremap <Leader>fh <cmd>lua require('telescope.builtin').help_tags()<CR>
-nnoremap <Leader>gn :lnext<CR>
-nnoremap <Leader>gp :lprevious<CR>
-nnoremap <Leader>T :TigOpenCurrentFile<CR>| " open tig with current file
-nnoremap <Leader>tt :TigOpenProjectRootDir<CR>| " open tig with Project root path
-nnoremap <Leader>tg :TigGrep<CR>| " open tig grep
-nnoremap <Leader>tr :TigGrepResume<CR>| " resume from last grep
-nnoremap <Leader>tc :<C-u>:TigGrep<Space><C-R><C-W><CR>| " open tig grep with the word under the cursor
-nnoremap <Leader>tb :TigBlame<CR>| " open tig blame with current file
-nnoremap <C-l> :Tagbar<CR>
-"nnoremap <C-p> <cmd>lua require('telescope.builtin').find_files({hidden=true,prompt_prefix="🔍"})<CR>
-nnoremap <C-q> :QuickRun<CR>
-nnoremap <C-s> :so $MYVIMRC<CR>|     " reload init.vim
-nnoremap <C-t> :NERDTreeToggle<CR>
-nnoremap <C-y> :YRShow<CR>|    " YankRing show
+function! MyFiletype()
+  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'no ft') : ''
+endfunction
+
+function! MyFileencoding()
+  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
+endfunction
+
+function! MyMode()
+  return winwidth(0) > 60 ? lightline#mode() : ''
+endfunction
+
+call neobundle#end()
+
+" Use indentations from plugins
+filetype plugin indent on
+
+" Check if the plugin for the language is installed
+NeoBundleCheck
+
+if !has('vim_starting')
+    " #When .vimrc reloaded
+    call neobundle#call_hook('on_source')
+endif
+
+"---------------------------------------------
+" Indentation
+"---------------------------------------------
+au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
+au BufNewFile,BufRead *.xml set tabstop=2 shiftwidth=2
+
+"---------------------------------------------
+" File encoding configuration
+"---------------------------------------------
+if &encoding !=# 'utf-8'
+	set encoding=japan
+	set fileencoding=japan
+endif
+
+if has('iconv')
+	let s:enc_enc = 'ecu-jp'
+	let s:enc_jis = 'iso-2022-jp'
+
+    " Check if iconv is compatible with eucJP-ms
+	if iconv("\x87\x64\x87\x6a", 'cp932', 'eucjp-ms') ==# "\xad\xc5\xad\xcb"
+		let s:enc_euc = 'eucjp-ms'
+		let s:enc_jis = 'iso-2022-jp-3'
+    " Check if iconv is compatible with euc-jisx0213
+	elseif iconv("\x87\x64\x87\x6a", 'cp932', 'euc-jisx0213') ==# "\xad\xc5\xad\xcb"
+		let s:enc_euc = 'euc-jisx0213'
+		let s:enc_jis = 'iso-2022-jp-3'
+	endif
+
+    " Set fileencoding
+	if &encoding ==# 'utf-8'
+		let s:fileencodings_default = &fileencodings
+		let &fileencodings = 'utf-8,'. s:enc_jis .','. s:enc_euc .',cp932'
+		let &fileencodings = &fileencodings .','. s:fileencodings_default
+		unlet s:fileencodings_default
+	else
+		let &fileencodings = &fileencodings .','. s:enc_jis
+		set fileencodings+=utf-8,ucs-2le,ucs-2
+		if &encoding =~# '^\(euc-jp\|euc-jisx0213\|eucjp-ms\)$'
+			set fileencodings+=cp932
+			set fileencodings-=euc-jp
+			set fileencodings-=euc-jisx0213
+			set fileencodings-=eucjp-ms
+			let &encoding = s:enc_euc
+			let &fileencoding = s:enc_euc
+		else
+			let &fileencodings = &fileencodings .','. s:enc_euc
+		endif
+	endif
+
+	unlet s:enc_euc
+	unlet s:enc_jis
+endif
+
+" If no Japanese included in the file use encoding
+if has('autocmd')
+	function! AU_ReCheck_FENC()
+		if &fileencoding =~# 'iso-2022-jp' && search("[^\x01-\x7e]", 'n') == 0
+			let &fileencoding=&encoding
+		endif
+	endfunction
+endif
+
+" Auto recognize newline codes
+set fileformats=unix,dos,mac
+
+" Print multi-byte characters in a proper width
+if exists('ambiwidth')
+	set ambiwidth=double
+endif
+
+
+"---------------------------------------------
+" Key remappings
+"---------------------------------------------
 nnoremap Y y$
 nnoremap + <C-a>
 nnoremap - <C-x>
+inoremap <C-b> <Left>
+inoremap <C-n> <Down>
+inoremap <C-p> <Up>
+inoremap <C-f> <Right>
+"inoremap { {}<LEFT>
+"inoremap [ []<LEFT>
+"inoremap ( ()<LEFT>
+"inoremap " ""<LEFT>
+"inoremap ' ''<LEFT>
+"inoremap < <><LEFT>
 
-"" Insert mode
-"inoremap <silent> jj <ESC>| " ESC
-"inoremap <silent><expr> <TAB>
-"      \ pumvisible() ? "\<C-n>" :
-"      \ <SID>check_back_space() ? "\<TAB>" :
-"      \ coc#refresh()
-inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+"---------------------------------------------
+" Options
+"---------------------------------------------
+set autoindent
+set autoread
+set backspace=indent,eol,start
+set backup
+set backupdir=~/.local/share/vim/backup
+set cursorline
+set directory=~/.local/share/vim/backup
+set display=lastline
+set equalalways
+set expandtab
+set hidden
+set hlsearch
+set ignorecase
+set laststatus=2
+set matchtime=1
+set modeline
+set number
+set pumheight=10
+set scrolloff=10
+set shiftwidth=4
+set showcmd
+set showmatch
+set smarttab
+set smartcase
+set softtabstop=4
+"set statusline=%<%f%=%h%w%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%9(\ %m%r\ %)[%4v][%12(\ %5l/%5L%)]
+set tabstop=4
+set tags=
+set title
+set undolevels=200
+set wrap
+set writebackup
 
-"" Visual and Select mode
-vnoremap <silent> <Enter> :EasyAlign<cr>
-vnoremap <Leader>g y:TigGrep<Space><C-R>"<CR> " open tig grep with the selected word
+" Syntax highlight
+syntax on
 
-"" Visual mode
-" xmap
-" Start interactive EasyAlign in visual mode (e.g. vipga)
-xmap ga <Plug>(EasyAlign)
+"---------------------------------------------
+" augroup and autocmd
+"---------------------------------------------
+augroup InsertHook
+    autocmd!
+    autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
+    autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=ccdc90
+augroup END
 
-"" Select mode
-" smap
+augroup BinaryXXD
+	autocmd!
+	autocmd BufReadPre  *.bin let &binary =1
+	autocmd BufReadPost * if &binary | silent %!xxd -g 1
+	autocmd BufReadPost * set ft=xxd | endif
+	autocmd BufWritePre * if &binary | %!xxd -r | endif
+	autocmd BufWritePost * if &binary | silent %!xxd -g 1
+	autocmd BufWritePost * set nomod | endif
+augroup END
 
-"" Terminal mode
-tnoremap <silent> <ESC> <C-\><C-n>
-"nnoremap <Leader>b <cmd>lua require('telescope.builtin').buffers()<cr>
-
-" ====================================================================================
-" Local settings
-" ====================================================================================
-if filereadable(expand($HOME.'/.vimrc_local'))
-  source $HOME/.vimrc_local
-endif
+augroup swapchoice-readonly
+  autocmd!
+  autocmd SwapExists * let v:swapchoice = 'o'
+augroup END
