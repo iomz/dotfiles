@@ -203,9 +203,11 @@ else
 fi
 
 # nvim
-for i (v vi vim); do
-    alias $i="nvim"
-done
+if whence nvim > /dev/null; then
+    for i (v vi vim); do
+        alias $i="nvim"
+    done
+fi
 
 # sed
 if whence gsed > /dev/null; then

@@ -53,14 +53,14 @@ keymap('n', '<Leader>bn', ':bnext<CR>', { noremap = true })
 keymap('n', '<Leader>bd', ':bdelete<CR>', { noremap = true })
 -- telescope
 keymap('n', '<Leader>fb', "<cmd>lua require('telescope.builtin').buffers()<cr>",
-  { noremap = true })
+    { noremap = true })
 keymap('n', '<Leader>ff',
-  "<cmd>lua require('telescope.builtin').find_files()<CR>",
-  { noremap = true })
+    "<cmd>lua require('telescope.builtin').find_files()<CR>",
+    { noremap = true })
 keymap('n', '<Leader>fg',
-  "<cmd>lua require('telescope.builtin').live_grep()<CR>", { noremap = true })
+    "<cmd>lua require('telescope.builtin').live_grep()<CR>", { noremap = true })
 keymap('n', '<Leader>fh',
-  "<cmd>lua require('telescope.builtin').help_tags()<CR>", { noremap = true })
+    "<cmd>lua require('telescope.builtin').help_tags()<CR>", { noremap = true })
 -- g
 keymap('n', '<Leader>gn', ':lnext<CR>', { noremap = true })
 keymap('n', '<Leader>gp', ':lprevious<CR>', { noremap = true })
@@ -74,7 +74,7 @@ keymap('n', '<Leader>tg', ':TigGrep<CR>', { noremap = true })
 keymap('n', '<Leader>tr', ':TigGrepResume<CR>', { noremap = true })
 -- open tig grep with the word under the cursor
 keymap('n', '<Leader>tc', ':<C-u>:TigGrep<Space><C-R><C-W><CR>',
-  { noremap = true })
+    { noremap = true })
 -- open tig blame with current file
 keymap('n', '<Leader>tb', ':TigBlame<CR>', { noremap = true })
 -- select all
@@ -82,10 +82,10 @@ keymap('n', '<C-a>', 'gg0vG$', { noremap = true })
 -- tagbar
 keymap('n', '<C-l>', ':Tagbar<CR>', { noremap = true })
 -- minimap
-keymap('n', '<C-m>', ':MinimapToggle<CR>', { noremap = true })
+--keymap('n', '<C-m>', ':MinimapToggle<CR>', { noremap = true })
 -- telescope ff
 keymap('n', '<C-p>', "<cmd>lua require('telescope.builtin').find_files()<CR>",
-  { noremap = true })
+    { noremap = true })
 -- quickrun
 keymap('n', '<C-q>', ':QuickRun<CR>', { noremap = true })
 -- reload init.lua

@@ -34,7 +34,10 @@ return {
         config = function() require('coq_3p') end
     },
     -- turn browsers into nvim clients
-    { 'glacambre/firenvim', build = function() vim.fn['firenvim#install'](0) end },
+    {
+        'glacambre/firenvim',
+        build = function() vim.fn['firenvim#install'](0) end
+    },
     -- git-signs: show git diff
     {
         'lewis6991/gitsigns.nvim',
@@ -72,7 +75,10 @@ return {
         }
     },
     -- minimap
-    { 'wfxr/minimap.vim',   build = 'cargo install --locked code-minimap' },
+    {
+        'wfxr/minimap.vim',
+        build = 'cargo install --locked code-minimap'
+    },
     -- molokai colorscheme
     {
         'tomasr/molokai'
