@@ -9,11 +9,11 @@ return {
     -- comfortable-motion: smooth scroll
     -- 'yuttie/comfortable-motion.vim',
     -- smart comment
-    {
-        'numToStr/Comment.nvim',
-        config = function() require('Comment').setup() end,
-        dependencies = { 'JoosepAlviste/nvim-ts-context-commentstring' }
-    },
+    --{
+    --    'numToStr/Comment.nvim',
+    --    config = function() require('Comment').setup() end,
+    --    dependencies = { 'JoosepAlviste/nvim-ts-context-commentstring' }
+    --},
     -- coplilot
     -- 'github/copilot.vim',
     -- coq_nvim: another coc
@@ -199,7 +199,7 @@ return {
     -- vim-sensible: starting point config
     -- 'tpope/vim-sensible',
     -- vim-surrond: parentheses, brackets, quotes, XML tags, and more
-    'tpope/vim-surround',
+    --'tpope/vim-surround',
     -- vim-trailing-whitespace: mark trailing whitespace
     'bronson/vim-trailing-whitespace',
     -- vimproc
