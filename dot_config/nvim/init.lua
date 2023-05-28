@@ -19,8 +19,9 @@ vim.g.coq_settings = {
         },
     },
 }
+vim.g.loaded_matchparen = 1 -- disable the built-in for Matchparen.nvim
 vim.g.loaded_perl_provider = 0
-vim.g.mapleader = ' ' -- Remap space as leader key
+vim.g.mapleader = ' '       -- Remap space as leader key
 vim.g.python3_host_prog = '~/.pyenv/versions/3.11.3/bin/python3.11'
 vim.g.ruby_host_prog = '~/.rbenv/shims/ruby'
 vim.opt.termguicolors = true

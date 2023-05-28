@@ -74,6 +74,18 @@ return {
             "jose-elias-alvarez/null-ls.nvim",
         }
     },
+    -- matchparen
+    {
+        'monkoose/matchparen.nvim',
+        config = function()
+            require('matchparen').setup({
+                on_startup = true,           -- Should it be enabled by default
+                hl_group = 'MatchParen',     -- highlight group of the matched brackets
+                augroup_name = 'matchparen', -- almost no reason to touch this unless there is already augroup with such name
+                debounce_time = 0,           -- debounce time in milliseconds for rehighlighting of brackets.
+            })
+        end,
+    },
     -- minimap
     {
         'wfxr/minimap.vim',
@@ -97,8 +109,8 @@ return {
     },
     -- inject LSP diagnostics, code actions, and more via Lua
     { 'jose-elias-alvarez/null-ls.nvim', build = 'npm i -g eslint_d' },
-    -- autopair
-    'windwp/nvim-autopairs',
+    -- autopair: https://github.com/windwp/nvim-autopairs
+    --'windwp/nvim-autopairs',
     -- base16
     {
         'RRethy/nvim-base16',
@@ -179,7 +191,7 @@ return {
     -- vim-gitgutter
     { 'airblade/vim-gitgutter' },
     -- matchup with texts
-    { 'andymass/vim-matchup',  event = 'VimEnter' },
+    --{ 'andymass/vim-matchup',  event = 'VimEnter' },
     -- vim-quickrun
     'thinca/vim-quickrun',
     -- vim-renamer

@@ -184,6 +184,12 @@ mason_lspconfig.setup_handlers({
             on_attach = on_attach
         }))
     end,
+    -- ts
+    ["tsserver"] = function()
+        lspconfig.tsserver.setup(coq.lsp_ensure_capabilities({
+            on_attach = on_attach,
+        }))
+    end,
     -- yaml
     ["yamlls"] = function()
         lspconfig.yamlls.setup(coq.lsp_ensure_capabilities({
