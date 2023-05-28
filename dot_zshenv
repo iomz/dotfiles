@@ -30,6 +30,7 @@ export \
     OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES \
     RIPGREP_CONFIG_PATH=${XDG_CONFIG_HOME}/ripgrep/rc \
     SHELL_SESSIONS_DISABLE=1
+
 # $PATH and $path (and also $FPATH and $fpath, etc.) are "tied" to each other.
 # Modifying one will also modify the other.
 # Note that each value in an array is expanded separately. Thus, we can use ~
@@ -75,10 +76,14 @@ else
         if [[ -x /opt/homebrew/opt/curl/bin/curl ]]; then
             path=( /opt/homebrew/opt/curl/bin $path )
         fi
+        # brew gnu awk
+        if [[ -x /opt/homebrew/opt/gawk/libexec/gnubin/awk ]]; then
+            path=( /opt/homebrew/opt/gawk/libexec/gnubin $path )
+        fi
     fi
 fi
 
-# Deno
+# Deno (not managed by asdf)
 export DENO_INSTALL=$HOME/.deno
 path=(${DENO_INSTALL}/bin(N-/) $path)
 if ! whence deno > /dev/null; then
@@ -86,78 +91,13 @@ if ! whence deno > /dev/null; then
     curl -fsSL https://deno.land/install.sh | sh
 fi
 
-# Go
-if [[ -x /usr/local/go/bin/go ]] || [[ -x /opt/homebrew/bin/go ]]; then
-    export GOPATH=$HOME/go
-    path=(
-        $GOPATH/bin(N-/)
-        $HOME/.ghg/bin(N-/) # https://github.com/Songmu/ghg
-        /usr/local/go/bin(N-/)
-        $path
-    )
-fi
-
-# Java
-# Don't load JAVA_HOME by default
-#if [[ -x /usr/libexec/java_home ]]; then
-#    export JAVA_HOME=$(/usr/libexec/java_home -v "14")
-#fi
-
 # LLVM
 path=(/usr/local/opt/llvm/bin(N-/) $path)
 
-# Node Version Manager: node, npm, and yarn
-# nvm init option 0: -------------------------
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-# nvm init option 1: -------------------------
-#export NVM_DIR=$HOME/.config/nvm
-#[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-#[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-# nvm init option 2: -------------------------
-#if [ -s "$HOME/.config/nvm/nvm.sh" ]; then
-#    export NVM_DIR="$HOME/.config/nvm"
-#    nvm_cmds=(nvm node npm yarn)
-#    for cmd in $nvm_cmds ; do
-#        alias $cmd="unalias $nvm_cmds && unset nvm_cmds && . $NVM_DIR/nvm.sh && $cmd"
-#    done
-#    [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-#fi
-# nvm init option 3: -------------------------
-#declare -a __node_commands=('nvm' 'node' 'npm' 'yarn' 'gulp' 'grunt' 'webpack')
-#function __init_nvm() {
-#  for i in "${__node_commands[@]}"; do unalias $i; done
-#  . "$NVM_DIR"/nvm.sh
-#  unset __node_commands
-#  unset -f __init_nvm
-#}
-#for i in "${__node_commands[@]}"; do alias $i='__init_nvm && '$i; done
-# nvm init option 4: -------------------------
-#export NVM_DIR=$HOME/.config/nvm
-#NODEPATH="$(find $NVM_DIR/ -type d -regex ".*/v[0-9.]*/bin")"
-#export PATH=$NODEPATH:$PATH
-# --------------------------------------------
-
-# Python
-if command -v ~/.pyenv/bin/pyenv 1> /dev/null 2>&1; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    path=($PYENV_ROOT/bin(N-/) $path)
-    source $PYENV_ROOT/completions/pyenv.zsh
-    # cf. https://github.com/pyenv/pyenv-virtualenv/issues/387
-    eval "$(pyenv init --path --no-rehash)"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-fi
-
-# Rust
+# Rust (not managed by asdf)
 if command -v ~/.cargo/bin/cargo 1> /dev/null 2>&1; then
     path=($HOME/.cargo/bin(N-/) $path)
     source $HOME/.cargo/env
-fi
-
-# Ruby
-if whence rbenv > /dev/null; then
-    eval "$(rbenv init - zsh)"
 fi
 
 # Snap
