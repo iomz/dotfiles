@@ -21,6 +21,7 @@ else
         @eth-p/bat-extras \
         @dandavison/delta \
         @muesli/duf \
+        @bootandy/dust \
         cp'**/exa.zsh->_exa' \
         @ogham/exa \
         compile'key-bindings.zsh' \
