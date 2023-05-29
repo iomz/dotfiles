@@ -124,6 +124,7 @@ zinit light-mode for \
 zle_highlight=('paste:fg=white,bg=black')
 zinit wait'0a' lucid for \
     atpull'zinit creinstall -q .' blockf \
+    atinit'fpath=(${XDG_DATA_HOME}/zinit/completions $fpath)' \
     @zsh-users/zsh-completions \
     atload"_zsh_autosuggest_start" \
     @zsh-users/zsh-autosuggestions \
@@ -136,11 +137,11 @@ zinit wait'0a' lucid for \
 
 
 # compinit {{{
-zinit lucid wait'0b' for \
-    as'null' atload'zpcompinit; zpcdreplay' \
-    id-as'init-zinit' \
-    nocd \
-    @zdharma-continuum/null
+#zinit lucid wait'0b' for \
+    #    as'null' atload'<do something>' \
+    #    id-as'init-zinit' \
+    #    nocd \
+    #    @zdharma-continuum/null
 # }}}
 
 
@@ -148,7 +149,6 @@ zinit lucid wait'0b' for \
 zinit light-mode for \
     @chriskempson/base16-shell \
     @iomz/emoji-cli \
-    @yukiycino-dotfiles/fancy-ctrl-z \
     @woefe/git-prompt.zsh \
     @romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z

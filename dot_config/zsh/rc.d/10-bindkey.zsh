@@ -8,6 +8,7 @@ bindkey -e
 #
 #"^A" beginning-of-line
 #"^B" backward-char
+#"^C" SIGINT
 #"^E" end-of-line
 #"^F" forward-char
 #"^H" backward-delete-char
@@ -30,6 +31,10 @@ zle -N edit-command-line
 bindkey '^XE'  edit-command-line
 bindkey '^X^E' edit-command-line
 
+# emoji-cli
+zle -N emoji::cli
+bindkey '^H' emoji::cli
+
 # open nvim with fzf
 # The -s flag to bindkey specifies that you are binding the key to a string, not a command.
 bindkey -s '^O' 'nvim $(fzf)^J'
@@ -42,9 +47,6 @@ bindkey -M menuselect 'H' vi-backward-char
 bindkey -M menuselect 'J' vi-down-line-or-history
 bindkey -M menuselect 'K' vi-up-line-or-history
 bindkey -M menuselect 'L' vi-forward-char
-
-# resume with fg (often to nvim)
-bindkey '^Z' fancy-ctrl-z
 
 # zeno.zsh {{{
 if [[ -n $ZENO_LOADED ]]; then
