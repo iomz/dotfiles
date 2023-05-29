@@ -13,13 +13,70 @@ dotfiles powered by [chezmoi](https://www.chezmoi.io/)
 - [Notes](#notes)
   - [Zsh: order of executions](#zsh-order-of-executions)
   - [Zsh: diagnosing the slow start](#zsh-diagnosing-the-slow-start)
-  - [Zsh: manage binaries with Zinit](#zsh-manage-binaries-with-zinit)
-  <!--toc:end-->
+  - [Zsh: manage binaries with zinit and z-a-linkbin](#zsh-manage-binaries-with-zinit-and-z-a-linkbin)
+
+<!--toc:end-->
 
 ## Synopsis
 
 ```console
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
+```
+
+Python, NodeJS, and Go runtimes used by Neovim are managed by asdf (asdf itself is installed at the first time zsh starts), and it is not automated by Zinit.
+
+Deno and Rust runtimes are taken cared by `~/.zshenv`.
+
+1. Install the dependencies
+
+- macOS
+
+```console
+brew install gpg gawk openssl readline sqlite3 xz zlib tcl-tk
+```
+
+- Debian
+
+```console
+sudo apt install -y dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+```
+
+2. Install Python, NodeJS, and Go via asdf
+
+- Python
+
+```console
+asdf plugin-add python
+asdf install python latest
+asdf global python latest
+```
+
+- NodeJS
+
+```console
+asdf plugin-add nodejs
+asdf install nodejs latest
+asdf global nodejs latest
+```
+
+- Go
+
+```console
+asdf plugin-add golang
+asdf install golang latest
+asdf global golang latest
+```
+
+3. Install the neovim module for Python
+
+```console
+pip install --upgrade pip && pip install neovim
+```
+
+4. (macOS) Install luarocks
+
+```console
+brew install luarocks
 ```
 
 ## Notes
