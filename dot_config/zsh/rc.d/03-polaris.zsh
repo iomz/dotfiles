@@ -34,6 +34,8 @@ else
         lbin'!nvim' \
         ver'nightly' \
         @neovim/neovim \
+        lbin'!rg' \
+        @BurntSushi/ripgrep \
         @r-darwish/topgrade
     # }}}
 fi

@@ -11,11 +11,11 @@ setopt AUTO_MENU            # show completion menu on a successive tab press.
 setopt AUTO_NAME_DIRS       # make dir name as parameters
 setopt AUTO_PARAM_SLASH     # if completed parameter is a directory, add a trailing slash.
 setopt AUTO_PUSHD           # make cd push to stack
-unsetopt AUTO_REMOVE_SLASH  # do not remove trailing slash
+setopt AUTO_REMOVE_SLASH    # remove trailing slash
 setopt AUTO_RESUME          # attempt to resume existing job before creating a new process.
-#setopt BANG_HIST          # treat the '!' character specially during expansion.
+#setopt BANG_HIST           # treat the '!' character specially during expansion.
 unsetopt BEEP               # i don't want beep
-#setopt BRACE_CCL            # allow brace character class list expansion.
+#setopt BRACE_CCL           # allow brace character class list expansion.
 unsetopt COMBINING_CHARS    # combine zero-length punctuation characters (accents) with the base character.
 setopt COMPLETE_ALIASES     # prevent alias for completion
 setopt COMPLETE_IN_WORD     # complete from both ends of a word.
@@ -51,7 +51,7 @@ setopt NO_SH_WORD_SPLIT     # don't split value by words -- only on demand by ht
 setopt NUMERIC_GLOB_SORT    # sort filenames numerically
 setopt PATH_DIRS            # perform path search even on command names with slashes.
 setopt PRINT_EIGHT_BIT      # display CJK characters just right
-#unsetopt PROMPT_CR          # don't print a CR just before zle
+#unsetopt PROMPT_CR         # don't print a CR just before zle
 unsetopt RC_QUOTES          # allow 'Henry''s Garage' instead of 'Henry'\''s Garage'.
 setopt RM_STAR_SILENT       # confirm rm *
 setopt SHARE_HISTORY        # disable shared history between terminals / sessions (auto-importing)
@@ -62,7 +62,7 @@ setopt SHARE_HISTORY        # disable shared history between terminals / session
 } 2>/dev/null
 
 # notify {{{
-REPORTTIME=1                # display process taken longer than 1 second
+REPORTTIME=10               # display process taken longer than 10 second
 # }}}
 
 # history {{{

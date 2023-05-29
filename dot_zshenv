@@ -107,16 +107,3 @@ fi
 
 # $HOME/.local/bin and $HOME/bin
 path=($HOME/.local/bin(N-/) $HOME/bin(N-/) $path)
-
-# Editor
-if whence nvim > /dev/null; then
-    export EDITOR=nvim
-    export VISUAL=nvim
-elif whence vim > /dev/null; then
-    export EDITOR=vim
-    export VISUAL=vim
-fi
-
-# Pager
-export PAGER=less
-#export PAGER=most

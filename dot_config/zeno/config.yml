@@ -1,5 +1,23 @@
----
 snippets:
+  - name: docker ps -a
+    keyword: dps
+    snippet: docker ps -a --format="table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+  - name: ghq get shallow
+    # ghq get shallow
+    keyword: gh
+    snippet: ghq get --shallow
+  - name: git ci -m
+    keyword: gci
+    snippet: git commit -m '{{commit_message}}'
+  - name: branch
+    keyword: B
+    snippet: git symbolic-ref --short HEAD
+    context:
+      lbuffer: '^git\s+checkout\s+'
+    evaluate: true # eval snippet
+  - name: git st
+    keyword: gs
+    snippet: git status --short --branch
   - name: "null"
     keyword: "null"
     snippet: ">/dev/null 2>&1"
@@ -9,33 +27,6 @@ snippets:
       # buffer: ''
       lbuffer: '.+\s'
       # rbuffer: ''
-
-  # ghq get shallow
-  - name: ghq get shallow
-    keyword: gh
-    snippet: ghq get --shallow
-
-  #
-  - name: git status
-    keyword: gs
-    snippet: git status --short --branch
-
-  #
-  - name: git commit message
-    keyword: gci
-    snippet: git commit -m '{{commit_message}}'
-
-  - name: branch
-    keyword: B
-    snippet: git symbolic-ref --short HEAD
-    context:
-      lbuffer: '^git\s+checkout\s+'
-    evaluate: true # eval snippet
-
-  - name: narrow docker ps -a
-    keyword: dps
-    snippet: docker ps -a --format="table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
 completions:
   # simple sourceCommand, no callback
   - name: kill signal
@@ -44,7 +35,6 @@ completions:
     sourceCommand: "kill -l | tr ' ' '\\n'"
     options:
       --prompt: "'Kill Signal> '"
-
   # use excludePatterns and callback
   - name: kill pid
     patterns:
@@ -57,12 +47,11 @@ completions:
       --multi: true
       --prompt: "'Kill Process> '"
     callback: "awk '{print $2}'"
-
   # Use null (\0) termination Input / Output
   - name: chdir
     patterns:
       - "^cd $"
-    sourceCommand: "find . -path '*.git/*' -prune -o -path '*Library/*' -prune -o -path '*.Trash/*' -prune -o -path '*.cache/*' -prune -o -type d -print0"
+    sourceCommand: "find . -path '*.git/*' -prune -o -path '*/.tmp/*' -prune -o -path '*Library/*' -prune -o -path '*.Trash/*' -prune -o -path '*.cache/*' -prune -o -type d -print0"
     options:
       # Added --read0 if null termination is used in `sourceCommand` output.
       --read0: true

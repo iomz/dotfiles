@@ -54,9 +54,9 @@ if [[ -n $ZENO_LOADED ]]; then
     bindkey '^G' zeno-ghq-cd # switch ghq dir
     bindkey '^M' zeno-auto-snippet-and-accept-line
     #bindkey '^R' zeno-history-selection # search history
-    bindkey '^X^S' zeno-insert-snippet # search snippets
-    bindkey '^X ' zeno-insert-space # insert space
-    bindkey '^X^M' accept-line
+    bindkey '^S' zeno-insert-snippet # search snippets
+    #bindkey '^X ' zeno-insert-space # insert space
+    #bindkey '^X^M' accept-line
     bindkey '^Xz' zeno-toggle-auto-snippet
 fi
 # }}}

@@ -31,11 +31,25 @@ if [[ -e /etc/rpi-issue ]]; then
     # }}}
 fi
 
+# rc.d
 local ZDOTDIR=${XDG_CONFIG_HOME}/zsh
 for f in ${ZDOTDIR}/rc.d/<->-*zsh(N); do
-    source "$f"
     #print -- "$f"
+    source "$f"
 done
+
+# Editor
+if whence nvim > /dev/null; then
+    export EDITOR=nvim
+    export VISUAL=nvim
+elif whence vim > /dev/null; then
+    export EDITOR=vim
+    export VISUAL=vim
+fi
+
+# Pager
+export PAGER=less
+#export PAGER=most
 
 #------------------------------------
 # zproftime end
