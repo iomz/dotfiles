@@ -105,8 +105,8 @@ if [[ -d /snap/bin ]]; then
     path=(/snap/bin(N-/) $path)
 fi
 
-# $HOME/bin
-path=($HOME/bin(N-/) $path)
+# $HOME/.local/bin and $HOME/bin
+path=($HOME/.local/bin(N-/) $HOME/bin(N-/) $path)
 
 # Editor
 if whence nvim > /dev/null; then

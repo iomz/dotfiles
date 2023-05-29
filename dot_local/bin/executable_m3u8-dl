@@ -1,0 +1,10 @@
+#!/bin/bash
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! command -v streamlink &> /dev/null; then
+        brew install streamlink
+    fi
+else
+    exit
+fi
+
+streamlink "$1" best -o "${2}.ts"

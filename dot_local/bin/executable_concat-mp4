@@ -1,0 +1,5 @@
+#!/bin/sh
+#for f in *.mp4; do echo "file '$f'" >> concat.txt; done &&
+if [ -f "/tmp/concat.txt" ]; then
+    ffmpeg -f concat -fflags +genpts -safe 0 -i /tmp/concat.txt -c copy "${1}.mp4"
+fi

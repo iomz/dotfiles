@@ -1,0 +1,11 @@
+#!/bin/bash
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    echo "Install ffmpeg";
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! command -v ffmpeg &> /dev/null; then
+        brew install ffmpeg
+    fi
+fi
+
+MP4="${1%ts}mp4"
+ffmpeg -i "$1" -c:v copy -c:a copy "$MP4"
