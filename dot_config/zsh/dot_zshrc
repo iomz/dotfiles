@@ -75,14 +75,15 @@ case ${OSTYPE} in
         command -v starship &> /dev/null && eval "$(starship init zsh)"
         ;;
     linux*)
-        colored_time=%{$fg[cyan]%}%t
-        colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
+        colored_time=${LIME_GREEN}%T
+        #colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
+        colored_user=$GREY$USER
         colored_at=%{$fg[white]%}@
         host_name=`hostname | cut -d. -f1`
         colored_host=$colors[$((`echo "$host_name" | sum | cut -f1 -d' '`%${#colors}))+1]$host_name
         #colored_host=%{$fg[blue]%}$host_name
-        colored_colon=%{$reset_color%}:
-        colored_path=%{$fg[magenta]%}%~
+        colored_colon=$DEFAULT:
+        #colored_path=%{$fg[magenta]%}%~
         #colored_prompt=%{$reset_color%}%#
         newline=$'\n'
         PROMPT="${colored_time} ${colored_user}${colored_at}${colored_host}${colored_colon}${PROMPT/ /"$newline"}"

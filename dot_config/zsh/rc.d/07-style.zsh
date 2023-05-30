@@ -36,6 +36,8 @@ local PURPLE=$colors[8]
 local RED=$colors[9]
 local GREEN=$colors[10]
 local LIME_GREEN=$colors[11]
+# extra
+local GREY=$'%{\e[38;5;008m%}'
 
 # Show all 256 colors with color number
 local ZSH_SPECTRUM_TEXT=${ZSH_SPECTRUM_TEXT:-Arma virumque cano Troiae qui primus ab oris}

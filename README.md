@@ -19,11 +19,11 @@ dotfiles powered by [chezmoi](https://www.chezmoi.io/)
 
 ## Synopsis
 
-```console
+```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 ```
 
-Python, NodeJS, and Go runtimes used by Neovim are managed by asdf (asdf itself is installed at the first time zsh starts), and it is not automated by Zinit.
+Go, Lua, NodeJS, and Python runtimes used by Neovim are managed by asdf (asdf itself is installed at the first time zsh starts), and it is not automated by Zinit.
 
 Deno and Rust runtimes are taken cared by `~/.zshenv`.
 
@@ -31,52 +31,32 @@ Deno and Rust runtimes are taken cared by `~/.zshenv`.
 
 - macOS
 
-```console
+```bash
 brew install gpg gawk openssl readline sqlite3 xz zlib tcl-tk
 ```
 
 - Debian
 
-```console
-sudo apt install -y dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+```bash
+sudo apt install -y dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev linux-headers-$(uname -r)
 ```
 
-2. Install Python, NodeJS, and Go via asdf
+2. Install Go, Lua (with LuaRocks), NodeJS, and Python via asdf
 
-- Python
-
-```console
-asdf plugin-add python
-asdf install python latest
-asdf global python latest
-```
-
-- NodeJS
-
-```console
-asdf plugin-add nodejs
-asdf install nodejs latest
-asdf global nodejs latest
-```
-
-- Go
-
-```console
-asdf plugin-add golang
-asdf install golang latest
-asdf global golang latest
+```bash
+for i in golang lua nodejs, python; do
+    IFS=","; set -- $i;
+    lang=$1; repo=$2
+    asdf plugin-add $lang $repo && \
+        asdf install $lang latest && \
+        asdf global $lang latest;
+done
 ```
 
 3. Install the neovim module for Python
 
-```console
+```bash
 pip install --upgrade pip && pip install neovim
-```
-
-4. (macOS) Install luarocks
-
-```console
-brew install luarocks
 ```
 
 ## Notes
