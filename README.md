@@ -44,9 +44,9 @@ sudo apt install -y dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev 
 2. Install Go, Lua (with LuaRocks), NodeJS, and Python via asdf
 
 ```bash
-for i in golang lua nodejs, python; do
+for i in golang lua nodejs python; do
     IFS=","; set -- $i;
-    lang=$1; repo=$2
+    lang=$1; repo=$2;
     asdf plugin-add $lang $repo && \
         asdf install $lang latest && \
         asdf global $lang latest;
