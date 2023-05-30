@@ -64,10 +64,10 @@ fi
 
 ############### -------------
 
-# source local
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-[[ -s ~/.profile ]] && source ~/.profile
+# source local if non-empty files exist
 [[ -s ~/.login ]] && source ~/.login
+[[ -s ~/.profile ]] && source ~/.profile
+[[ -s ~/.zprofile ]] && source ~/.zprofile
 
 case ${OSTYPE} in
     darwin*)
