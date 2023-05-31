@@ -10,6 +10,7 @@ dotfiles powered by [chezmoi](https://www.chezmoi.io/)
 <!--toc:start-->
 
 - [Synopsis](#synopsis)
+- [Font](#font)
 - [Notes](#notes)
   - [Zsh: order of executions](#zsh-order-of-executions)
   - [Zsh: diagnosing the slow start](#zsh-diagnosing-the-slow-start)
@@ -57,6 +58,16 @@ done
 
 ```bash
 pip install --upgrade pip && pip install neovim
+```
+
+## Font
+
+I am borrowing MesloLGS Nerd Font from [romkatv/powerlevel10k](https://github.com/romkatv/powerlevel10k#fonts) to be installed on macOS.
+
+Just enter the following in Zsh (the script is a reduced version of [this](https://github.com/romkatv/powerlevel10k/blob/master/internal/wizard.zsh)):
+
+```zsh
+install-meslo-nerd-font
 ```
 
 ## Notes
