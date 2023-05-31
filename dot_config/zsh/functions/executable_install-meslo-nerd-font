@@ -1,0 +1,163 @@
+#!autoload
+#
+# install-meslo-nerd-font
+#
+# taken from p10k wizard:
+# https://raw.githubusercontent.com/romkatv/powerlevel10k/master/internal/wizard.zsh
+
+local -r font_base_url='https://github.com/romkatv/powerlevel10k-media/raw/master'
+local choice
+local can_install_font=0
+
+function iterm_get() {
+    /usr/libexec/PlistBuddy -c "Print :$1" ~/Library/Preferences/com.googlecode.iterm2.plist
+}
+
+function ask() {
+    local choices=$1
+    print -P -- "(q)  Quit and do nothing."
+    print -P -- ""
+    print -P -- "%BChoice [${choices}q]: %b"
+    while true; do
+        typeset -g choice
+        if read -t1 -k choice; then
+            print -P -- ""
+            print -P -- ""
+            choice=${(L)choice}
+            if [[ $choice == q ]]; then
+                return
+            fi
+            if [[ $choices == *$choice* ]]; then
+                return
+            fi
+        fi
+    done
+}
+
+function ask_remove_font() {
+    local font
+    local -a fonts
+    local -i protected
+    for font in {,/System,~}/Library/Fonts/**/*[Mm]eslo*.(ttf|otf)(N:A); do
+        [[ -f $font && -r $font ]] || continue
+        [[ $font == ~/Library/Fonts/'MesloLGS NF '(Regular|Bold|Italic|Bold\ Italic).ttf ]] && continue
+        [[ "$(<$font)" == *"MesloLGS NF"$'\0'* ]] || continue
+        fonts+=$font
+        [[ -w ${font:h} ]] || protected=1
+    done
+    (( $#fonts )) || return 0
+    print -nP -- "A variant of '%2FMeslo Nerd Font%f' is already installed."
+    print -P ""
+    for font in $fonts; do
+        print -nP -- "$font"
+    done
+    print -P -- ""
+    if (( protected )); then
+        if (( $#fonts == 1 )); then
+            print -nP -- "Please %Bdelete%b this file and run '%2Fp10k%f %Bconfigure%b.'"
+        else
+            print -nP -- "Please %Bdelete%b these files and run '%2Fp10k%f %Bconfigure%b.'"
+        fi
+        print -P -- ""
+        exit 1
+    fi
+    if (( $#fonts == 1 )); then
+        print -nP -- "%BDelete this file?%b"
+    else
+        print -nP -- "%BDelete these files?%b"
+    fi
+    print -P -- ""
+    print -P -- "%B(y)  Yes (recommended).%b"
+    print -P -- ""
+    ask y
+    case $choice in
+        y) zf_rm -f -- $fonts || quit -c ;;
+    esac
+    return 0
+}
+
+function install_font() {
+    command mkdir -p -- ~/Library/Fonts || quit -c
+    local style
+    for style in Regular Bold Italic 'Bold Italic'; do
+        local file="MesloLGS NF ${style}.ttf"
+        print -nP -- "Downloading %B$file%b"
+        curl -fsSL -o ~/Library/Fonts/$file.tmp "$font_base_url/${file// /%20}"
+        command mv -f -- ~/Library/Fonts/$file{.tmp,} || return 1
+        print -P -- " %2FOK%f"
+    done
+    #local size=$iterm2_font_size
+    #[[ $size == 12 ]] && size=13
+    #local k t v settings=(
+    #    '"Normal Font"'                                 string '"MesloLGS-NF-Regular '$size'"'
+    #    '"Terminal Type"'                               string '"xterm-256color"'
+    #    '"Horizontal Spacing"'                          real   1
+    #    '"Vertical Spacing"'                            real   1
+    #    '"Minimum Contrast"'                            real   0
+    #    '"Use Bold Font"'                               bool   1
+    #    '"Use Bright Bold"'                             bool   1
+    #    '"Use Italic Font"'                             bool   1
+    #    '"ASCII Anti Aliased"'                          bool   1
+    #    '"Non-ASCII Anti Aliased"'                      bool   1
+    #    '"Use Non-ASCII Font"'                          bool   0
+    #    '"Ambiguous Double Width"'                      bool   0
+    #    '"Draw Powerline Glyphs"'                       bool   1
+    #    '"Only The Default BG Color Uses Transparency"' bool   1
+    #)
+    print -P -- ""
+    print -P -- "%2FMeslo Nerd Font%f successfully installed."
+    print -P -- ""
+
+    return 0
+}
+
+
+function ask_font() {
+    (( can_install_font )) || return 0
+    print -nP -- "%BInstall '%b%2FMeslo Nerd Font%f%B?%b'"
+    print -P -- ""
+    print -P -- "%B(y)  Yes (recommended).%b"
+    print -P -- ""
+    print -P -- "%B(n)  No. Use the current font.%b"
+    print -P -- ""
+    ask yn
+    case $choice in
+        y)
+            clear
+            ask_remove_font || return
+            clear
+            install_font
+            ;;
+        n) ;;
+    esac
+    return 0
+}
+
+
+() {
+    if [[ "$(uname)" == Darwin && $TERM_PROGRAM == iTerm.app ]]; then
+        (( $+commands[curl] )) || return
+        [[ $TERM_PROGRAM_VERSION == [2-9]* ]] || return
+        if [[ -f ~/Library/Fonts ]]; then
+            [[ -d ~/Library/Fonts && -w ~/Library/Fonts ]] || return
+        else
+            [[ -d ~/Library && -w ~/Library ]] || return
+        fi
+        [[ -x /usr/libexec/PlistBuddy ]] || return
+        [[ -x /usr/bin/plutil ]] || return
+        [[ -x /usr/bin/defaults ]] || return
+        [[ -f ~/Library/Preferences/com.googlecode.iterm2.plist ]] || return
+        [[ -r ~/Library/Preferences/com.googlecode.iterm2.plist ]] || return
+        [[ -w ~/Library/Preferences/com.googlecode.iterm2.plist ]] || return
+        local font && font="$(iterm_get '"New Bookmarks":0:"Normal Font"' 2>/dev/null)" || return
+        print -P -- "The current font: '$font'"
+        [[ $font != 'MesloLGS-NF-Regular '<-> ]] || return
+        [[ $font == (#b)*' '(<->) ]] || return
+        iterm2_font_size=$match[1]
+        return 0
+    fi
+    return 1
+} && can_install_font=1
+
+[[ $can_install_font ]] && echo "This script cannot install MesloLGS Nerd Font for you."
+ask_font
