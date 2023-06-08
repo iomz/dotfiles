@@ -54,9 +54,8 @@ fpath=(
 )
 
 # Brew
-#if [[ "$OSTYPE" == "linux"* ]] && [[ "$(uname -m)" != "aarch64" ]]; then
-if [[ -e /etc/rpi-issue ]]; then
-    # do nothing for raspberry pi
+if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
+    # do nothing for aarch64 (e.g., raspberry pi)
 else
     if [[ -x /opt/homebrew/bin/brew ]]; then
         BREW_LOCATION="/opt/homebrew/bin/brew"
