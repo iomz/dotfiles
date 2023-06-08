@@ -86,8 +86,12 @@ fi
 export DENO_INSTALL=$HOME/.deno
 path=(${DENO_INSTALL}/bin(N-/) $path)
 if ! whence deno > /dev/null; then
-    echo "Install Deno to ${DENO_INSTALL}"
-    curl -fsSL https://deno.land/install.sh | sh
+    if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
+        # do nothing for linux aarch64
+    else
+        echo "Install Deno to ${DENO_INSTALL}"
+        curl -fsSL https://deno.land/install.sh | sh
+    fi
 fi
 
 # LLVM
