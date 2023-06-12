@@ -54,9 +54,8 @@ fpath=(
 )
 
 # Brew
-#if [[ "$OSTYPE" == "linux"* ]] && [[ "$(uname -m)" != "aarch64" ]]; then
-if [[ -e /etc/rpi-issue ]]; then
-    # do nothing for raspberry pi
+if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
+    # For aarch64 linux, don't do much
 else
     if [[ -x /opt/homebrew/bin/brew ]]; then
         BREW_LOCATION="/opt/homebrew/bin/brew"
@@ -83,14 +82,6 @@ else
     fi
 fi
 
-# Deno (not managed by asdf)
-export DENO_INSTALL=$HOME/.deno
-path=(${DENO_INSTALL}/bin(N-/) $path)
-if ! whence deno > /dev/null; then
-    echo "Install Deno to ${DENO_INSTALL}"
-    curl -fsSL https://deno.land/install.sh | sh
-fi
-
 # LLVM
 path=(/usr/local/opt/llvm/bin(N-/) $path)
 
@@ -98,6 +89,18 @@ path=(/usr/local/opt/llvm/bin(N-/) $path)
 if command -v ~/.cargo/bin/cargo 1> /dev/null 2>&1; then
     path=($HOME/.cargo/bin(N-/) $path)
     source $HOME/.cargo/env
+fi
+
+# Deno (not managed by asdf, requires cargo for aarch64)
+export DENO_INSTALL=$HOME/.deno
+path=(${DENO_INSTALL}/bin(N-/) $path)
+if ! whence deno > /dev/null; then
+    if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
+        cargo install deno --locked
+    else
+        echo "Install Deno to ${DENO_INSTALL}"
+        curl -fsSL https://deno.land/install.sh | sh
+    fi
 fi
 
 # Snap
