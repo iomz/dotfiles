@@ -31,7 +31,6 @@ mason_lspconfig.setup({
         "rust_analyzer",                   -- rust
         "tsserver",                        -- typescript
         "yamlls",                          -- yaml
-        "lemminx"                          -- xml
     },
 })
 

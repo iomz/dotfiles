@@ -17,7 +17,7 @@ fi
 #------------------------------------
 
 # do stuff for rpi
-if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
+if [[ -e /etc/rpi-issue ]]; then
     # nvim {{{
     #sudo apt install -y snapd
     #sudo snap install --beta nvim --classic

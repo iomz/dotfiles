@@ -4,8 +4,8 @@
 # Download and link binaries
 #
 
-# For aarch64 linux, don't do much
-if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
+# For RPi, don't do much
+if [[ -e /etc/rpi-issue ]]; then
     zinit from'gh-r' lbin'!' light-mode no'compile' for \
         compile'key-bindings.zsh' \
         dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \

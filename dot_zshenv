@@ -54,8 +54,9 @@ fpath=(
 )
 
 # Brew
-if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
-    # do nothing for aarch64 (e.g., raspberry pi)
+#if [[ "$OSTYPE" == "linux"* ]] && [[ "$(uname -m)" != "aarch64" ]]; then
+if [[ -e /etc/rpi-issue ]]; then
+    # do nothing for raspberry pi
 else
     if [[ -x /opt/homebrew/bin/brew ]]; then
         BREW_LOCATION="/opt/homebrew/bin/brew"
@@ -86,12 +87,8 @@ fi
 export DENO_INSTALL=$HOME/.deno
 path=(${DENO_INSTALL}/bin(N-/) $path)
 if ! whence deno > /dev/null; then
-    if [[ "$OSTYPE" == "linux"* ]] && [[ $(uname -m) == "aarch64" ]]; then
-        # do nothing for linux aarch64
-    else
-        echo "Install Deno to ${DENO_INSTALL}"
-        curl -fsSL https://deno.land/install.sh | sh
-    fi
+    echo "Install Deno to ${DENO_INSTALL}"
+    curl -fsSL https://deno.land/install.sh | sh
 fi
 
 # LLVM

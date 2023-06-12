@@ -20,10 +20,12 @@ mason_null_ls.setup({
         "black",         -- python
         "clang_format",  -- c++
         "eslint_d",      -- eslint_d
+        "flake8",        -- python
         "golangci_lint", -- go
         "golines",       -- go
         "prettierd",     -- web
-        "yamlfmt"        -- yaml
+        "yamlfmt",       -- yaml
+        "xmlformat",     -- xml
     }
 })
 
@@ -36,6 +38,7 @@ null_ls.setup({
             diagnostics_format = '[eslint_d] #{m}\n(#{c})'
         }),                                         -- eslint_d
         null_ls.builtins.diagnostics.golangci_lint, -- go
+        null_ls.builtins.diagnostics.flake8,        -- python
         null_ls.builtins.diagnostics.zsh,           -- zsh
         --
         -- formatting
@@ -47,7 +50,8 @@ null_ls.setup({
         null_ls.builtins.formatting.clang_format, -- c++
         null_ls.builtins.formatting.golines,      -- go
         null_ls.builtins.formatting.prettierd,    -- web
-        null_ls.builtins.formatting.yamlfmt       -- yaml
+        null_ls.builtins.formatting.yamlfmt,      -- yaml
+        null_ls.builtins.formatting.xmlformat,    -- xml
     },
     on_attach = function(client, bufnr)
         if client.supports_method("textDocument/formatting") then
@@ -61,6 +65,7 @@ null_ls.setup({
     end
 })
 
+-- TODO: fix this
 vim.api.nvim_create_user_command('DisableLspFormatting', function()
     vim.api.nvim_clear_autocmds({ group = augroup, buffer = 0 })
 end, { nargs = 0 })
