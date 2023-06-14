@@ -60,6 +60,13 @@ done
 pip install --upgrade pip && pip install neovim
 ```
 
+4. (Optional) Install poetry
+
+```bash
+asdf plugin-add poetry https://github.com/asdf-community/asdf-poetry.git
+asdf install poetry latest
+```
+
 ## Font
 
 I am borrowing MesloLGS Nerd Font from [romkatv/powerlevel10k](https://github.com/romkatv/powerlevel10k#fonts) to be installed on macOS.

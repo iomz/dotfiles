@@ -20,7 +20,6 @@ mason_null_ls.setup({
         "black",         -- python
         "clang_format",  -- c++
         "eslint_d",      -- eslint_d
-        "flake8",        -- python
         "golangci_lint", -- go
         "golines",       -- go
         "prettierd",     -- web
@@ -38,15 +37,14 @@ null_ls.setup({
             diagnostics_format = '[eslint_d] #{m}\n(#{c})'
         }),                                         -- eslint_d
         null_ls.builtins.diagnostics.golangci_lint, -- go
-        null_ls.builtins.diagnostics.flake8,        -- python
         null_ls.builtins.diagnostics.zsh,           -- zsh
         --
         -- formatting
         --
-        null_ls.builtins.formatting.beautysh, -- bash/zsh
-        null_ls.builtins.formatting.black.with({
+        null_ls.builtins.formatting.beautysh,    -- bash/zsh
+        null_ls.builtins.formatting.black.with({ -- python
             extra_args = { "--line-length=120" }
-        }),                                       -- python
+        }),
         null_ls.builtins.formatting.clang_format, -- c++
         null_ls.builtins.formatting.golines,      -- go
         null_ls.builtins.formatting.prettierd,    -- web
