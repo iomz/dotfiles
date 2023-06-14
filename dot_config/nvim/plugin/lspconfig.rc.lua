@@ -49,11 +49,12 @@ local enable_format_on_save = function(_, bufnr)
 end
 
 -- See: https://github.com/neovim/nvim-lspconfig/tree/54eb2a070a4f389b1be0f98070f81d23e2b1a715#suggested-configuration
+local keymap = vim.api.nvim_set_keymap
 local opts = { noremap = true, silent = true }
-vim.keymap.set('n', '[d', "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
-vim.keymap.set('n', ']d', "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
-vim.keymap.set('n', '<space>e', "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
-vim.keymap.set('n', '<space>q', "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
+keymap('n', '[d', "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
+keymap('n', ']d', "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
+keymap('n', '<space>e', "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
+keymap('n', '<space>q', "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 
 -- Function executed when the LSP server startup
 local on_attach = function(client, bufnr)
@@ -61,16 +62,16 @@ local on_attach = function(client, bufnr)
     vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
     -- Mappings (mostly replaced by lspsaga)
-    local bufopts = { noremap=true, silent=true, buffer=bufnr }
+    local bufopts = { noremap = true, silent = true, buffer = bufnr }
     ---- See `:help vim.lsp.*` for documentation on any of the below functions
-    vim.keymap.set('n', '<leader>gD', "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
-    vim.keymap.set('n', '<leader>gi', "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
-    vim.keymap.set('n', '<leader>gr', "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
-    --vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
-    vim.keymap.set('n', '<leader>gf', '<cmd>lua vim.lsp.buf.formatting()<CR>', bufopts)
-    vim.keymap.set('n', '<leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
-    vim.keymap.set('n', '<leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
-    vim.keymap.set('n', '<leader>gwl', function()
+    keymap('n', '<leader>gD', "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
+    keymap('n', '<leader>gi', "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
+    keymap('n', '<leader>gr', "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
+    --keymap('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
+    keymap('n', '<leader>gf', '<cmd>lua vim.lsp.buf.formatting()<CR>', bufopts)
+    keymap('n', '<leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
+    keymap('n', '<leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
+    keymap('n', '<leader>gwl', function()
         print(vim.inspect(vim.lsp.buf.list_workleader_folders()))
     end, bufopts)
 
@@ -147,12 +148,12 @@ mason_lspconfig.setup_handlers({
             on_attach = on_attach,
             settings = {
                 pylsp = {
-                  plugins = {
-                    pycodestyle = {
-                      ignore = {'W391'},
-                      maxLineLength = 120
+                    plugins = {
+                        pycodestyle = {
+                            ignore = { 'W391' },
+                            maxLineLength = 120
+                        }
                     }
-                  }
                 }
             }
         }))

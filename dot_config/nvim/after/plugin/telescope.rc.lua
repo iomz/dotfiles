@@ -66,7 +66,8 @@ telescope.setup {
             case_mode = 'smart_case'        -- or 'ignore_case' or 'respect_case'
         },
         file_browser = {
-            theme = "dropdown",
+            -- dropdown
+            theme = 'dropdown',
             -- disables netrw and use telescope-file-browser in its place
             hijack_netrw = true,
             mappings = {
@@ -89,15 +90,18 @@ telescope.setup {
 -- file_browser
 telescope.load_extension("file_browser")
 
-vim.keymap.set('n', ';f', function()
-    builtin.find_files({ no_ignore = false, hidden = true })
-end)
-vim.keymap.set('n', ';r', function() builtin.live_grep() end)
-vim.keymap.set('n', '\\\\', function() builtin.buffers() end)
-vim.keymap.set('n', ';t', function() builtin.help_tags() end)
-vim.keymap.set('n', ';;', function() builtin.resume() end)
-vim.keymap.set('n', ';e', function() builtin.diagnostics() end)
-vim.keymap.set("n", "ff", function()
+-- keymap
+local keymap = vim.keymap.set
+local opts = { noremap = true }
+keymap('n', '<c-p>', "<cmd>lua require('telescope.builtin').find_files()<CR>", opts)
+keymap('n', 'ff', function()
+    builtin.find_files({
+        cwd = telescope_buffer_dir(),
+        --hidden = true
+        --no_ignore = false,
+    })
+end, opts)
+keymap("n", "fe", function()
     telescope.extensions.file_browser.file_browser({
         path = "%:p:h",
         cwd = telescope_buffer_dir(),
@@ -106,9 +110,14 @@ vim.keymap.set("n", "ff", function()
         grouped = true,
         previewer = false,
         initial_mode = "normal",
-        layout_config = { height = 40 }
+        layout_config = { height = 40 },
     })
-end)
+end, opts)
+keymap('n', 'fb', "<cmd>lua require('telescope.builtin').buffers()<cr>", opts)
+keymap('n', 'fd', "<cmd>lua require('telescope.builtin').diagnostics()<CR>", opts)
+keymap('n', 'fg', "<cmd>lua require('telescope.builtin').live_grep()<CR>", opts)
+keymap('n', 'fh', "<cmd>lua require('telescope.builtin').help_tags()<CR>", opts)
+keymap('n', 'fr', "<cmd>lua require('telescope.builtin').resume()<CR>", opts)
 
 -- fzf
 ---- FZF syntax:
