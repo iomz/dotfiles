@@ -4,11 +4,14 @@ snippets:
     snippet: docker ps -a --format="table {{.Names}}\t{{.Status}}\t{{.Ports}}"
   - name: ghq get shallow
     # ghq get shallow
-    keyword: gh
+    keyword: ghqs
     snippet: ghq get --shallow
   - name: git ci -m
     keyword: gci
     snippet: git commit -m '{{commit_message}}'
+  - name: git push origin HEAD
+    keyword: gpo
+    snippet: git push origin HEAD
   - name: branch
     keyword: B
     snippet: git symbolic-ref --short HEAD

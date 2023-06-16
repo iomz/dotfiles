@@ -11,7 +11,7 @@ setopt AUTO_MENU            # show completion menu on a successive tab press.
 setopt AUTO_NAME_DIRS       # make dir name as parameters
 setopt AUTO_PARAM_SLASH     # if completed parameter is a directory, add a trailing slash.
 setopt AUTO_PUSHD           # make cd push to stack
-setopt AUTO_REMOVE_SLASH    # remove trailing slash
+unsetopt AUTO_REMOVE_SLASH  # don't remove trailing slash
 setopt AUTO_RESUME          # attempt to resume existing job before creating a new process.
 #setopt BANG_HIST           # treat the '!' character specially during expansion.
 unsetopt BEEP               # i don't want beep
@@ -19,7 +19,7 @@ unsetopt BEEP               # i don't want beep
 unsetopt COMBINING_CHARS    # combine zero-length punctuation characters (accents) with the base character.
 setopt COMPLETE_ALIASES     # prevent alias for completion
 setopt COMPLETE_IN_WORD     # complete from both ends of a word.
-setopt CORRECT              # try to correct the spelling
+unsetopt CORRECT            # don't try to correct the spelling
 setopt EXTENDED_HISTORY     # write the history file in the ':start:elapsed;command' format.
 unsetopt FLOW_CONTROL       # disable start/stop characters in shell editor.
 setopt GLOB_DOTS            # don't require leading `.' in a filename
