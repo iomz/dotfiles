@@ -1,40 +1,40 @@
 [user]
     name = Iori Mizutani
     email = iori.mizutani@gmail.com
-	signingkey = {{ onepasswordRead "op://chezmoi/gnupg/signingkey" }}
+{{- if eq .chezmoi.os "darwin" }}
+    signingkey = {{ onepasswordRead "op://chezmoi/gnupg/signingkey" }}
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+[gpg]
+    program = /opt/homebrew/bin/gpg
+[commit]
+    gpgsign = true
+[credential]
+    helper = osxkeychain
+{{- end }}
 [alias]
-    st = status
-
-    ls-untracked = ls-files --others --exclude-standard
-
     amend = commit --amend
-    ci = commit
-    cama = commit --amend -a
-    pom = push -u origin HEAD --tags
-
-    clear = clean -df
-
     br = branch -a
-
-    stashes = stash list
-
-    unstage = reset -q HEAD --
-    uncommit = reset --mixed HEAD~
-    resa = reset HEAD
-    nevermind = !git reset --hard HEAD && git clean -d -f
-
+    cama = commit --amend -a
+    ci = commit
+    clear = clean -df
     co = checkout
-    discard = checkout --
-
     df = diff --color
-    precommit = diff --cached --diff-algorithm=minimal -w
-    unmerged = diff --name-only --diff-filter=U
-
-    remotes = remote -v
-
-    lg = log -p
+    discard = checkout --
     gg = log --oneline --abbrev-commit --all --graph --decorate --color
-    graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+    graph = log --graph -10 --branches --remotes --tags --date-order
+    lg = log -p
+    ls-untracked = ls-files --others --exclude-standard
+    nevermind = !git reset --hard HEAD && git clean -d -f
+    pom = push -u origin HEAD --tags
+    precommit = diff --cached --diff-algorithm=minimal -w
+    remotes = remote -v
+    resa = reset HEAD
+    st = status
+    stashes = stash list
+    uncommit = reset --mixed HEAD~
+    unmerged = diff --name-only --diff-filter=U
+    unstage = reset -q HEAD --
 [diff]
     tool = nvimdiff
 [merge]
@@ -49,9 +49,3 @@
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
-[credential]
-	helper = osxkeychain
-[gpg]
-	program = /opt/homebrew/bin/gpg
-[commit]
-	gpgsign = true
