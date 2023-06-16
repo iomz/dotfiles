@@ -1,6 +1,7 @@
 [user]
     name = Iori Mizutani
     email = iori.mizutani@gmail.com
+	signingkey = {{ onepasswordRead "op://chezmoi/gnupg/signingkey" }}
 [alias]
     st = status
 
@@ -50,3 +51,7 @@
 	smudge = git-lfs smudge -- %f
 [credential]
 	helper = osxkeychain
+[gpg]
+	program = /opt/homebrew/bin/gpg
+[commit]
+	gpgsign = true
