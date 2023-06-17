@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*
+import argparse
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "filename",
+        help="path to the filter list",
+    )
+
+    args = parser.parse_args()
+
+    # load lists
+    lst = []
+    with open(args.filename) as f:
+        for line in f.readlines():
+            lst.append(line.strip())
+
+    # clean up
+    lst = sorted(set(lst))
+    with open(args.filename, "w") as f:
+        for line in lst:
+            f.write(line + "\n")
+
+    # print
+    sep = "|".join(lst)
+    print(
+        sep,
+    )
+    # print(f"from:({sep})",)
+
+
+if __name__ == "__main__":
+    main()
