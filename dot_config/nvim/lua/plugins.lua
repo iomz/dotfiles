@@ -204,6 +204,10 @@ return {
     'bronson/vim-trailing-whitespace',
     -- vimproc
     { 'Shougo/vimproc.vim', build = 'make' },
+    -- wakatime
+    {
+        'wakatime/vim-wakatime',
+    },
     -- which-key popup
     {
         'folke/which-key.nvim',

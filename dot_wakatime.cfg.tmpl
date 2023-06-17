@@ -1,0 +1,11 @@
+[settings]
+debug = false
+hidefilenames = false
+ignore =
+    COMMIT_EDITMSG$
+    PULLREQ_EDITMSG$
+    MERGE_MSG$
+    TAG_EDITMSG$
+{{- if eq .chezmoi.os "darwin" }}
+api_key = {{ onepasswordRead "op://chezmoi/wakatime/api_key" }}
+{{- end }}
