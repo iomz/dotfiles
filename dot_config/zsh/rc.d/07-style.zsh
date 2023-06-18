@@ -83,23 +83,18 @@ zstyle ':completion:*:options' list-colors '=*=32' # green
 zstyle ':completion:*:options' list-colors '=^(-- *)=34'
 zstyle ':completion:*:parameters' list-colors '=*=32' # green
 zstyle ':completion:*:warnings' format ${BROWN_RED}'No matches for: '$RED'%d'$DEFAULT
-#zstyle ':completion:*:warnings' format ${BROWN_RED}' -- no matches found --'$DEFAULT
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;36=0=01'
-#zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([%0-9]#)*=0=01;31'
-
 ## }}}
 
 #zstyle '*' single-ignored show
 #
-zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list
+#zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list
 zstyle ':completion:*' group-name ''
 #zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' '+m:{A-Z}={a-z}'
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' verbose yes
-
 zstyle ':completion:*:approximate:*' max-errors 1 numeric
-#zstyle -e ':completion:*:approximate:*' max-errors 'reply=($((($#PREFIX+$#SUFFIX)/3))numeric)'
 zstyle ':completion:*:complete:*' cache-path "${ZDOTDIR:-$HOME}/.zcompcache"
 zstyle ':completion:*:complete:*' use-cache on
 zstyle ':completion:*:default' menu select=2
@@ -109,24 +104,16 @@ zstyle ':completion:*:manuals' separate-sections true
 zstyle ':completion:*:manuals.(^1*)' insert-sections true
 zstyle ':completion:*:match:*' original only
 zstyle ':completion:*:matches' group 'yes'
-#zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
 zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin /sbin /bin
-
-#zstyle ':completion:*:(rm|kill|diff):*' ignore-line other
-
 zstyle ':completion:*:complete:*' use-cache true
-
 zstyle ':completion:*:options' auto-description '%d'
 zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:rm:*' file-patterns '*:all-files'
 zstyle ':completion::*:(-command-|export):*' fake-parameters ${${${_comps[(I)-value-*]#*,}%%,*}:#-*-}
 zstyle ':completion:*:-tilde-:*' group-order 'named-directories' 'path-directories' 'users' 'expand'
-
-
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
 zstyle ':completion:*:*:cd:*:directory-stack' menu yes select
-
 zstyle ':completion:*:*:kill:*' force-list always
 zstyle ':completion:*:*:kill:*' insert-ids single
 zstyle ':completion:*:*:kill:*' menu yes select

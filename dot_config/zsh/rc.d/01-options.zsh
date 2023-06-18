@@ -61,6 +61,10 @@ setopt SHARE_HISTORY        # disable shared history between terminals / session
     setopt PIPE_FAIL        # Exit pipe with rightmost non-zero code
 } 2>/dev/null
 
+# AUTO_CD {{{
+#cdpath=$(cut -d"|" -f1 ~/.z)
+# }}}
+
 # notify {{{
 REPORTTIME=10               # display process taken longer than 10 second
 # }}}

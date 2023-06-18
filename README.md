@@ -54,17 +54,23 @@ for i in golang lua nodejs python; do
 done
 ```
 
-3. Install the neovim module for Python
+3. Install the neovim modules
 
 ```bash
 pip install --upgrade pip && pip install neovim
+npm i -g neovim
 ```
 
-4. (Optional) Install poetry
+4. (Optional) Install other stuff
 
 ```bash
-asdf plugin-add poetry https://github.com/asdf-community/asdf-poetry.git
-asdf install poetry latest
+for i in pnpm poetry; do
+    IFS=","; set -- $i;
+    lang=$1; repo=$2;
+    asdf plugin-add $lang $repo && \
+        asdf install $lang latest && \
+        asdf global $lang latest;
+done
 ```
 
 ## Font

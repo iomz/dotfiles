@@ -3,3 +3,4 @@ nodejs 20.2.0
 ruby 3.2.2
 golang 1.20.4
 poetry 1.5.1
+pnpm 8.6.2
