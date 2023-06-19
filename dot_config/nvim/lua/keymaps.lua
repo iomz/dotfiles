@@ -74,7 +74,7 @@ keymap('n', '<C-l>', ':Tagbar<CR>', { noremap = true })
 -- minimap
 --keymap('n', '<C-m>', ':MinimapToggle<CR>', { noremap = true })
 -- quickrun
-keymap('n', '<C-q>', ':QuickRun<CR>', { noremap = true })
+keymap('n', '<C-q>', ':Jaq<CR>', { noremap = true })
 -- reload init.lua
 -- keymap('n', '<C-s>', ':so $MYVIMRC<CR>', { noremap=true })
 keymap('n', '<C-t>', ':NERDTreeToggle<CR>', { noremap = true })

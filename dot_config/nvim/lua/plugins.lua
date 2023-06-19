@@ -44,6 +44,8 @@ return {
         dependencies = { 'nvim-lua/plenary.nvim' },
         config = function() require('gitsigns').setup() end
     },
+    -- just another quick run
+    "is0n/jaq-nvim",
     -- vscode-like pictograms for built-in lsp
     'onsails/lspkind-nvim',
     -- LSP UIs
@@ -192,8 +194,8 @@ return {
     { 'airblade/vim-gitgutter' },
     -- matchup with texts
     --{ 'andymass/vim-matchup',  event = 'VimEnter' },
-    -- vim-quickrun
-    'thinca/vim-quickrun',
+    -- markdown-toc
+    { 'mzlogin/vim-markdown-toc' },
     -- vim-renamer
     'qpkorr/vim-renamer',
     -- vim-sensible: starting point config
