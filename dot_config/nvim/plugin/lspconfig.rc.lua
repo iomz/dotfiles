@@ -150,9 +150,12 @@ mason_lspconfig.setup_handlers({
                 pylsp = {
                     plugins = {
                         pycodestyle = {
-                            ignore = { 'W391' },
+                            ignore = { 'E203', 'W391' },
                             maxLineLength = 120
-                        }
+                        },
+                        pyflakes = {
+                            enabled = false,
+                        },
                     }
                 }
             }

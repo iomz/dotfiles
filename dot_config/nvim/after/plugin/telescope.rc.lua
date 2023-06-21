@@ -94,6 +94,13 @@ telescope.load_extension("file_browser")
 local keymap = vim.keymap.set
 local opts = { noremap = true }
 keymap('n', '<c-p>', "<cmd>lua require('telescope.builtin').find_files()<CR>", opts)
+keymap('n', '<c-g>', function()
+    builtin.find_files({
+        cwd = '~/ghq',
+        hidden = true,
+        no_ignore = true,
+    })
+end, opts)
 keymap('n', '<leader>ff', function()
     builtin.find_files({
         cwd = telescope_buffer_dir(),

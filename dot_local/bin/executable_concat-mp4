@@ -1,5 +1,76 @@
-#!/bin/sh
-#for f in *.mp4; do echo "file '$f'" >> concat.txt; done &&
-if [ -f "/tmp/concat.txt" ]; then
-    ffmpeg -f concat -fflags +genpts -safe 0 -i /tmp/concat.txt -c copy "${1}.mp4"
-fi
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*
+import argparse
+import subprocess
+from pathlib import Path
+from shutil import which
+from getch import getch
+
+
+def get_base(lst):
+    for i, ss in enumerate(lst):
+        others = lst[:i] + lst[i + 1 :]
+        if all(ss.name.strip(".mp4") in o.name for o in others):
+            return ss, others
+    return None, lst
+
+
+def main():
+    if which("ffmpeg") is None:
+        print("ffmpeg not found")
+        exit(1)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--reverse",
+        "-r",
+        action="store_true",
+        help="reverse the order",
+    )
+
+    args = parser.parse_args()
+    cwd = Path.cwd()
+
+    lst = [c for c in cwd.iterdir() if c.is_file() and c.name.endswith(".mp4")]
+
+    base, lst = get_base(lst)
+    lst = sorted(set(lst), reverse=args.reverse)
+    if base:
+        lst.insert(0, base)
+
+    for p in lst:
+        print(p.absolute())
+
+    print()
+    print("alright? [Y/n]")
+
+    if getch().lower() == "n":
+        print("cancelled")
+        exit(0)
+
+    with open("/tmp/concat.txt", "w") as f:
+        for p in lst:
+            print(f"file '{p.absolute()}'", file=f)
+
+    filename = lst[0].name.strip(".mp4") + "-out.mp4"
+
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-f",
+            "concat",
+            "-fflags",
+            "+genpts",
+            "-safe",
+            "0",
+            "-i",
+            "/tmp/concat.txt",
+            "-c",
+            "copy",
+            filename,
+        ]
+    )
+
+
+if __name__ == "__main__":
+    main()
