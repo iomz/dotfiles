@@ -10,7 +10,8 @@ from getch import getch
 def get_base(lst):
     for i, ss in enumerate(lst):
         others = lst[:i] + lst[i + 1 :]
-        if all(ss.name.strip(".mp4") in o.name for o in others):
+        fragment = ss.name.replace(".mp4", "")
+        if all(fragment in o.name for o in others):
             return ss, others
     return None, lst
 
@@ -36,6 +37,8 @@ def main():
     base, lst = get_base(lst)
     lst = sorted(set(lst), reverse=args.reverse)
     if base:
+        print(f"base: {base.name}")
+        print()
         lst.insert(0, base)
 
     for p in lst:
