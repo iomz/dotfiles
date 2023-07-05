@@ -47,7 +47,7 @@ telescope.setup {
     },
     pickers = {
         current_buffer_fuzzy_find = { theme = 'ivy' },
-        find_files = { hidden = false, no_ignore = false },
+        find_files = { hidden = true, no_ignore = false },
         buffers = {
             layout_config = { preview_width = 0.6 },
             ignore_current_buffer = false,
@@ -97,7 +97,7 @@ keymap('n', '<c-p>', "<cmd>lua require('telescope.builtin').find_files()<CR>", o
 keymap('n', '<c-g>', function()
     builtin.find_files({
         cwd = '~/ghq',
-        hidden = true,
+        hidden = false,
         no_ignore = true,
     })
 end, opts)
