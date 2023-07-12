@@ -149,6 +149,9 @@ mason_lspconfig.setup_handlers({
             settings = {
                 pylsp = {
                     plugins = {
+                        mccabe = {
+                            enabled = false,
+                        },
                         pycodestyle = {
                             ignore = { 'E203', 'W391', 'W503' },
                             maxLineLength = 120
