@@ -110,7 +110,7 @@ return {
         -- config = function() vim.cmd [[colorscheme carbonfox]] end
     },
     -- inject LSP diagnostics, code actions, and more via Lua
-    { 'jose-elias-alvarez/null-ls.nvim', build = 'npm i -g eslint_d' },
+    { 'jose-elias-alvarez/null-ls.nvim' },
     -- autopair: https://github.com/windwp/nvim-autopairs
     --'windwp/nvim-autopairs',
     -- base16
@@ -154,7 +154,7 @@ return {
         dependencies = { 'nvim-treesitter/nvim-treesitter-context' }
     },
     -- nvim tree-sitter autotag
-    { 'windwp/nvim-ts-autotag',          event = 'InsertEnter' },
+    { 'windwp/nvim-ts-autotag',         event = 'InsertEnter' },
     -- <-> vim-devicons
     { 'nvim-tree/nvim-web-devicons' },
     -- plenary: a Lua module for asynchronous programming using coroutines
@@ -189,7 +189,7 @@ return {
     -- vim-easy-align: align with ga
     'junegunn/vim-easy-align',
     -- dispatch compiler plugins
-    { 'tpope/vim-dispatch',    cmd = { 'Dispatch', 'Make', 'Focus', 'Start' } },
+    { 'tpope/vim-dispatch',      cmd = { 'Dispatch', 'Make', 'Focus', 'Start' } },
     -- vim-gitgutter
     { 'airblade/vim-gitgutter' },
     -- matchup with texts
