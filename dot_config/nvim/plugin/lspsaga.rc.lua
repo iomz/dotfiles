@@ -10,7 +10,7 @@ lspsaga.setup({
         expand = "",
         collapse = "",
         colors = { normal_bg = '#002b36' },
-        code_action = "󱧡",
+        code_action = "",
         incoming = " ",
         outgoing = " ",
         hover = ' ',
