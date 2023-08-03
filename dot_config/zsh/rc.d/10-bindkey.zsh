@@ -40,13 +40,13 @@ bindkey '^H' emoji::cli
 bindkey -s '^O' '$EDITOR $(fzf)^J'
 
 # menu select
-bindkey -M menuselect '^H' undo
-bindkey -M menuselect '^N' down-line-or-history
-bindkey -M menuselect '^P' up-line-or-history
-bindkey -M menuselect 'H' vi-backward-char
-bindkey -M menuselect 'J' vi-down-line-or-history
-bindkey -M menuselect 'K' vi-up-line-or-history
-bindkey -M menuselect 'L' vi-forward-char
+#bindkey -M menuselect '^H' undo
+#bindkey -M menuselect '^N' down-line-or-history
+#bindkey -M menuselect '^P' up-line-or-history
+#bindkey -M menuselect 'H' vi-backward-char
+#bindkey -M menuselect 'J' vi-down-line-or-history
+#bindkey -M menuselect 'K' vi-up-line-or-history
+#bindkey -M menuselect 'L' vi-forward-char
 
 # zeno.zsh {{{
 if [[ -n $ZENO_LOADED ]]; then
