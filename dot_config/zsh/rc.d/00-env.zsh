@@ -21,7 +21,7 @@ export FZF_COMPLETION_TRIGGER=';'
 
 
 # zeno.zsh {{{
-if [[ -z "${LIGHT_CHEZMOI}" ]]; then # not LIGHT_CHEZMOI
+if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     # fallback if snippet not matched (default: self-insert)
     export ZENO_AUTO_SNIPPET_FALLBACK=self-insert
 

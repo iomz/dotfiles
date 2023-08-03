@@ -4,8 +4,8 @@
 # Download and link binaries
 #
 
-# LIGHT_CHEZMOI
-if [[ -n "${LIGHT_CHEZMOI}" ]]; then
+# TINY_CHEZMOI
+if [[ -n "${TINY_CHEZMOI}" ]]; then
     zinit from'gh-r' lbin'!' light-mode no'compile' for \
         compile'key-bindings.zsh' \
         dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \

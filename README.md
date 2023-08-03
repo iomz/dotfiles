@@ -75,8 +75,8 @@ install-meslo-nerd-font
 
 ### Zsh: order of executions
 
-First of all, `$HOME/.profile` contains the local option like `${LIGHT_CHEZMOI}` while `~/.profile` is only loaded when running zsh in sh compatibility mode.
-If `LIGHT_CHEZMOI=1`, then it doesn't load the heavy setup (nvim, cargo, deno (zeno), and so forth).
+First of all, `$HOME/.profile` contains the local option like `${TINY_CHEZMOI}` while `~/.profile` is only loaded when running zsh in sh compatibility mode.
+If `TINY_CHEZMOI=1`, then it doesn't load the heavy setup (nvim, cargo, deno (zeno), and so forth).
 
 The setup loads in the order of
 

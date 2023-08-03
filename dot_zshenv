@@ -5,7 +5,7 @@ skip_global_compinit=1
 # uncomment to analyze init time
 #ENABLE_ZPROFTIME=true
 
-# load .profile for local options like $LIGHT_CHEZMOI
+# load .profile for local options like $TINY_CHEZMOI
 [[ -s ~/.profile ]] && source ~/.profile
 
 # set ZDOTDIR
@@ -58,7 +58,7 @@ fpath=(
 )
 
 # Brew
-if [[ -z "${LIGHT_CHEZMOI}" ]]; then # not LIGHT_CHEZMOI
+if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     if [[ -x /opt/homebrew/bin/brew ]]; then
         BREW_LOCATION="/opt/homebrew/bin/brew"
     elif [[ -x /usr/local/bin/brew ]]; then
@@ -88,13 +88,13 @@ fi
 path=(/usr/local/opt/llvm/bin(N-/) $path)
 
 # Rust - cargo, rustup and rustc (not managed by asdf)
-if [[ -z "${LIGHT_CHEZMOI}" ]] && [[ -x $HOME/.cargo/bin/cargo ]]; then
+if [[ -z "${TINY_CHEZMOI}" ]] && [[ -x $HOME/.cargo/bin/cargo ]]; then
     path=($HOME/.cargo/bin(N-/) $path)
     source $HOME/.cargo/env
 fi
 
 # Deno (not managed by asdf)
-if [[ -z "${LIGHT_CHEZMOI}" ]]; then # not LIGHT_CHEZMOI
+if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     export DENO_INSTALL=$HOME/.deno
     path=(${DENO_INSTALL}/bin(N-/) $path)
     if ! whence deno > /dev/null; then
