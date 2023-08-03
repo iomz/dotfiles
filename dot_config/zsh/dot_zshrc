@@ -71,7 +71,7 @@ case ${OSTYPE} in
     linux*)
         colored_time=${LIME_GREEN}%T
         #colored_user=$colors[$((`echo "$USER" | sum | cut -f1 -d' '`%${#colors}))+1]$USER
-        colored_user=$GREY$USER
+        colored_user=${BROWN_RED}$USER
         colored_at=%{$fg[white]%}@
         host_name=`hostname | cut -d. -f1`
         colored_host=$colors[$((`echo "$host_name" | sum | cut -f1 -d' '`%${#colors}))+1]$host_name
