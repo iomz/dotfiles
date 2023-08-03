@@ -98,8 +98,10 @@ zinit id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods',
 
 
 # zeno.zsh {{{
-zinit lucid depth'1' blockf for \
-    @yuki-yano/zeno.zsh
+if [[ -z "${LIGHT_CHEZMOI}" ]]; then # not LIGHT_CHEZMOI
+    zinit lucid depth'1' blockf for \
+        @yuki-yano/zeno.zsh
+fi
 # }}}
 
 

@@ -37,7 +37,7 @@ bindkey '^H' emoji::cli
 
 # open nvim with fzf
 # The -s flag to bindkey specifies that you are binding the key to a string, not a command.
-bindkey -s '^O' 'nvim $(fzf)^J'
+bindkey -s '^O' '$EDITOR $(fzf)^J'
 
 # menu select
 bindkey -M menuselect '^H' undo

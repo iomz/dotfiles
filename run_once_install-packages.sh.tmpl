@@ -1,0 +1,9 @@
+{{ if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "aarch64") -}}
+sudo apt install -y git dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev linux-headers-$(uname -r)
+{{ else if eq .chezmoi.os "linux" -}}
+#!/bin/sh
+sudo apt install -y git dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev linux-headers-$(uname -r)
+{{ else if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+brew install git gpg gawk openssl readline sqlite3 xz zlib tcl-tk
+{{ end -}}

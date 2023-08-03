@@ -200,6 +200,8 @@ return {
     'qpkorr/vim-renamer',
     -- vim-sensible: starting point config
     -- 'tpope/vim-sensible',
+    -- vim-startify: fancy startup screen
+    'mhinz/vim-startify',
     -- vim-surrond: parentheses, brackets, quotes, XML tags, and more
     --'tpope/vim-surround',
     -- vim-trailing-whitespace: mark trailing whitespace

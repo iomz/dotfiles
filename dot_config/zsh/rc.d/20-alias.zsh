@@ -184,7 +184,13 @@
 # +─────────+
 # │ DEFAULT │
 # +─────────+
-# ls
+if whence bat > /dev/null; then
+    export cat="bat --color=always"
+    # zeno
+    export ZENO_GIT_CAT="bat --color=always"
+fi
+
+# exa
 if whence exa > /dev/null; then
     alias l='exa -blF'
     alias la='exa -abghilmu'
@@ -193,6 +199,9 @@ if whence exa > /dev/null; then
     #alias ll='exa -al'
     alias ls='exa --git --group-directories-first'
     #alias ls="exa"
+    alias tree='exa --tree'
+    # zeno
+    export ZENO_GIT_TREE="exa --tree"
 elif whence gls > /dev/null; then
     alias ls='gls --color=auto'
     alias ll='ls -lh'
@@ -207,14 +216,10 @@ if whence nvim > /dev/null; then
     for i (v vi vim); do
         alias $i="nvim"
     done
+    alias vimdiff='nvim -d'
 fi
 
 # sed
 if whence gsed > /dev/null; then
     alias sed='gsed'
-fi
-
-# tree
-if whence exa > /dev/null; then
-    alias tree='exa --tree'
 fi

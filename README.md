@@ -26,21 +26,9 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 
 Go, Lua, NodeJS, and Python runtimes used by Neovim are managed by asdf (asdf itself is installed at the first time zsh starts), and it is not automated by Zinit.
 
-Deno and Rust runtimes are taken cared by `~/.zshenv`.
+Other runtime (e.g, Deno and Rust) is taken cared in`~/.zshenv`.
 
-1. Install the dependencies
-
-- macOS
-
-```bash
-brew install gpg gawk openssl readline sqlite3 xz zlib tcl-tk
-```
-
-- Debian
-
-```bash
-sudo apt install -y dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev linux-headers-$(uname -r)
-```
+1. Installation of the dependencies (automatically done via `run_once_install_packages.sh.tmpl`
 
 2. Install Go, Lua (with LuaRocks), NodeJS, and Python via asdf
 
@@ -87,6 +75,9 @@ install-meslo-nerd-font
 
 ### Zsh: order of executions
 
+First of all, `$HOME/.profile` contains the local option like `${LIGHT_CHEZMOI}` while `~/.profile` is only loaded when running zsh in sh compatibility mode.
+If `LIGHT_CHEZMOI=1`, then it doesn't load the heavy setup (nvim, cargo, deno (zeno), and so forth).
+
 The setup loads in the order of
 
 ```
@@ -117,7 +108,7 @@ while the default is
 5. `.zlogout` is sometimes used to clear and reset the terminal.
    It is called when exiting, not when opening.
 
-`~/.profile` is only loaded when running zsh in sh compatibility mode, otherwise it reads `.zprofile`, as well as `.zshrc` for interactive and `.zlogin` for login shells.
+It reads `.zprofile`, as well as `.zshrc` for interactive and `.zlogin` for login shells.
 
 cf. [What should/shouldn't go in .zshenv, .zshrc, .zlogin, .zprofile, .zlogout?](https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout)
 

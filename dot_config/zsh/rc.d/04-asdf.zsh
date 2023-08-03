@@ -14,6 +14,7 @@ fi
 fpath=(${ASDF_DIR}/completions $fpath)
 
 # install dependencies for plugins
+# TODO: this seems wrong
 case ${OSTYPE} in
     darwin*)
         # golang

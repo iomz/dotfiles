@@ -1,0 +1,3 @@
+{{ if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "aarch64") -}}
+export TINY_CHEZMOI=1
+{{ end -}}
