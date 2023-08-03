@@ -5,7 +5,7 @@
 
 # emacs style (instead of -v)
 bindkey -e
-#
+
 #"^A" beginning-of-line
 #"^B" backward-char
 #"^C" SIGINT

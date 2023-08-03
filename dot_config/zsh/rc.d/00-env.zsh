@@ -58,6 +58,6 @@ fi
 
 # zsh-autosuggestions {{{
 export ZSH_AUTOSUGGEST_USE_ASYNC=1
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#ff00ff,bg=#00ffff,bold,underline'
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ffff,bold,underline'
 ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line)
 # }}}
