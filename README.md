@@ -32,7 +32,7 @@ Other runtime (e.g, Deno and Rust) is taken cared in`~/.zshenv`.
 
 2. Install Go, Lua (with LuaRocks), NodeJS, and Python via asdf
 
-```bash
+```zsh
 for i in golang lua nodejs python; do
     IFS=","; set -- $i;
     lang=$1; repo=$2;
@@ -44,14 +44,14 @@ done
 
 3. Install the neovim modules
 
-```bash
+```zsh
 pip install --upgrade pip && pip install neovim
 npm i -g neovim
 ```
 
 4. (Optional) Install other stuff
 
-```bash
+```zsh
 for i in pnpm poetry; do
     IFS=","; set -- $i;
     lang=$1; repo=$2;
@@ -72,6 +72,24 @@ install-meslo-nerd-font
 ```
 
 ## Notes
+
+### Neovim: force reinstall the executable linked from $ZPFX ("polaris")
+
+A nightly version of `nvim` binary is installed by Zinit; however, the `nightly` tag won't change for new commits in the repository.
+To update a nightly version of the installed nvim, simply remove the plugin directory and reopen zsh to force install it again.
+
+```zsh
+rm -fr ${XDG_DATA_HOME}/zinit/plugins/neovim---neovim
+```
+
+### Zinit: missing completion link
+
+After `zinit update`, some completions may get broken (check with `zinit completions`).
+If any, clean up the broken links by
+
+```zsh
+zinit cclean
+```
 
 ### Zsh: order of executions
 

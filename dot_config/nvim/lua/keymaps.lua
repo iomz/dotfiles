@@ -51,7 +51,6 @@ keymap('n', '<Esc><Esc>', ':<C-u>nohlsearch<CR>', { noremap = true })
 keymap('n', '<leader>bp', ':bprevious<CR>', { noremap = true })
 keymap('n', '<leader>bn', ':bnext<CR>', { noremap = true })
 keymap('n', '<leader>bd', ':bdelete<CR>', { noremap = true })
--- g
 --keymap('n', '<leader>gn', ':lnext<CR>', { noremap = true })
 --keymap('n', '<leader>gp', ':lprevious<CR>', { noremap = true })
 -- open tig with current file
@@ -63,8 +62,7 @@ keymap('n', '<leader>tg', ':TigGrep<CR>', { noremap = true })
 -- resume from last grep
 keymap('n', '<leader>tr', ':TigGrepResume<CR>', { noremap = true })
 -- open tig grep with the word under the cursor
-keymap('n', '<leader>tc', ':<C-u>:TigGrep<Space><C-R><C-W><CR>',
-    { noremap = true })
+keymap('n', '<leader>tc', ':<C-u>:TigGrep<Space><C-R><C-W><CR>', { noremap = true })
 -- open tig blame with current file
 keymap('n', '<leader>tb', ':TigBlame<CR>', { noremap = true })
 -- select all

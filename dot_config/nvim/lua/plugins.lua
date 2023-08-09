@@ -5,7 +5,10 @@ return {
     -- bclose: for tig-explorer
     'rbgrouleff/bclose.vim',
     -- snazzy buffer line
-    { 'akinsho/bufferline.nvim', dependencies = { 'nvim-tree/nvim-web-devicons' } },
+    {
+        'akinsho/bufferline.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' }
+    },
     -- comfortable-motion: smooth scroll
     -- 'yuttie/comfortable-motion.vim',
     -- smart comment
@@ -26,7 +29,10 @@ return {
         dependencies = { 'neovim/nvim-lspconfig' }
     },
     -- 9000+ Snippets
-    { 'ms-jpq/coq.artifacts',    branch = 'artifacts' },
+    {
+        'ms-jpq/coq.artifacts',
+        branch = 'artifacts'
+    },
     -- lua & third party sources -- See https://github.com/ms-jpq/coq.thirdparty
     {
         'ms-jpq/coq.thirdparty',
@@ -46,6 +52,15 @@ return {
     },
     -- just another quick run
     "is0n/jaq-nvim",
+    -- lazygit
+    {
+        "iomz/lazygit.nvim",
+        branch = 'remove-oldshell',
+        -- optional for floating window border decoration
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+        },
+    },
     -- vscode-like pictograms for built-in lsp
     'onsails/lspkind-nvim',
     -- LSP UIs
@@ -176,6 +191,12 @@ return {
     },
     -- tig: git client
     'iberianpig/tig-explorer.vim',
+    -- toggleterm
+    --{
+    --    'akinsho/toggleterm.nvim',
+    --    version = "*",
+    --    config = true
+    --},
     -- transparent
     'xiyaowong/transparent.nvim',
     -- vim-closer
@@ -189,7 +210,10 @@ return {
     -- vim-easy-align: align with ga
     'junegunn/vim-easy-align',
     -- dispatch compiler plugins
-    { 'tpope/vim-dispatch',      cmd = { 'Dispatch', 'Make', 'Focus', 'Start' } },
+    {
+        'tpope/vim-dispatch',
+        cmd = { 'Dispatch', 'Make', 'Focus', 'Start' }
+    },
     -- vim-gitgutter
     { 'airblade/vim-gitgutter' },
     -- matchup with texts
