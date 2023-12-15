@@ -1,0 +1,12 @@
+#!/bin/bash
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    echo "Install ffmpeg";
+    exit 1;
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! command -v ffmpeg &> /dev/null; then
+        brew install ffmpeg;
+    fi
+fi
+
+bv=`ffprobe -v quiet -select_streams v:0 -show_entries stream=bit_rate -of default=noprint_wrappers=1:nokey=1 "$1"`
+ffmpeg -fflags +genpts -i "$1" -map_metadata -1 -c:a aac -c:v h264_videotoolbox -b:v $bv "${1%.*}.mp4"
