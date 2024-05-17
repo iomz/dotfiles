@@ -53,6 +53,7 @@ keymap('n', '<leader>bn', ':bnext<CR>', { noremap = true })
 keymap('n', '<leader>bd', ':bdelete<CR>', { noremap = true })
 --keymap('n', '<leader>gn', ':lnext<CR>', { noremap = true })
 --keymap('n', '<leader>gp', ':lprevious<CR>', { noremap = true })
+keymap('n', '<leader>S', '<cmd>lua require("spectre").toggle()<CR>', { noremap = true })
 -- open tig with current file
 keymap('n', '<leader>T', ':TigOpenCurrentFile<CR>', { noremap = true })
 -- open tig with Project root path

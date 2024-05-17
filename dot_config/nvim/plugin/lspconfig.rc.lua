@@ -30,7 +30,7 @@ mason_lspconfig.setup({
         "ruff_lsp",      -- python
         "rust_analyzer", -- rust
         "tsserver",      -- typescript
-        --"yamlls",        -- yaml
+        "yamlls",        -- yaml
     },
 })
 

@@ -82,13 +82,13 @@ return {
             'williamboman/mason-lspconfig.nvim' -- mason-lspconfig
         }
     },                                          --
-    -- mason-null-ls: ensure null-ls installations
+    -- mason-null-ls: ensure none-ls(null-ls) installations
     {
         "jay-babu/mason-null-ls.nvim",
         event = { "BufReadPre", "BufNewFile" },
         dependencies = {
             "williamboman/mason.nvim",
-            "jose-elias-alvarez/null-ls.nvim",
+            "nvimtools/none-ls.nvim",
         }
     },
     -- matchparen
@@ -125,7 +125,7 @@ return {
         -- config = function() vim.cmd [[colorscheme carbonfox]] end
     },
     -- inject LSP diagnostics, code actions, and more via Lua
-    { 'jose-elias-alvarez/null-ls.nvim' },
+    { 'nvimtools/none-ls.nvim' },
     -- autopair: https://github.com/windwp/nvim-autopairs
     --'windwp/nvim-autopairs',
     -- base16
@@ -157,6 +157,20 @@ return {
     --    'theHamsta/nvim-dap-virtual-text',
     --  }
     -- },
+    -- nvim-spectre: find the enemy and replace them with dark power
+    {
+        'nvim-pack/nvim-spectre',
+        config = function()
+            require('spectre').setup({
+                is_block_ui_break = true,
+                -- default = {
+                --     replace = {
+                --         cmd = "sed"
+                --     }
+                -- }
+            })
+        end
+    },
     -- nvim-treesitter
     {
         'nvim-treesitter/nvim-treesitter',
@@ -181,7 +195,6 @@ return {
     -- telescope
     {
         'nvim-telescope/telescope.nvim',
-        tag = '0.1.1',
         dependencies = {
             -- telescope fzf
             { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
