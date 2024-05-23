@@ -103,7 +103,7 @@ set-option -g status-right-length 90
 set-option -g status-left '#{?client_prefix,🔥,} #[fg=cyan]#H:[#P]'
 
 # Contents right
-set-option -g status-right '#[fg=red]#(~/bin/usdjpy) #[fg=white]| #(~/bin/wifi) | 🔋 #(~/bin/battery --tmux) #[default][%a %m-%d-%Y %H:%M:%S]'
+set-option -g status-right '#[fg=white]| #(~/bin/emoji) | 🔋 #(~/bin/battery --tmux) #[default][%a %m-%d-%Y %H:%M:%S]'
 
 # Reload statusbar
 set-option -g status-interval 1
