@@ -56,6 +56,8 @@ def main():
             print(f"file '{p.absolute()}'", file=f)
 
     filename = lst[0].name.strip(".mp4") + "-out.mp4"
+    if filename.startswith("-"):
+        filename = filename[1:]
 
     subprocess.run(
         [

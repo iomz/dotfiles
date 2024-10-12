@@ -29,7 +29,6 @@ mason_lspconfig.setup({
         "pylsp",         -- python
         "ruff_lsp",      -- python
         "rust_analyzer", -- rust
-        "tsserver",      -- typescript
         "yamlls",        -- yaml
     },
 })
@@ -201,12 +200,6 @@ mason_lspconfig.setup_handlers({
     --        on_attach = on_attach
     --    }))
     --end,
-    -- ts
-    ["tsserver"] = function()
-        lspconfig.tsserver.setup(coq.lsp_ensure_capabilities({
-            on_attach = on_attach,
-        }))
-    end,
     -- yaml
     --["yamlls"] = function()
     --    lspconfig.yamlls.setup(coq.lsp_ensure_capabilities({

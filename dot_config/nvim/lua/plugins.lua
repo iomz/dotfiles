@@ -117,6 +117,19 @@ return {
     -- 'folke/neodev.nvim',
     -- neoterm: access terminal with :T
     -- 'kassio/neoterm',
+    -- neotest
+    {
+        'nvim-neotest/neotest',
+        dependencies = {
+            'nvim-neotest/nvim-nio',
+            'nvim-lua/plenary.nvim',
+            'antoinemadec/FixCursorHold.nvim',
+            'nvim-treesitter/nvim-treesitter'
+        },
+    },
+    'nvim-neotest/neotest-python',
+    'nvim-neotest/neotest-plenary',
+    'nvim-neotest/neotest-vim-test',
     -- nerdtree: filesystem explorer
     'scrooloose/nerdtree',
     -- nightfox colorshceme
@@ -148,6 +161,11 @@ return {
     {
         'norcalli/nvim-colorizer.lua',
         config = function() require('colorizer').setup({ '*' }) end
+    },
+    -- display coverage informaion
+    {
+        'andythigpen/nvim-coverage',
+        config = function() require("coverage").setup() end
     },
     -- nvim-dap: debug adapter protocol client
     -- {
@@ -183,7 +201,7 @@ return {
         dependencies = { 'nvim-treesitter/nvim-treesitter-context' }
     },
     -- nvim tree-sitter autotag
-    { 'windwp/nvim-ts-autotag',         event = 'InsertEnter' },
+    { 'windwp/nvim-ts-autotag',     event = 'InsertEnter' },
     -- <-> vim-devicons
     { 'nvim-tree/nvim-web-devicons' },
     -- plenary: a Lua module for asynchronous programming using coroutines
