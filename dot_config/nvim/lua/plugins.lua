@@ -108,6 +108,11 @@ return {
         'wfxr/minimap.vim',
         build = 'cargo install --locked code-minimap'
     },
+    -- mini.icons
+    {
+        'echasnovski/mini.icons',
+        version = '*'
+    },
     -- molokai colorscheme
     {
         'tomasr/molokai'
@@ -165,7 +170,7 @@ return {
     -- display coverage informaion
     {
         'andythigpen/nvim-coverage',
-        config = function() require("coverage").setup() end
+        dependencies = { "nvim-lua/plenary.nvim" }
     },
     -- nvim-dap: debug adapter protocol client
     -- {
