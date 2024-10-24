@@ -33,7 +33,7 @@ else
         @x-motemen/ghq \
         @sharkdp/hyperfine \
         lbin'!nvim' \
-        ver'nightly' \
+        ver'v0.10.2' \
         @neovim/neovim \
         lbin'!rg' \
         @BurntSushi/ripgrep \
