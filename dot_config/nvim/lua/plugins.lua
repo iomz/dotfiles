@@ -50,6 +50,21 @@ return {
         dependencies = { 'nvim-lua/plenary.nvim' },
         config = function() require('gitsigns').setup() end
     },
+    -- go
+    {
+        "ray-x/go.nvim",
+        dependencies = { -- optional packages
+            "ray-x/guihua.lua",
+            "neovim/nvim-lspconfig",
+            "nvim-treesitter/nvim-treesitter",
+        },
+        config = function()
+            require("go").setup()
+        end,
+        event = { "CmdlineEnter" },
+        ft = { "go", 'gomod' },
+        build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+    },
     -- just another quick run
     "is0n/jaq-nvim",
     -- lazygit
@@ -167,11 +182,6 @@ return {
         'norcalli/nvim-colorizer.lua',
         config = function() require('colorizer').setup({ '*' }) end
     },
-    -- display coverage informaion
-    {
-        'andythigpen/nvim-coverage',
-        dependencies = { "nvim-lua/plenary.nvim" }
-    },
     -- nvim-dap: debug adapter protocol client
     -- {
     --  'mfussenegger/nvim-dap',
@@ -244,6 +254,12 @@ return {
     -- <-> nvim-web-devicons
     -- 'ryanoasis/vim-devicons',
     -- vim-easy-align: align with ga
+    -- show test coveragee
+    -- {
+    --     'google/vim-coverage',
+    --     dependencies = { 'google/vim-maktaba', 'google/vim-glaive' },
+    --     build = ':call glaive#Install()',
+    -- },
     'junegunn/vim-easy-align',
     -- dispatch compiler plugins
     {

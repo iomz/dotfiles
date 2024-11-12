@@ -84,3 +84,13 @@ vim.api.nvim_create_autocmd("TextYankPost", {
         vim.highlight.on_yank({ higroup = "Visual", timeout = 1000 })
     end
 })
+
+-- file-specific tab spaces
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = { "*.js", "*.jsx", "*.mjs" },
+    callback = function()
+        vim.opt.tabstop = 2
+        vim.opt.shiftwidth = 2
+        vim.opt.softtabstop = 2
+    end
+})

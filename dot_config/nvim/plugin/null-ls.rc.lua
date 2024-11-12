@@ -16,16 +16,16 @@ if (not mason_null_ls_status) then return end
 mason_null_ls.setup({
     automatic_setup = true,
     ensure_installed = {
-        "beautysh",      -- bash/zsh
-        "black",         -- python
-        "clang_format",  -- c++
+        "beautysh",     -- bash/zsh
+        "black",        -- python
+        "clang_format", -- c++
         -- "eslint_d",      -- eslint_d
-        "golangci_lint", -- go
-        "golines",       -- go
-        "prettierd",     -- web
-        "vale",          -- latex
-        "yamlfmt",       -- yaml
-        "xmlformat",     -- xml
+        -- "golangci_lint", -- go
+        -- "golines",       -- go
+        "prettierd", -- web
+        "vale",      -- latex
+        "yamlfmt",   -- yaml
+        "xmlformat", -- xml
     }
 })
 
@@ -37,7 +37,7 @@ null_ls.setup({
         --null_ls.builtins.diagnostics.eslint_d.with({
         --    diagnostics_format = '[eslint_d] #{m}\n(#{c})'
         --}),                                         -- eslint_d
-        null_ls.builtins.diagnostics.golangci_lint, -- go
+        -- null_ls.builtins.diagnostics.golangci_lint, -- go
         null_ls.builtins.diagnostics.vale.with({
             filetypes = { "tex" },
         }),                               -- latex
@@ -49,10 +49,10 @@ null_ls.setup({
             extra_args = { "--line-length=120" }
         }),
         null_ls.builtins.formatting.clang_format, -- c++
-        null_ls.builtins.formatting.golines,      -- go
+        --null_ls.builtins.formatting.golines,      -- go
         --null_ls.builtins.formatting.latexindent,  -- latex
-        null_ls.builtins.formatting.prettierd,    -- web
-        null_ls.builtins.formatting.yamlfmt,      -- yaml
+        null_ls.builtins.formatting.prettierd, -- web
+        null_ls.builtins.formatting.yamlfmt,   -- yaml
         --null_ls.builtins.formatting.beautysh,    -- bash/zsh
         --null_ls.builtins.formatting.xmlformat,    -- xml
     },

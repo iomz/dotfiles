@@ -46,6 +46,14 @@ local enable_format_on_save = function(_, bufnr)
         callback = function() vim.lsp.buf.format({ bufnr = bufnr }) end
     })
 end
+local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.go",
+    callback = function()
+        require('go.format').goimports()
+    end,
+    group = format_sync_grp,
+})
 
 -- See: https://github.com/neovim/nvim-lspconfig/tree/54eb2a070a4f389b1be0f98070f81d23e2b1a715#suggested-configuration
 local keymap = vim.keymap.set
