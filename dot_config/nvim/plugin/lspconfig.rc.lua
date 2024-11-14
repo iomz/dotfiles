@@ -20,10 +20,7 @@ if (not mason_lspconfig_status) then return end
 mason_lspconfig.setup({
     automatic_installation = true,
     ensure_installed = {
-        "cssls",         -- css
-        "tailwindcss",   -- css
         "dockerls",      -- docker
-        "gopls",         -- go
         "lua_ls",        -- lua
         "marksman",      -- markdown
         "pylsp",         -- python
@@ -89,12 +86,6 @@ end
 mason_lspconfig.setup_handlers({
     function(server)
         lspconfig[server].setup(coq.lsp_ensure_capabilities({
-            on_attach = on_attach
-        }))
-    end,
-    -- css
-    ["cssls"] = function()
-        lspconfig.cssls.setup(coq.lsp_ensure_capabilities({
             on_attach = on_attach
         }))
     end,

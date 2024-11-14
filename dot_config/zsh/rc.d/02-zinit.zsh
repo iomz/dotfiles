@@ -97,7 +97,7 @@ zinit id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods',
 # }}}
 
 
-# zeno.zsh {{{
+## zeno.zsh {{{
 if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     zinit lucid depth'1' blockf for \
         @yuki-yano/zeno.zsh
@@ -112,7 +112,7 @@ zinit light-mode for \
     atinit'bindkey -M vicmd "^v" edit-command-line' \
     @softmoth/zsh-vim-mode \
     as'null' \
-    lbin'!build/zsd*' \
+    lbin'!build/zsd-*' \
     make'--always-make' \
     @zdharma-continuum/zshelldoc \
     atclone'./build.zsh' \

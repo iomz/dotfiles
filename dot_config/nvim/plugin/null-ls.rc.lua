@@ -16,16 +16,15 @@ if (not mason_null_ls_status) then return end
 mason_null_ls.setup({
     automatic_setup = true,
     ensure_installed = {
-        "beautysh",     -- bash/zsh
-        "black",        -- python
-        "clang_format", -- c++
-        -- "eslint_d",      -- eslint_d
-        -- "golangci_lint", -- go
-        -- "golines",       -- go
-        "prettierd", -- web
-        "vale",      -- latex
-        "yamlfmt",   -- yaml
-        "xmlformat", -- xml
+        "beautysh",                    -- bash/zsh
+        "black",                       -- python
+        "clang_format",                -- c++
+        "golines",                     -- go
+        "prettierd",                   -- web
+        "tailwindcss-language-server", -- css
+        "vale",                        -- latex
+        "yamlfmt",                     -- yaml
+        "xmlformat",                   -- xml
     }
 })
 

@@ -28,16 +28,16 @@ bindkey "$terminfo[kcbt]" reverse-menu-complete
 # edit command line with $EDITOR
 autoload -Uz edit-command-line
 zle -N edit-command-line
-bindkey '^XE'  edit-command-line
-bindkey '^X^E' edit-command-line
+bindkey '^xe'  edit-command-line
+bindkey '^x^e' edit-command-line
 
 # emoji-cli
 zle -N emoji::cli
-bindkey '^H' emoji::cli
+bindkey '^h' emoji::cli
 
 # open nvim with fzf
 # The -s flag to bindkey specifies that you are binding the key to a string, not a command.
-bindkey -s '^O' '$EDITOR $(fzf)^J'
+bindkey -s '^o' '$EDITOR $(fzf)^J'
 
 # menu select
 #bindkey -M menuselect '^H' undo
@@ -52,14 +52,14 @@ bindkey -s '^O' '$EDITOR $(fzf)^J'
 if [[ -n $ZENO_LOADED ]]; then
     bindkey -M isearch ' ' self-insert
     bindkey ' ' zeno-auto-snippet
-    bindkey '^I' zeno-completion
-    bindkey '^G' zeno-ghq-cd # switch ghq dir
-    bindkey '^M' zeno-auto-snippet-and-accept-line
-    #bindkey '^R' zeno-history-selection # search history
-    bindkey '^S' zeno-insert-snippet # search snippets
-    #bindkey '^X ' zeno-insert-space # insert space
-    #bindkey '^X^M' accept-line
-    bindkey '^Xz' zeno-toggle-auto-snippet
+    bindkey '^i' zeno-completion
+    bindkey '^g' zeno-ghq-cd # switch ghq dir
+    bindkey '^m' zeno-auto-snippet-and-accept-line
+    #bindkey '^r' zeno-history-selection # search history
+    bindkey '^s' zeno-insert-snippet # search snippets
+    #bindkey '^x ' zeno-insert-space # insert space
+    #bindkey '^x^m' accept-line
+    bindkey '^xz' zeno-toggle-auto-snippet
 fi
 # }}}
 

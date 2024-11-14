@@ -87,7 +87,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 -- file-specific tab spaces
 vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = { "*.js", "*.jsx", "*.mjs" },
+    pattern = { "*.js", "*.jsx", "*.mjs", "*.ts", "*.tsx" },
     callback = function()
         vim.opt.tabstop = 2
         vim.opt.shiftwidth = 2
