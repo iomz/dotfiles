@@ -97,7 +97,7 @@ keymap('n', '-', '<C-x>', { noremap = true })
 --       {noremap = true})
 
 -- Visual and Select mode
-keymap('v', '<Enter>', ':EasyAlign<CR>', { noremap = true })
+-- keymap('v', '<Enter>', ':EasyAlign<CR>', { noremap = true })
 
 --
 -- Visual mode
