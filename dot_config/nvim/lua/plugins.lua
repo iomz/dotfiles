@@ -66,7 +66,9 @@ return {
         build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
     },
     -- just another quick run
-    "is0n/jaq-nvim",
+    {
+        "is0n/jaq-nvim",
+    },
     -- lazygit
     {
         "iomz/lazygit.nvim",
