@@ -2,6 +2,11 @@
 -- plugins for lazy.vim
 --
 return {
+    -- autoclose; auto pairs & close brackets
+    {
+        'm4xshen/autoclose.nvim',
+        config = function() require('autoclose').setup() end
+    },
     -- bclose: for tig-explorer
     'rbgrouleff/bclose.vim',
     -- snazzy buffer line
@@ -66,9 +71,7 @@ return {
         build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
     },
     -- just another quick run
-    {
-        "is0n/jaq-nvim",
-    },
+    "is0n/jaq-nvim",
     -- lazygit
     {
         "iomz/lazygit.nvim",
@@ -218,9 +221,12 @@ return {
         dependencies = { 'nvim-treesitter/nvim-treesitter-context' }
     },
     -- nvim tree-sitter autotag
-    { 'windwp/nvim-ts-autotag',     event = 'InsertEnter' },
+    {
+        'windwp/nvim-ts-autotag',
+        event = 'InsertEnter'
+    },
     -- <-> vim-devicons
-    { 'nvim-tree/nvim-web-devicons' },
+    'nvim-tree/nvim-web-devicons',
     -- plenary: a Lua module for asynchronous programming using coroutines
     'nvim-lua/plenary.nvim',
     -- sonictemplate: quick template with :Template
@@ -323,11 +329,12 @@ return {
     -- vim-trailing-whitespace: mark trailing whitespace
     'bronson/vim-trailing-whitespace',
     -- vimproc
-    { 'Shougo/vimproc.vim', build = 'make' },
-    -- wakatime
     {
-        'wakatime/vim-wakatime',
+        'Shougo/vimproc.vim',
+        build = 'make'
     },
+    -- wakatime
+    'wakatime/vim-wakatime',
     -- which-key popup
     {
         'folke/which-key.nvim',
