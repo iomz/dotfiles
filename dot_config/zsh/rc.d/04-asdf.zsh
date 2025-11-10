@@ -3,15 +3,18 @@
 # asdf
 #
 
-export ASDF_DIR=$HOME/.asdf
-if [[ ! -d "${ASDF_DIR}" ]]; then
-    git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} --branch v0.11.3
+export ASDF_DATA_DIR="${XDG_DATA_HOME}/asdf"
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+
+if [[ ! -d "${ASDF_DATA_DIR:-$HOME/.asdf}/completions" ]]; then
+    mkdir -p "${ASDF_DATA_DIR:-$HOME/.asdf}/completions"
+    asdf completion zsh > "${ASDF_DATA_DIR:-$HOME/.asdf}/completions/_asdf"
 fi
 
-. "${ASDF_DIR}/asdf.sh"
-
 # append completions to fpath
-fpath=(${ASDF_DIR}/completions $fpath)
+fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+# initialise completions with ZSH's compinit
+autoload -Uz compinit && compinit
 
 # install dependencies for plugins
 # TODO: this seems wrong

@@ -36,9 +36,9 @@ Other runtime (e.g, Deno and Rust) is taken cared in`~/.zshenv`.
 for i in golang lua nodejs python; do
     IFS=","; set -- $i;
     lang=$1; repo=$2;
-    asdf plugin-add $lang $repo && \
+    asdf plugin add $lang $repo && \
         asdf install $lang latest && \
-        asdf global $lang latest;
+        asdf set -u $lang latest;
 done
 ```
 
@@ -55,9 +55,9 @@ npm i -g neovim
 for i in pnpm poetry; do
     IFS=","; set -- $i;
     lang=$1; repo=$2;
-    asdf plugin-add $lang $repo && \
+    asdf plugin add $lang $repo && \
         asdf install $lang latest && \
-        asdf global $lang latest;
+        asdf set -u $lang latest;
 done
 ```
 

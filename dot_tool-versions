@@ -1,6 +1,7 @@
-python 3.12.7
-nodejs 23.0.0
+python 3.14.0t
+nodejs 25.1.0
 ruby 3.2.2
-golang 1.24.3
-poetry 1.8.3
-pnpm 9.12.2
+golang 1.25.4
+poetry 2.2.1
+pnpm 10.21.0
+lua 5.4.7
