@@ -24,8 +24,9 @@ mason_lspconfig.setup({
         "lua_ls",        -- lua
         "marksman",      -- markdown
         "pylsp",         -- python
-        "ruff_lsp",      -- python
+        "ruff",          -- python
         "rust_analyzer", -- rust
+        "ts_ls",         -- typescript
         "yamlls",        -- yaml
     },
 })
