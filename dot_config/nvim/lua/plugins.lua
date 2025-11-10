@@ -83,6 +83,31 @@ return {
         'akinsho/bufferline.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' }
     },
+    -- blink.cmp: modern completion engine
+    {
+        'Saghen/blink.cmp',
+        version = '1.*',
+        event = { 'InsertEnter', 'CmdlineEnter' },
+        dependencies = {
+            'rafamadriz/friendly-snippets',
+        },
+        opts = {
+            keymap = { preset = 'super-tab' },
+            appearance = {
+                nerd_font_variant = 'mono',
+            },
+            completion = {
+                documentation = { auto_show = false },
+            },
+            sources = {
+                default = { 'lsp', 'path', 'snippets', 'buffer' },
+            },
+            fuzzy = {
+                implementation = 'prefer_rust_with_warning',
+            },
+        },
+        opts_extend = { 'sources.default' },
+    },
     -- {
     --     "olimorris/codecompanion.nvim",
     --     dependencies = {
@@ -106,26 +131,6 @@ return {
     --},
     -- coplilot
     -- 'github/copilot.vim',
-    -- coq_nvim: another coc
-    {
-        'ms-jpq/coq_nvim',
-        branch = 'coq',
-        build = function()
-            vim.cmd [[:COQdeps]]
-        end,
-        dependencies = { 'neovim/nvim-lspconfig' }
-    },
-    -- 9000+ Snippets
-    {
-        'ms-jpq/coq.artifacts',
-        branch = 'artifacts'
-    },
-    -- lua & third party sources -- See https://github.com/ms-jpq/coq.thirdparty
-    {
-        'ms-jpq/coq.thirdparty',
-        branch = '3p',
-        config = function() require('coq_3p') end
-    },
     -- turn browsers into nvim clients
     {
         'glacambre/firenvim',
@@ -180,8 +185,8 @@ return {
         'williamboman/mason.nvim',
         build = function() require('mason.api.command').MasonUpdate() end,
         dependencies = {
+            'williamboman/mason-lspconfig.nvim',-- mason-lspconfig
             'neovim/nvim-lspconfig',            -- nvim-lspconfig
-            'williamboman/mason-lspconfig.nvim' -- mason-lspconfig
         }
     },                                          --
     -- mason-null-ls: ensure none-ls(null-ls) installations
@@ -198,10 +203,9 @@ return {
         'monkoose/matchparen.nvim',
         config = function()
             require('matchparen').setup({
-                on_startup = true,           -- Should it be enabled by default
-                hl_group = 'MatchParen',     -- highlight group of the matched brackets
-                augroup_name = 'matchparen', -- almost no reason to touch this unless there is already augroup with such name
-                debounce_time = 0,           -- debounce time in milliseconds for rehighlighting of brackets.
+                enabled = true,           -- enable plugin on startup
+                hl_group = 'MatchParen',  -- highlight group of the matched brackets
+                debounce_time = 0,        -- debounce time in milliseconds for rehighlighting of brackets
             })
         end,
     },

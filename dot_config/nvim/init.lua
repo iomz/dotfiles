@@ -7,18 +7,6 @@
 -- =============================================================
 -- Initialization
 vim.cmd("autocmd!")
-vim.g.coq_settings = {
-    auto_start = 'shut-up',
-    clients = {
-        lsp = {
-            enabled = true,
-        },
-        tree_sitter = {
-            enabled = true,
-            weight_adjust = 1.0
-        },
-    },
-}
 vim.g.loaded_matchparen = 1 -- disable the built-in for Matchparen.nvim
 vim.g.loaded_perl_provider = 0
 vim.g.mapleader = ' '       -- Remap space as leader key
