@@ -45,7 +45,8 @@ local function on_attach(client, bufnr)
 
     -- format on save (clear only this buffer's autocmds)
     -- Skip for Go files since they have their own goimports formatter
-    if vim.bo[bufnr].filetype ~= "go" then
+    local ft = vim.bo[bufnr].filetype
+    if not vim.tbl_contains({ "go", "gomod" }, ft) then
         vim.api.nvim_clear_autocmds({ group = format_augroup, buffer = bufnr })
         vim.api.nvim_create_autocmd("BufWritePre", {
             group = format_augroup,
@@ -203,7 +204,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         local ft = vim.bo[bufnr].filetype
 
         -- Only handle TypeScript/JavaScript files
-        if not vim.tbl_contains({ "typescript", "typescript.tsx", "typescriptreact", "javascript", "javascript.jsx", "javascriptreact" }, ft) then
+        if not vim.tbl_contains({ "typescript", "typescriptreact", "javascript", "javascriptreact" }, ft) then
             return
         end
 
@@ -305,7 +306,7 @@ protocol.CompletionItemKind = {
 -- First, set the allowed server flag on FileType (before LSP servers start)
 -- This autocmd is defined first so it runs before the one below that starts LSP servers
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "typescript", "typescript.tsx", "typescriptreact", "javascript", "javascript.jsx", "javascriptreact" },
+    pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
         local fname = vim.api.nvim_buf_get_name(bufnr)
@@ -332,28 +333,19 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- Then, start the appropriate LSP server
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "typescript", "typescript.tsx", "typescriptreact", "javascript", "javascript.jsx", "javascriptreact" },
+    pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
         local fname = vim.api.nvim_buf_get_name(bufnr)
+        local allowed = _G.allowed_ts_server[bufnr]
 
-        -- Check which project type
-        local is_deno = root_pattern("deno.json", "deno.jsonc")(fname)
-        local is_node = root_pattern(
-            'package.json',
-            'package-lock.json',
-            'pnpm-lock.yaml',
-            'yarn.lock',
-            'bun.lockb',
-            'node_modules'
-        )(fname)
-
-        if is_deno and not is_node then
+        if allowed == "denols" then
             -- Start denols
+            local root_dir = root_pattern("deno.json", "deno.jsonc")(fname)
             vim.lsp.start({
                 name = "denols",
                 cmd = { "deno", "lsp" },
-                root_dir = is_deno,
+                root_dir = root_dir,
                 capabilities = capabilities,
                 on_attach = on_attach,
                 settings = {
@@ -375,12 +367,20 @@ vim.api.nvim_create_autocmd("FileType", {
                     unstable = true,
                 },
             })
-        elseif is_node and not is_deno then
+        elseif allowed == "ts_ls" then
             -- Start ts_ls
+            local root_dir = root_pattern(
+                'package.json',
+                'package-lock.json',
+                'pnpm-lock.yaml',
+                'yarn.lock',
+                'bun.lockb',
+                'node_modules'
+            )(fname)
             vim.lsp.start({
                 name = "ts_ls",
                 cmd = { "typescript-language-server", "--stdio" },
-                root_dir = is_node,
+                root_dir = root_dir,
                 capabilities = capabilities,
                 on_attach = on_attach,
                 init_options = {
