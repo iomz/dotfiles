@@ -44,14 +44,17 @@ local function on_attach(client, bufnr)
     end, bufopts)
 
     -- format on save (clear only this buffer's autocmds)
-    vim.api.nvim_clear_autocmds({ group = format_augroup, buffer = bufnr })
-    vim.api.nvim_create_autocmd("BufWritePre", {
-        group = format_augroup,
-        buffer = bufnr,
-        callback = function()
-            vim.lsp.buf.format({ bufnr = bufnr, async = false })
-        end
-    })
+    -- Skip for Go files since they have their own goimports formatter
+    if vim.bo[bufnr].filetype ~= "go" then
+        vim.api.nvim_clear_autocmds({ group = format_augroup, buffer = bufnr })
+        vim.api.nvim_create_autocmd("BufWritePre", {
+            group = format_augroup,
+            buffer = bufnr,
+            callback = function()
+                vim.lsp.buf.format({ bufnr = bufnr, async = false })
+            end
+        })
+    end
 end
 
 mason_lspconfig.setup({
@@ -181,6 +184,14 @@ vim.lsp.enable({ 'gopls', 'lua_ls', 'pylsp', 'ruff', 'dockerls', 'marksman', 'ru
 -- Global flag to track which server should be allowed per buffer
 _G.allowed_ts_server = {}
 
+-- Clean up the table when buffers are deleted to prevent memory leaks
+vim.api.nvim_create_autocmd("BufDelete", {
+    callback = function(args)
+        -- Clean up any buffer that might have been in the table
+        _G.allowed_ts_server[args.buf] = nil
+    end,
+})
+
 -- Kill unwanted LSP servers immediately on attach
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(args)
@@ -192,7 +203,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         local ft = vim.bo[bufnr].filetype
 
         -- Only handle TypeScript/JavaScript files
-        if not vim.tbl_contains({ "typescript", "typescriptreact", "javascript", "javascriptreact" }, ft) then
+        if not vim.tbl_contains({ "typescript", "typescript.tsx", "typescriptreact", "javascript", "javascript.jsx", "javascriptreact" }, ft) then
             return
         end
 
@@ -291,9 +302,10 @@ protocol.CompletionItemKind = {
 -- ts_ls and denols with mutual exclusion via autocommands
 -- This must be at the end after on_attach is defined
 
--- First, set the allowed server flag EARLY (on BufReadPost/BufNewFile, before FileType)
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-    pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+-- First, set the allowed server flag on FileType (before LSP servers start)
+-- This autocmd is defined first so it runs before the one below that starts LSP servers
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "typescript", "typescript.tsx", "typescriptreact", "javascript", "javascript.jsx", "javascriptreact" },
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
         local fname = vim.api.nvim_buf_get_name(bufnr)
@@ -320,7 +332,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 
 -- Then, start the appropriate LSP server
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+    pattern = { "typescript", "typescript.tsx", "typescriptreact", "javascript", "javascript.jsx", "javascriptreact" },
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
         local fname = vim.api.nvim_buf_get_name(bufnr)
