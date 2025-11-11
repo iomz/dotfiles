@@ -19,7 +19,38 @@ local blink_status, blink = pcall(require, "blink.cmp")
 if (not blink_status) then return end
 
 local capabilities = blink.get_lsp_capabilities()
-local on_attach
+
+-- Function executed when the LSP server startup
+local function on_attach(client, bufnr)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+    -- Mappings (mostly replaced by lspsaga)
+    local keymap = vim.keymap.set
+    local bufopts = { noremap = true, silent = true, buffer = bufnr }
+    ---- See `:help vim.lsp.*` for documentation on any of the below functions
+    keymap('n', '<leader>gD', "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
+    keymap('n', '<leader>gi', "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
+    keymap('n', '<leader>gr', "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
+    --keymap('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
+    keymap('n', '<leader>gf', '<cmd>lua vim.lsp.buf.format()<CR>', bufopts)
+    keymap('n', '<leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
+    keymap('n', '<leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
+    keymap('n', '<leader>gwl', function()
+        print(vim.inspect(vim.lsp.buf.list_workleader_folders()))
+    end, bufopts)
+
+    -- format on save
+    local augroup_format = vim.api.nvim_create_augroup("Format", { clear = true })
+    vim.api.nvim_clear_autocmds({ group = augroup_format, buffer = bufnr })
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        group = augroup_format,
+        buffer = bufnr,
+        callback = function()
+            vim.lsp.buf.format({ bufnr = bufnr, async = false })
+        end
+    })
+end
 
 mason_lspconfig.setup({
     automatic_installation = true,
@@ -60,6 +91,7 @@ vim.lsp.config('gopls', {
     filetypes = { "go", "gomod" },
     root_markers = { "go.work", "go.mod", ".git" },
     capabilities = capabilities,
+    on_attach = on_attach,
     settings = {
         gopls = {
             analyses = {
@@ -75,6 +107,7 @@ vim.lsp.config('lua_ls', {
     filetypes = { "lua" },
     root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" },
     capabilities = capabilities,
+    on_attach = on_attach,
     settings = {
         Lua = {
             runtime = {
@@ -99,6 +132,7 @@ vim.lsp.config('pylsp', {
     filetypes = { "python" },
     root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
     capabilities = capabilities,
+    on_attach = on_attach,
     settings = {
         pylsp = {
             plugins = {
@@ -131,6 +165,7 @@ local simple_servers = {
 for _, server in ipairs(simple_servers) do
     vim.lsp.config(server, {
         capabilities = capabilities,
+        on_attach = on_attach,
     })
 end
 
@@ -169,18 +204,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end,
 })
 
--- format on save
-local augroup_format = vim.api.nvim_create_augroup("Format", { clear = true })
-local enable_format_on_save = function(_, bufnr)
-    vim.api.nvim_clear_autocmds({ group = augroup_format, buffer = bufnr })
-    vim.api.nvim_create_autocmd("BufWritePre", {
-        group = augroup_format,
-        buffer = bufnr,
-        callback = function()
-            vim.lsp.buf.format({ bufnr = bufnr, async = false })
-        end
-    })
-end
+-- Go-specific format on save (in addition to LSP formatting)
 local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
 vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*.go",
@@ -197,30 +221,6 @@ keymap('n', '[d', "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
 keymap('n', ']d', "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
 keymap('n', '<leader>e', "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
 keymap('n', '<leader>q', "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
-
--- Function executed when the LSP server startup
-on_attach = function(client, bufnr)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-    -- Mappings (mostly replaced by lspsaga)
-    local bufopts = { noremap = true, silent = true, buffer = bufnr }
-    ---- See `:help vim.lsp.*` for documentation on any of the below functions
-    keymap('n', '<leader>gD', "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
-    keymap('n', '<leader>gi', "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
-    keymap('n', '<leader>gr', "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
-    --keymap('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
-    keymap('n', '<leader>gf', '<cmd>lua vim.lsp.buf.format()<CR>', bufopts)
-    keymap('n', '<leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
-    keymap('n', '<leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
-    keymap('n', '<leader>gwl', function()
-        print(vim.inspect(vim.lsp.buf.list_workleader_folders()))
-    end, bufopts)
-
-    -- format
-    enable_format_on_save(client, bufnr)
-end
-
 
 -- on_publish_diagnostics
 vim.lsp.handlers["textDocument/publishDiagnostics"] =
