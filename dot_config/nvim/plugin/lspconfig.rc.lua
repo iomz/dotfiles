@@ -20,6 +20,9 @@ if (not blink_status) then return end
 
 local capabilities = blink.get_lsp_capabilities()
 
+-- Create format augroup once at module level
+local format_augroup = vim.api.nvim_create_augroup("Format", { clear = true })
+
 -- Function executed when the LSP server startup
 local function on_attach(client, bufnr)
     -- Enable completion triggered by <c-x><c-o>
@@ -37,14 +40,13 @@ local function on_attach(client, bufnr)
     keymap('n', '<leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
     keymap('n', '<leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
     keymap('n', '<leader>gwl', function()
-        print(vim.inspect(vim.lsp.buf.list_workleader_folders()))
+        print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, bufopts)
 
-    -- format on save
-    local augroup_format = vim.api.nvim_create_augroup("Format", { clear = true })
-    vim.api.nvim_clear_autocmds({ group = augroup_format, buffer = bufnr })
+    -- format on save (clear only this buffer's autocmds)
+    vim.api.nvim_clear_autocmds({ group = format_augroup, buffer = bufnr })
     vim.api.nvim_create_autocmd("BufWritePre", {
-        group = augroup_format,
+        group = format_augroup,
         buffer = bufnr,
         callback = function()
             vim.lsp.buf.format({ bufnr = bufnr, async = false })
@@ -56,21 +58,21 @@ mason_lspconfig.setup({
     automatic_installation = true,
     ensure_installed = {
         "dockerls",      -- docker
-        "denols",     -- manual setup below
+        "denols",        -- manual setup below
         "eslint",        -- eslint
         "lua_ls",        -- lua
         "marksman",      -- markdown
         "pylsp",         -- python
         "ruff",          -- python
         "rust_analyzer", -- rust
-        "ts_ls",      -- manual setup below
+        "ts_ls",         -- manual setup below
         "yamlls",        -- yaml
     },
 })
 
 -- Helper to get root patterns
 local function root_pattern(...)
-    local patterns = {...}
+    local patterns = { ... }
     return function(fname)
         for _, pattern in ipairs(patterns) do
             local match = vim.fs.find(pattern, {
@@ -170,7 +172,8 @@ for _, server in ipairs(simple_servers) do
 end
 
 -- Enable all configured servers
-vim.lsp.enable({'gopls', 'lua_ls', 'pylsp', 'ruff', 'dockerls', 'marksman', 'rust_analyzer', 'yamlls', 'eslint', 'tailwindcss'})
+vim.lsp.enable({ 'gopls', 'lua_ls', 'pylsp', 'ruff', 'dockerls', 'marksman', 'rust_analyzer', 'yamlls', 'eslint',
+    'tailwindcss' })
 
 -- Note: ts_ls and denols are managed manually via autocommand below
 -- They will be started with vim.lsp.start() instead of vim.lsp.config
@@ -184,19 +187,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
         local bufnr = args.buf
         local client = vim.lsp.get_client_by_id(args.data.client_id)
         if not client then return end
-        
+
         local fname = vim.api.nvim_buf_get_name(bufnr)
         local ft = vim.bo[bufnr].filetype
-        
+
         -- Only handle TypeScript/JavaScript files
         if not vim.tbl_contains({ "typescript", "typescriptreact", "javascript", "javascriptreact" }, ft) then
             return
         end
-        
+
         local allowed = _G.allowed_ts_server[bufnr]
-        
-        if (client.name == "ts_ls" and allowed ~= "ts_ls") or 
-           (client.name == "denols" and allowed ~= "denols") then
+
+        if (client.name == "ts_ls" and allowed ~= "ts_ls") or
+            (client.name == "denols" and allowed ~= "denols") then
             vim.schedule(function()
                 client.stop()
             end)
@@ -288,13 +291,13 @@ protocol.CompletionItemKind = {
 -- ts_ls and denols with mutual exclusion via autocommands
 -- This must be at the end after on_attach is defined
 
--- First, set the allowed server flag EARLY (on BufReadPost, before FileType)
-vim.api.nvim_create_autocmd("BufReadPost", {
+-- First, set the allowed server flag EARLY (on BufReadPost/BufNewFile, before FileType)
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
     pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
         local fname = vim.api.nvim_buf_get_name(bufnr)
-        
+
         -- Check which project type
         local is_deno = root_pattern("deno.json", "deno.jsonc")(fname)
         local is_node = root_pattern(
@@ -305,7 +308,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
             'bun.lockb',
             'node_modules'
         )(fname)
-        
+
         -- Set the flag FIRST before any LSP servers start
         if is_deno and not is_node then
             _G.allowed_ts_server[bufnr] = "denols"
@@ -321,7 +324,7 @@ vim.api.nvim_create_autocmd("FileType", {
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
         local fname = vim.api.nvim_buf_get_name(bufnr)
-        
+
         -- Check which project type
         local is_deno = root_pattern("deno.json", "deno.jsonc")(fname)
         local is_node = root_pattern(
@@ -332,7 +335,7 @@ vim.api.nvim_create_autocmd("FileType", {
             'bun.lockb',
             'node_modules'
         )(fname)
-        
+
         if is_deno and not is_node then
             -- Start denols
             vim.lsp.start({
@@ -360,7 +363,6 @@ vim.api.nvim_create_autocmd("FileType", {
                     unstable = true,
                 },
             })
-            
         elseif is_node and not is_deno then
             -- Start ts_ls
             vim.lsp.start({
