@@ -90,6 +90,14 @@ return {
         event = { 'InsertEnter', 'CmdlineEnter' },
         dependencies = {
             'rafamadriz/friendly-snippets',
+            {
+                'L3MON4D3/LuaSnip',
+                version = 'v2.*',
+                build = 'make install_jsregexp',
+                config = function()
+                    require('luasnip.loaders.from_vscode').lazy_load()
+                end,
+            },
         },
         opts = {
             keymap = { preset = 'super-tab' },
@@ -97,7 +105,14 @@ return {
                 nerd_font_variant = 'mono',
             },
             completion = {
-                documentation = { auto_show = false },
+                documentation = { auto_show = true },
+                ghost_text = {
+                    enabled = true,
+                    show_with_menu = true,
+                },
+            },
+            snippets = {
+                preset = 'luasnip',
             },
             sources = {
                 default = { 'lsp', 'path', 'snippets', 'buffer' },
