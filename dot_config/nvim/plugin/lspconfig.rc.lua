@@ -1,6 +1,4 @@
 -- vim.lsp.set_log_level("debug")
-local status, lspconfig = pcall(require, "lspconfig")
-if (not status) then return end
 
 local mason_status, mason = pcall(require, "mason")
 if (not mason_status) then return end
@@ -21,141 +19,154 @@ local blink_status, blink = pcall(require, "blink.cmp")
 if (not blink_status) then return end
 
 local capabilities = blink.get_lsp_capabilities()
-
 local on_attach
-
-local function with_defaults(config)
-    return vim.tbl_deep_extend("force", {}, {
-        on_attach = on_attach,
-        capabilities = capabilities,
-    }, config or {})
-end
 
 mason_lspconfig.setup({
     automatic_installation = true,
     ensure_installed = {
         "dockerls",      -- docker
+        "denols",     -- manual setup below
+        "eslint",        -- eslint
         "lua_ls",        -- lua
         "marksman",      -- markdown
         "pylsp",         -- python
         "ruff",          -- python
         "rust_analyzer", -- rust
-        "ts_ls",         -- typescript
+        "ts_ls",      -- manual setup below
         "yamlls",        -- yaml
     },
-    handlers = {
-        function(server)
-            lspconfig[server].setup(with_defaults())
-        end,
-        ["tailwindcss"] = function()
-            lspconfig.tailwindcss.setup(with_defaults())
-        end,
-        -- go
-        ["gopls"] = function()
-            local util = require('lspconfig/util')
-            lspconfig.gopls.setup(with_defaults({
-                cmd = { "gopls", "serve" },
-                filetypes = { "go", "gomod" },
-                root_dir = util.root_pattern("go.work", "go.mod", ".git"),
-                settings = {
-                    gopls = {
-                        analyses = {
-                            unusedparams = true,
-                        },
-                        staticcheck = true,
-                    },
-                },
-            }))
-        end,
-        -- lua
-        ["lua_ls"] = function()
-            lspconfig.lua_ls.setup(with_defaults({
-                settings = {
-                    Lua = {
-                        runtime = {
-                            -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-                            version = 'LuaJIT',
-                        },
-                        diagnostics = {
-                            -- Get the language server to recognize the `vim` global
-                            globals = { 'exepath', 'vim' },
-                        },
-                        workspace = {
-                            -- Make the server aware of Neovim runtime files
-                            library = vim.api.nvim_get_runtime_file("", true),
-                            checkThirdParty = false
-                        },
-                        -- Do not send telemetry data containing a randomized but unique identifier
-                        telemetry = {
-                            enable = false,
-                        },
-                    },
-                },
-            }))
-        end,
-        -- python
-        -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#pylsp
-        ["pylsp"] = function()
-            lspconfig.pylsp.setup(with_defaults({
-                settings = {
-                    pylsp = {
-                        plugins = {
-                            mccabe = {
-                                enabled = false,
-                            },
-                            pycodestyle = {
-                                ignore = { 'E203', 'W391', 'W503' },
-                                maxLineLength = 120
-                            },
-                            pyflakes = {
-                                enabled = false,
-                            },
-                        }
-                    }
-                }
-            }))
-        end,
-        -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#ruff_lsp
-        ["ruff_lsp"] = function()
-            lspconfig.ruff_lsp.setup(with_defaults({
-                --init_otions = {
-                --    settings = {
-                --        args = {},
-                --    }
-                --}
-            }))
-        end,
-        --["pyright"] = function()
-        --    local util = require('lspconfig/util')
-        --    local function get_python_path(workspace)
-        --        -- Use activated virtualenv.
-        --        if vim.env.VIRTUAL_ENV then
-        --            return util.path.join(vim.env.VIRTUAL_ENV, 'bin', 'python')
-        --        end
-        --        -- Find and use virtualenv in workspace directory.
-        --        for _, pattern in ipairs({ '*', '.*' }) do
-        --            local match = vim.fn.glob(util.path.join(workspace, pattern,
-        --                'pyvenv.cfg'))
-        --            if match ~= '' then
-        --                return util.path.join(util.path.dirname(match), 'bin', 'python')
-        --            end
-        --        end
-        --        -- Fallback to system Python.
-        --        return exepath('python3') or exepath('python') or 'python'
-        --    end
-        --    lspconfig.pyright.setup(with_defaults({
-        --        before_init = function(_, config)
-        --            config.settings.python.pythonPath = get_python_path(config.root_dir)
-        --        end,
-        --        filetypes = { "python" },
-        --    }))
-        --end,
-        --["yamlls"] = function()
-        --    lspconfig.yamlls.setup(with_defaults({
-        --        settings = { yaml = { keyOrdering = false } }
-        --    }))
-        --end
+})
+
+-- Helper to get root patterns
+local function root_pattern(...)
+    local patterns = {...}
+    return function(fname)
+        for _, pattern in ipairs(patterns) do
+            local match = vim.fs.find(pattern, {
+                upward = true,
+                path = vim.fs.dirname(fname),
+            })[1]
+            if match then
+                return vim.fs.dirname(match)
+            end
+        end
+        return nil
+    end
+end
+
+-- Configure LSP servers using vim.lsp.config
+vim.lsp.config('gopls', {
+    cmd = { "gopls", "serve" },
+    filetypes = { "go", "gomod" },
+    root_markers = { "go.work", "go.mod", ".git" },
+    capabilities = capabilities,
+    settings = {
+        gopls = {
+            analyses = {
+                unusedparams = true,
+            },
+            staticcheck = true,
+        },
     },
+})
+
+vim.lsp.config('lua_ls', {
+    cmd = { "lua-language-server" },
+    filetypes = { "lua" },
+    root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" },
+    capabilities = capabilities,
+    settings = {
+        Lua = {
+            runtime = {
+                version = 'LuaJIT',
+            },
+            diagnostics = {
+                globals = { 'exepath', 'vim' },
+            },
+            workspace = {
+                library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false
+            },
+            telemetry = {
+                enable = false,
+            },
+        },
+    },
+})
+
+vim.lsp.config('pylsp', {
+    cmd = { "pylsp" },
+    filetypes = { "python" },
+    root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
+    capabilities = capabilities,
+    settings = {
+        pylsp = {
+            plugins = {
+                mccabe = {
+                    enabled = false,
+                },
+                pycodestyle = {
+                    ignore = { 'E203', 'W391', 'W503' },
+                    maxLineLength = 120
+                },
+                pyflakes = {
+                    enabled = false,
+                },
+            }
+        }
+    }
+})
+
+-- Simple servers with default config
+local simple_servers = {
+    'ruff',
+    'dockerls',
+    'marksman',
+    'rust_analyzer',
+    'yamlls',
+    'eslint',
+    'tailwindcss',
+}
+
+for _, server in ipairs(simple_servers) do
+    vim.lsp.config(server, {
+        capabilities = capabilities,
+    })
+end
+
+-- Enable all configured servers
+vim.lsp.enable({'gopls', 'lua_ls', 'pylsp', 'ruff', 'dockerls', 'marksman', 'rust_analyzer', 'yamlls', 'eslint', 'tailwindcss'})
+
+-- Note: ts_ls and denols are managed manually via autocommand below
+-- They will be started with vim.lsp.start() instead of vim.lsp.config
+
+-- Global flag to track which server should be allowed per buffer
+_G.allowed_ts_server = {}
+
+-- Kill unwanted LSP servers immediately on attach
+vim.api.nvim_create_autocmd("LspAttach", {
+    callback = function(args)
+        local bufnr = args.buf
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if not client then return end
+        
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        local ft = vim.bo[bufnr].filetype
+        
+        -- Only handle TypeScript/JavaScript files
+        if not vim.tbl_contains({ "typescript", "typescriptreact", "javascript", "javascriptreact" }, ft) then
+            return
+        end
+        
+        local allowed = _G.allowed_ts_server[bufnr]
+        
+        if (client.name == "ts_ls" and allowed ~= "ts_ls") or 
+           (client.name == "denols" and allowed ~= "denols") then
+            vim.schedule(function()
+                client.stop()
+            end)
+        end
+    end,
 })
 
 -- format on save
@@ -273,3 +284,95 @@ protocol.CompletionItemKind = {
     'ﬦ', -- Operator
     '' -- TypeParameter
 }
+
+-- ts_ls and denols with mutual exclusion via autocommands
+-- This must be at the end after on_attach is defined
+
+-- First, set the allowed server flag EARLY (on BufReadPost, before FileType)
+vim.api.nvim_create_autocmd("BufReadPost", {
+    pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+    callback = function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        
+        -- Check which project type
+        local is_deno = root_pattern("deno.json", "deno.jsonc")(fname)
+        local is_node = root_pattern(
+            'package.json',
+            'package-lock.json',
+            'pnpm-lock.yaml',
+            'yarn.lock',
+            'bun.lockb',
+            'node_modules'
+        )(fname)
+        
+        -- Set the flag FIRST before any LSP servers start
+        if is_deno and not is_node then
+            _G.allowed_ts_server[bufnr] = "denols"
+        elseif is_node and not is_deno then
+            _G.allowed_ts_server[bufnr] = "ts_ls"
+        end
+    end,
+})
+
+-- Then, start the appropriate LSP server
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+    callback = function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        
+        -- Check which project type
+        local is_deno = root_pattern("deno.json", "deno.jsonc")(fname)
+        local is_node = root_pattern(
+            'package.json',
+            'package-lock.json',
+            'pnpm-lock.yaml',
+            'yarn.lock',
+            'bun.lockb',
+            'node_modules'
+        )(fname)
+        
+        if is_deno and not is_node then
+            -- Start denols
+            vim.lsp.start({
+                name = "denols",
+                cmd = { "deno", "lsp" },
+                root_dir = is_deno,
+                capabilities = capabilities,
+                on_attach = on_attach,
+                settings = {
+                    deno = {
+                        enable = true,
+                        suggest = {
+                            imports = {
+                                hosts = {
+                                    ["https://deno.land"] = true,
+                                    ["https://cdn.nest.land"] = true,
+                                    ["https://crux.land"] = true,
+                                },
+                            },
+                        },
+                    },
+                },
+                init_options = {
+                    lint = true,
+                    unstable = true,
+                },
+            })
+            
+        elseif is_node and not is_deno then
+            -- Start ts_ls
+            vim.lsp.start({
+                name = "ts_ls",
+                cmd = { "typescript-language-server", "--stdio" },
+                root_dir = is_node,
+                capabilities = capabilities,
+                on_attach = on_attach,
+                init_options = {
+                    hostInfo = "neovim"
+                },
+            })
+        end
+    end,
+})
