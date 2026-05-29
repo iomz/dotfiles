@@ -3,6 +3,9 @@
 # Zinit
 #
 
+# Skip plugin loading for command-only shells and non-TTY automation.
+[[ -o interactive && -t 0 ]] || return
+
 # Initialize Zinit {{{
 typeset -gAH ZI=(HOME_DIR "${XDG_DATA_HOME}/zinit")
 ZI+=(

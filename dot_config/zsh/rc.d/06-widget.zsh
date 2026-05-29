@@ -3,6 +3,10 @@
 # Widget
 #
 
+# ZLE widgets require an interactive shell attached to a terminal.
+[[ -o interactive && -t 0 ]] || return
+[[ -o zle ]] || return
+
 # url quote magic
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic

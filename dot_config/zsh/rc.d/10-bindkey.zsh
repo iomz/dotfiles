@@ -3,6 +3,10 @@
 # Sets bindkeys
 #
 
+# Keymaps only exist for interactive ZLE sessions.
+[[ -o interactive && -t 0 ]] || return
+[[ -o zle ]] || return
+
 # emacs style (instead of -v)
 bindkey -e
 

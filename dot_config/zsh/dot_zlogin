@@ -1,3 +1,7 @@
+# Background recompilation is useful for real login shells, but noisy in
+# noninteractive command execution.
+[[ -o interactive ]] || return
+
 {
     # Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
     (( $+commands[locale] )) || return
@@ -17,5 +21,6 @@
     #    zmodload -i $m
     #done
 
+    (( $+functions[zsh::recompile] )) || return
     zsh::recompile
 } &!

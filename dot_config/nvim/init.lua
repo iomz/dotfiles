@@ -16,6 +16,7 @@ vim.opt.termguicolors = true
 vim.scriptencoding = 'utf-8'
 vim.wo.number = true
 
+
 -- base16 color
 local current_theme_name = os.getenv('BASE16_THEME')
 if current_theme_name and vim.g.colors_name ~= 'base16-' .. current_theme_name then

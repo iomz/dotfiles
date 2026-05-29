@@ -9,15 +9,26 @@ ZDOTDIR=$zdir
 # Refresh commands list from PATH in current shell
 rehash
 
-zcompile ~/.zshenv
-[[ -s ~/.zprofile ]] && zcompile ~/.zprofile
+_zsh_compile_if_writable() {
+    local target=$1
+    # Avoid noisy zcompile failures in readonly or sandboxed startup contexts.
+    [[ -s $target && -w ${target:h} ]] || return
+    zcompile $target
+}
+
+_zsh_compile_if_writable ~/.zshenv
+_zsh_compile_if_writable ~/.zprofile
 
 # Combine zshrc components into one file
 lst=()
 lst+=($zdir/rc.d/*)
 lst+=($zdir/.zshrc $zdir/.zlogin $zdir/functions/*)
-zcompile ${lst[@]}
+lst=(${^lst}(N-.))
+# Compile the combined zwc only when the config directory is writable.
+if [[ -n $lst && -w $zdir ]]; then
+    zcompile ${lst[@]}
+fi
 
 # Compile the completion dump
 zcd=$zdir/.zcompdump
-if [[ -s $zcd && (! -s ${zcd}.zwc || $zcd -nt ${zcd}.zwc) ]]; then zcompile $zcd; fi
+if [[ -s $zcd && -w ${zcd:h} && (! -s ${zcd}.zwc || $zcd -nt ${zcd}.zwc) ]]; then zcompile $zcd; fi

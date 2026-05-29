@@ -4,6 +4,9 @@
 # Download and link binaries
 #
 
+# Polaris/zinit binary setup is only needed in real interactive shells.
+[[ -o interactive && -t 0 ]] || return
+
 # TINY_CHEZMOI
 if [[ -n "${TINY_CHEZMOI}" ]]; then
     zinit from'gh-r' lbin'!' light-mode no'compile' for \

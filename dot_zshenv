@@ -32,7 +32,7 @@ export \
     GTAGSLABEL=pygments \
     HOMEBREW_NO_{ENV_HINTS,INSTALL_CLEANUP}=1 \
     OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES \
-    RIPGREP_CONFIG_PATH=${XDG_CONFIG_HOME}/ripgrep/rc \
+    RIPGREP_CONFIG_PATH=${XDG_CONFIG_HOME}/ripgrep/config \
     SHELL_SESSIONS_DISABLE=1
 
 # $PATH and $path (and also $FPATH and $fpath, etc.) are "tied" to each other.
@@ -84,6 +84,10 @@ if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     fi
 fi
 
+# Go
+export GOPATH=$HOME/go
+path=( $GOPATH/bin(N-/) $HOME/.ghg/bin(N-/) $path )
+
 # LLVM
 path=(/usr/local/opt/llvm/bin(N-/) $path)
 
@@ -118,6 +122,10 @@ esac
 if [[ -d /snap/bin ]]; then
     path=(/snap/bin(N-/) $path)
 fi
+
+# Keep asdf-managed commands available in noninteractive shells.
+export ASDF_DATA_DIR="${XDG_DATA_HOME}/asdf"
+path=(${ASDF_DATA_DIR}/shims(N-/) $path)
 
 # $HOME/.local/bin and $HOME/bin
 path=($HOME/.local/bin(N-/) $HOME/bin(N-/) $path)
