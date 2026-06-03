@@ -47,10 +47,10 @@ if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     # disable builtin completion
     export ZENO_DISABLE_BUILTIN_COMPLETION=1
 
-    # may get overwritten in 20-alias.zsh
+    # may get overwritten in 20-aliases.zsh
     export ZENO_GIT_CAT="cat"
 
-    # may get overwritten in 20-alias.zsh
+    # may get overwritten in 20-aliases.zsh
     export ZENO_GIT_TREE="tree"
 fi
 # }}}

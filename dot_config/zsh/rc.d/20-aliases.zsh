@@ -70,9 +70,9 @@
 #emulate -L zsh
 #setopt extendedglob
 #typeset -A pairs=(
-#  ealiases 'zsh/rc.d/[0-9]*-alias.zsh' gignore 'git/ignore'                gcfg  'git/config'
+#  ealiases 'zsh/rc.d/[0-9]*-aliases.zsh' gignore 'git/ignore'              gcfg  'git/config'
 #  nvplg    "nvim/lua/plugins.lua"      rcenv   'zsh/rc.d/[0-9]*-env.zsh'   wezrc 'wezterm/wezterm.lua'
-#  tmuxrc   'tmux/tmux.conf'            zic     'zsh/rc.d/[0-9]*-zinit.zsh' zrc   'zsh/.zshrc'
+#  tmuxrc   'tmux/tmux.conf'            zic     'zsh/rc.d/[0-9]*-plugin-manager.zsh' zrc   'zsh/.zshrc'
 #  brewrc   "$DOTFILES/Brewfile"
 #)
 #for k v in ${(kv)pairs[@]}; do

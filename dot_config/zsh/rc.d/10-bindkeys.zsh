@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #
-# Sets bindkeys
+# Key bindings
 #
 
 # Keymaps only exist for interactive ZLE sessions.

@@ -1,0 +1,12 @@
+# # Generated from iTerm2 profile: base16-tokyo
+theme = base16-tokyo
+font-family = "MesloLGS NF"
+font-size = 17
+background-opacity = 0.82
+cursor-style = block
+cursor-style-blink = false
+window-theme = dark
+shell-integration = detect
+# iTerm2 rows/columns were 40x100. Ghostty window size is usually managed by OS/window state.
+# iTerm2 working directory was /Users/iomz. Set initial-command if you want to force cd there.
+

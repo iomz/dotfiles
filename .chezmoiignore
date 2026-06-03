@@ -1,6 +1,9 @@
 # README
 README.md
 
+# AGENTS
+AGENTS.md
+
 # LICENSE
 LICENSE
 
@@ -25,3 +28,11 @@ run_once_install-packages.sh.tmpl
 
 # local
 .zprofile
+
+# codex
+.codex/*
+!.codex/AGENTS.md
+!.codex/skills/
+!.codex/skills/**
+.codex/skills/.system/
+.codex/skills/.system/**

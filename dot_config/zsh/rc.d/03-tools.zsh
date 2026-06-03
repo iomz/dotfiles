@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 #
-# Zinit polaris
-# Download and link binaries
+# Zinit-managed tools
+# Download and link binaries into $ZPFX.
 #
 
-# Polaris/zinit binary setup is only needed in real interactive shells.
+# Tool setup is only needed in real interactive shells.
 [[ -o interactive && -t 0 ]] || return
 
 # TINY_CHEZMOI
@@ -36,6 +36,7 @@ else
         @x-motemen/ghq \
         @sharkdp/hyperfine \
         lbin'!nvim' \
+        nocompletions \
         ver'v0.11.5' \
         @neovim/neovim \
         lbin'!rg' \

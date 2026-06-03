@@ -42,7 +42,7 @@ if not vim.loop.fs_stat(lazypath) then
     })
 end
 vim.opt.rtp:prepend(lazypath)
-require('lazy').setup('plugins', {
+require('lazy').setup(require('iomz.plugins'), {
     -- defaults = {lazy = true},
     performance = {
         rtp = {
@@ -67,9 +67,9 @@ require('lazy').setup('plugins', {
 -- Add asterisks in block comments
 -- vim.opt.formatoptions:append { 'r' }
 
-require('options')
-require('keymaps')
-require('commands')
+require('iomz.options')
+require('iomz.keymaps')
+require('iomz.commands')
 
 --
 -- OS-specific
@@ -79,6 +79,6 @@ local is_mac = has "macunix"
 local is_win = has "win32"
 local is_wsl = has "wsl"
 
-if is_mac == 1 then require('macos') end
-if is_win == 1 then require('windows') end
-if is_wsl == 1 then require('wsl') end
+if is_mac == 1 then require('iomz.os.macos') end
+if is_win == 1 then require('iomz.os.windows') end
+if is_wsl == 1 then require('iomz.os.wsl') end
