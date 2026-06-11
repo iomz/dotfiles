@@ -58,6 +58,14 @@ fi
 
 # zsh-autosuggestions {{{
 export ZSH_AUTOSUGGEST_USE_ASYNC=1
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#00ffff,bold,underline'
-ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(accept-line)
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
+    accept-line
+    backward-delete-char
+    backward-kill-word
+    kill-line
+    kill-word
+    unix-word-rubout
+    zeno-auto-snippet-and-accept-line
+)
 # }}}

@@ -15,6 +15,8 @@ zmodload -i zsh/parameter
 autoload -Uz zkbd
 
 function _accept-line-with-url {
+    unset POSTDISPLAY
+
     if [[ $BUFFER =~ ^https.*git ]]; then
         echo $BUFFER >> $HISTFILE
         fc -R
