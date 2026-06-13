@@ -21,3 +21,13 @@ Not tracked:
 
 Caveman mode is installed through Codex hooks, not through `AGENTS.md`.
 `~/.codex/hooks.json` runs caveman activation at session start.
+
+Append the folloing to `~/.codex/config.toml`:
+
+```toml
+[features]
+codex_git_commit = true
+
+[git]
+commit_attribution = "Co-authored-by: Codex <noreply@openai.com>"
+```
