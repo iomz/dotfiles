@@ -1,10 +1,98 @@
 {{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.arch "aarch64") (eq .chezmoi.arch "arm64")) -}}
 #!/bin/sh
-sudo apt install -y git dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+set -eu
+
+sudo apt update
+sudo apt install -y \
+  git \
+  curl \
+  ca-certificates \
+  gnupg \
+  dirmngr \
+  gawk \
+  build-essential \
+  pkg-config \
+  libssl-dev \
+  zlib1g-dev \
+  libbz2-dev \
+  libreadline-dev \
+  libsqlite3-dev \
+  libncursesw5-dev \
+  xz-utils \
+  tk-dev \
+  libxml2-dev \
+  libxmlsec1-dev \
+  libffi-dev \
+  liblzma-dev \
+  extrepo
+
+if ! command -v mise >/dev/null 2>&1; then
+  sudo extrepo enable mise
+  sudo apt update
+  sudo apt install -y mise
+fi
+
 {{ else if eq .chezmoi.os "linux" -}}
 #!/bin/sh
-sudo apt install -y git dirmngr gpg curl gawk build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev linux-headers-$(uname -r)
+set -eu
+
+sudo apt update
+sudo apt install -y \
+  git \
+  curl \
+  ca-certificates \
+  chafa \
+  gnupg \
+  dirmngr \
+  gawk \
+  build-essential \
+  pkg-config \
+  libssl-dev \
+  zlib1g-dev \
+  libbz2-dev \
+  libreadline-dev \
+  libsqlite3-dev \
+  libncursesw5-dev \
+  xz-utils \
+  tk-dev \
+  libxml2-dev \
+  libxmlsec1-dev \
+  libffi-dev \
+  liblzma-dev \
+  linux-headers-$(uname -r) \
+  extrepo
+
+if ! command -v mise >/dev/null 2>&1; then
+  sudo extrepo enable mise
+  sudo apt update
+  sudo apt install -y mise
+fi
+
 {{ else if eq .chezmoi.os "darwin" -}}
 #!/bin/sh
-brew install direnv git gpg gawk just mise openssl readline sqlite3 xz zlib tcl-tk
+set -eu
+
+brew install \
+  ca-certificates \
+  chafa \
+  cmake \
+  colordiff \
+  coreutils \
+  git \
+  gnu-sed \
+  gnu-getopt \
+  gpg \
+  gawk \
+  jq \
+  mise \
+  openssl \
+  pkg-config \
+  readline \
+  sqlite3 \
+  tcl-tk \
+  trash \
+  watch \
+  wget \
+  xz \
+  zlib
 {{ end -}}

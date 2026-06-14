@@ -190,6 +190,11 @@ if whence bat > /dev/null; then
     export ZENO_GIT_CAT="bat --color=always"
 fi
 
+# direnv
+if whence direnv >/dev/null; then
+    eval "$(direnv hook zsh)"
+fi
+
 # exa
 if whence exa > /dev/null; then
     alias l='exa -blF'

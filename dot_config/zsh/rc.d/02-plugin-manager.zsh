@@ -100,14 +100,6 @@ zinit id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods',
 # }}}
 
 
-## zeno.zsh {{{
-if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
-    zinit lucid depth'1' blockf for \
-        @yuki-yano/zeno.zsh
-fi
-# }}}
-
-
 # unit testing {{{
 zinit light-mode for \
     compile \

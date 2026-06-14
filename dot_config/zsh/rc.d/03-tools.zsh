@@ -32,6 +32,7 @@ else
         lbin'!fzf;!fzf-tmux;' \
         src'key-bindings.zsh' \
         @junegunn/fzf \
+        @sharkdp/fd \
         @Songmu/ghg \
         @x-motemen/ghq \
         @sharkdp/hyperfine \
@@ -41,6 +42,7 @@ else
         @neovim/neovim \
         lbin'!rg' \
         @BurntSushi/ripgrep \
-        @r-darwish/topgrade
+        @r-darwish/topgrade \
+        @atanunq/viu
     # }}}
 fi
