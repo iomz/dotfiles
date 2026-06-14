@@ -5,11 +5,9 @@ skip_global_compinit=1
 # uncomment to analyze init time
 #ENABLE_ZPROFTIME=true
 
-# load .profile for local options like $TINY_CHEZMOI
-[[ -s ~/.profile ]] && source ~/.profile
-
 # set ZDOTDIR
-ZDOTDIR=${XDG_CONFIG_HOME:=~/.config}/zsh
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export ZDOTDIR="${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}"
 
 # extended globbing
 setopt EXTENDED_GLOB
@@ -21,6 +19,14 @@ setopt NO_GLOBAL_RCS
 (( ${+XDG_CACHE_HOME} )) || export XDG_CACHE_HOME="${HOME}/.cache"
 (( ${+XDG_CONFIG_HOME} )) || export XDG_CONFIG_HOME="${HOME}/.config"
 (( ${+XDG_DATA_HOME} )) || export XDG_DATA_HOME="${HOME}/.local/share"
+
+# Mirror the only current .profile-managed shell option without sourcing .profile
+# for every zsh process.
+if [[ -z "${TINY_CHEZMOI}" && "$(uname -s)" == "Linux" ]]; then
+    case "$(uname -m)" in
+        aarch64|arm64) export TINY_CHEZMOI=1 ;;
+    esac
+fi
 
 # Program options
 export \
@@ -34,94 +40,3 @@ export \
     OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES \
     RIPGREP_CONFIG_PATH=${XDG_CONFIG_HOME}/ripgrep/config \
     SHELL_SESSIONS_DISABLE=1
-
-# $PATH and $path (and also $FPATH and $fpath, etc.) are "tied" to each other.
-# Modifying one will also modify the other.
-# Note that each value in an array is expanded separately. Thus, we can use ~
-# for $HOME in each $path entry.
-typeset -gU FPATH PATH fpath path
-fpath=( $HOME/.config/zsh/(func|comple)tions(N) $fpath )
-autoload -Uz ~/.config/zsh/functions/**/*
-
-path=(
-    /usr/local/bin(N-/)
-    /usr/bin(N-/)
-    /bin(N-/)
-    /usr/local/sbin(N-/)
-    /usr/sbin(N-/)
-    /sbin(N-/)
-    /usr/X11/bin(N-/)
-)
-fpath=(
-    ~/.zsh/completions(N-/)
-    $fpath
-)
-
-# Brew
-if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
-    if [[ -x /opt/homebrew/bin/brew ]]; then
-        BREW_LOCATION="/opt/homebrew/bin/brew"
-    elif [[ -x /usr/local/bin/brew ]]; then
-        BREW_LOCATION="/usr/local/bin/brew"
-    elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
-        BREW_LOCATION="/home/linuxbrew/.linuxbrew/bin/brew"
-    elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
-        BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
-    fi
-    if [[ -n "${BREW_LOCATION}" ]]; then
-        eval "$("$BREW_LOCATION" shellenv)"
-        unset BREW_LOCATION
-        path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
-        fpath=( $HOMEBREW_PREFIX/share/zsh/site-functions(/N) $fpath )
-        # brew curl
-        if [[ -x /opt/homebrew/opt/curl/bin/curl ]]; then
-            path=( /opt/homebrew/opt/curl/bin $path )
-        fi
-        # brew gnu awk
-        if [[ -x /opt/homebrew/opt/gawk/libexec/gnubin/awk ]]; then
-            path=( /opt/homebrew/opt/gawk/libexec/gnubin $path )
-        fi
-    fi
-fi
-
-# Go
-export GOPATH=$HOME/go
-path=( $GOPATH/bin(N-/) $HOME/.ghg/bin(N-/) $path )
-
-# LLVM
-path=(/usr/local/opt/llvm/bin(N-/) $path)
-
-# Rust - cargo, rustup and rustc
-if [[ -z "${TINY_CHEZMOI}" ]] && [[ -x $HOME/.cargo/bin/cargo ]]; then
-    path=($HOME/.cargo/bin(N-/) $path)
-    source $HOME/.cargo/env
-fi
-
-# Deno
-if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
-    export DENO_INSTALL=$HOME/.deno
-    path=(${DENO_INSTALL}/bin(N-/) $path)
-    if ! whence deno > /dev/null; then
-        if whence cargo > /dev/null && [[ $(uname -m) == "aarch64" ]]; then
-            cargo install deno --locked
-        else
-            echo "Install Deno to ${DENO_INSTALL}"
-            curl -fsSL https://deno.land/install.sh | sh
-        fi
-    fi
-fi
-
-# pnpm
-export PNPM_HOME="/Users/iomz/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-
-# Snap
-if [[ -d /snap/bin ]]; then
-    path=(/snap/bin(N-/) $path)
-fi
-
-# $HOME/.local/bin and $HOME/bin
-path=($HOME/.local/bin(N-/) $HOME/bin(N-/) $path)

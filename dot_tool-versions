@@ -1,7 +1,8 @@
-python 3.14.6
-nodejs 24.14.1
-ruby 3.4.9
+deno 2.8.3
 golang 1.26.1
-poetry 2.4.1
-pnpm 10.32.0
 lua 5.4.8
+nodejs 24.14.1
+pnpm 10.32.0
+poetry 2.4.1
+python 3.14.6
+ruby 3.4.9
