@@ -6,6 +6,8 @@ For commands that may produce large output, use:
 
 Then summarize the failure and inspect the log only as needed.
 
+Before diagnosing environment issues, run `ai-check`.
+
 # Git
 
 Always use Conventional Commits for commit messages unless repository history clearly uses another strict format.

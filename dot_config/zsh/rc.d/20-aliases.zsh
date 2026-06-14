@@ -72,7 +72,7 @@
 #typeset -A pairs=(
 #  ealiases 'zsh/rc.d/[0-9]*-aliases.zsh' gignore 'git/ignore'              gcfg  'git/config'
 #  nvplg    "nvim/lua/plugins.lua"      rcenv   'zsh/rc.d/[0-9]*-env.zsh'   wezrc 'wezterm/wezterm.lua'
-#  tmuxrc   'tmux/tmux.conf'            zic     'zsh/rc.d/[0-9]*-plugin-manager.zsh' zrc   'zsh/.zshrc'
+#  zic      'zsh/rc.d/[0-9]*-plugin-manager.zsh' zrc   'zsh/.zshrc'
 #  brewrc   "$DOTFILES/Brewfile"
 #)
 #for k v in ${(kv)pairs[@]}; do
@@ -227,6 +227,11 @@ fi
 # sed
 if whence gsed > /dev/null; then
     alias sed='gsed'
+fi
+
+# zellij
+if whence zellij > /dev/null; then
+    alias zj='zellij attach --create main'
 fi
 
 # tail

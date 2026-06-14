@@ -11,8 +11,8 @@
 if [[ -n "${TINY_CHEZMOI}" ]]; then
     zinit from'gh-r' lbin'!' light-mode no'compile' for \
         compile'key-bindings.zsh' \
-        dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/refs/heads/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \
-        lbin'!fzf;!fzf-tmux;' \
+        dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/refs/heads/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'man/man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;'})" \
+        lbin'!fzf;' \
         src'key-bindings.zsh' \
         @junegunn/fzf \
         @x-motemen/ghq
@@ -28,8 +28,8 @@ else
         cp'**/exa.zsh->_exa' \
         @ogham/exa \
         compile'key-bindings.zsh' \
-        dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/refs/heads/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'bin/fzf-tmux -> fzf-tmux;',man/{'man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;','man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'}})" \
-        lbin'!fzf;!fzf-tmux;' \
+        dl="$(builtin print -c -- https://raw.githubusercontent.com/junegunn/fzf/refs/heads/master/{shell/{'key-bindings.zsh;','completion.zsh -> _fzf;'},'man/man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;'})" \
+        lbin'!fzf;' \
         src'key-bindings.zsh' \
         @junegunn/fzf \
         @sharkdp/fd \
