@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "== shell =="
+echo "SHELL=$SHELL"
+echo "PWD=$PWD"
+echo "PATH=$PATH"
+echo
+
+echo "== tools =="
+for c in git mise direnv just codex claude; do
+  printf "%-8s " "$c"
+  if command -v "$c" >/dev/null 2>&1; then
+    command -v "$c"
+  else
+    echo "NOT FOUND"
+  fi
+done
+echo
+
+echo "== git =="
+git status --short 2>/dev/null || true
+git rev-parse --show-toplevel 2>/dev/null || true
+echo
+
+echo "== terminal =="
+stty -a 2>/dev/null | head -n 1 || true

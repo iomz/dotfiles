@@ -223,3 +223,7 @@ fi
 if whence gsed > /dev/null; then
     alias sed='gsed'
 fi
+
+# tail
+alias lt='tail -n 160'
+alias lr='less -R'

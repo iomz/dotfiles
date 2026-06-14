@@ -1,0 +1,10 @@
+runlog() {
+  local log="${TMPDIR:-/tmp}/ai-run-$(date +%Y%m%d-%H%M%S).log"
+  echo "log: $log"
+  "$@" >"$log" 2>&1
+  local status=$?
+  echo "exit: $status"
+  echo "---- tail ----"
+  tail -n 120 "$log"
+  return $status
+}
