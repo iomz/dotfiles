@@ -1,3 +1,11 @@
+# Inspection
+
+For commands that may produce large output, use:
+
+`runlog <command>`
+
+Then summarize the failure and inspect the log only as needed.
+
 # Git
 
 Always use Conventional Commits for commit messages unless repository history clearly uses another strict format.

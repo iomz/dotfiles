@@ -8,5 +8,16 @@ cursor-style-blink = false
 window-theme = dark
 shell-integration = detect
 # iTerm2 rows/columns were 40x100. Ghostty window size is usually managed by OS/window state.
-# iTerm2 working directory was /Users/iomz. Set initial-command if you want to force cd there.
+command = /opt/homebrew/bin/zsh -l -i
 
+# Set the default starting directory to Home
+working-directory = home
+
+# Prevent new windows from inheriting the current directory
+window-inherit-working-directory = false
+
+# Prevent new tabs from inheriting the current directory (optional)
+tab-inherit-working-directory = false
+
+# Prevent new split panes from inheriting the current directory
+#split-inherit-working-directory = false

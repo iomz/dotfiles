@@ -10,8 +10,8 @@ vim.cmd("autocmd!")
 vim.g.loaded_matchparen = 1 -- disable the built-in for Matchparen.nvim
 vim.g.loaded_perl_provider = 0
 vim.g.mapleader = ' '       -- Remap space as leader key
-vim.g.python3_host_prog = '~/.asdf/shims/python'
-vim.g.ruby_host_prog = '~/.asdf/shims/ruby'
+vim.g.python3_host_prog = vim.fn.expand("~/.local/share/mise/shims/python3")
+vim.g.ruby_host_prog = vim.fn.expand("~/.local/share/mise/shims/ruby")
 vim.opt.termguicolors = true
 vim.scriptencoding = 'utf-8'
 vim.wo.number = true

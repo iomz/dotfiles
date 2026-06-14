@@ -37,6 +37,8 @@ local options = {
     -- relativenumber = false,
     -- scrolloff = 8,
     -- shell = 'fish',
+    shell = 'zsh',
+    shellcmdflag = '-f -c',
     -- number of spaces to use for each step of indent
     shiftwidth = 4,
     showcmd = true,

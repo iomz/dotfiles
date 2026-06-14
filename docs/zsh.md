@@ -28,7 +28,7 @@ Files in `rc.d` are loaded numerically:
 - `01-options.zsh`: shell options and history
 - `02-plugin-manager.zsh`: Zinit bootstrap and plugins
 - `03-tools.zsh`: Zinit-managed binary tools
-- `04-asdf.zsh`: asdf setup and completions
+- `05-mise.zsh`: mise activation
 - `06-widgets.zsh`: ZLE widgets
 - `07-style.zsh`: colors, completion styles, prompt colors
 - `10-bindkeys.zsh`: key bindings

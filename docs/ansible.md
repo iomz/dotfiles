@@ -1,7 +1,6 @@
 # Ansible
 
-Use pipx, not asdf, for Ansible. asdf manages Python runtimes; pipx manages
-Python CLI apps.
+Use pipx for Ansible. pipx manages Python CLI apps.
 
 Install:
 

@@ -6,45 +6,69 @@
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 ```
 
-Go, Lua, NodeJS, and Python runtimes used by Neovim are managed by asdf.
-asdf itself is installed on the first zsh startup, and is not automated by
-Zinit.
-
-Other runtimes, such as Deno and Rust, are handled in `~/.zshenv`.
+Package installation and host-specific setup are handled by chezmoi scripts.
 
 ## Runtime Setup
 
-Install dependencies with `run_once_install-packages.sh.tmpl`.
-
-Install Go, Lua with LuaRocks, NodeJS, and Python via asdf:
+Install system dependencies with:
 
 ```zsh
-for i in golang lua nodejs python; do
-    IFS=","; set -- $i;
-    lang=$1; repo=$2;
-    asdf plugin add $lang $repo && \
-        asdf install $lang latest && \
-        asdf set -u $lang latest;
-done
+run_once_install-packages.sh.tmpl
 ```
 
-Install Neovim providers:
+Development runtimes are managed by mise. The global tool versions are defined in
+`.tool-versions`.
+
+After bootstrapping, install the configured runtimes:
 
 ```zsh
-pip install --upgrade pip && pip install neovim
-npm i -g neovim
+mise install
 ```
 
-Optional tools:
+Verify the runtime environment:
 
 ```zsh
-for i in pnpm poetry; do
-    IFS=","; set -- $i;
-    lang=$1; repo=$2;
-    asdf plugin add $lang $repo && \
-        asdf install $lang latest && \
-        asdf set -u $lang latest;
-done
+mise doctor
+mise current
+```
+
+## Neovim Providers
+
+Neovim uses mise-managed Python and Ruby providers.
+
+Install Python provider support:
+
+```zsh
+python3 -m pip install --upgrade pip pynvim
+```
+
+Install Ruby provider support:
+
+```zsh
+gem install neovim
+```
+
+Verify providers from Neovim:
+
+```zsh
+nvim +'checkhealth provider' +qa
+```
+
+## Optional Tools
+
+Additional CLI tools such as pnpm, Poetry, and Lua are managed by mise when they
+are listed in `.tool-versions`.
+
+Install or update all configured tools with:
+
+```zsh
+mise install
+```
+
+Check for outdated tools:
+
+```zsh
+mise outdated
 ```
 
 ## Font
