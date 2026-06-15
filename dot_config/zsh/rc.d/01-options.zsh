@@ -26,6 +26,7 @@ setopt GLOB_DOTS            # don't require leading `.' in a filename
 setopt HASH_LIST_ALL        # make sure the entire command path hashed
 unsetopt HIST_BEEP          # beep when accessing non-existent history.
 setopt HIST_EXPIRE_DUPS_FIRST   # expire a duplicate event first when trimming history.
+setopt HIST_FCNTL_LOCK      # use flock for updating history
 setopt HIST_FIND_NO_DUPS    # do not display a previously found event.
 setopt HIST_IGNORE_ALL_DUPS # delete an old recorded event if a new event is a duplicate.
 setopt HIST_IGNORE_DUPS     # do not record an event that was just recorded again.
@@ -54,7 +55,7 @@ setopt PRINT_EIGHT_BIT      # display CJK characters just right
 #unsetopt PROMPT_CR         # don't print a CR just before zle
 unsetopt RC_QUOTES          # allow 'Henry''s Garage' instead of 'Henry'\''s Garage'.
 setopt RM_STAR_SILENT       # confirm rm *
-setopt SHARE_HISTORY        # disable shared history between terminals / sessions (auto-importing)
+setopt SHARE_HISTORY        # enable shared history between terminals / sessions (auto-importing)
 
 
 { # New options (may be unavailable)
@@ -70,8 +71,8 @@ REPORTTIME=10               # display process taken longer than 10 second
 # }}}
 
 # history {{{
-[[ -z $HISTFILE ]] && HISTFILE=${XDG_DATA_HOME:-$HOME/.local/share}/zsh/history
-[[ ! -x $HISTFILE ]] && mkdir -p ${XDG_DATA_HOME:-$HOME/.local/share}/zsh
+HISTFILE=${XDG_DATA_HOME:-$HOME/.local/share}/zsh/history
+mkdir -p ${HISTFILE:h}
 HISTSIZE=9999999                 # The maximum number of events to save in the internal history.
 SAVEHIST=9999999                 # The maximum number of events to save in the history file.
 # }}}
