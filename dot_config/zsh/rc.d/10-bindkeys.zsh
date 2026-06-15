@@ -44,6 +44,7 @@ bindkey -e
 
 # open $EDITOR with fzf
 bind_widget_if_exists '^o' fzf-edit-widget
+bind_widget_if_exists '^x^o' fzf-edit-all-widget
 
 # back-tab key
 bindkey "$terminfo[kcbt]" reverse-menu-complete

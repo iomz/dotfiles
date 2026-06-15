@@ -32,6 +32,48 @@ fzf-edit-widget() {
 }
 zle -N fzf-edit-widget
 
+# open $EDITOR with fzf without ignore
+fzf-edit-all-widget() {
+    local file
+    local -a editor_cmd
+
+    command -v fzf >/dev/null 2>&1 || return
+
+    if command -v rg >/dev/null 2>&1; then
+        file="$(
+            rg --files --hidden --follow --no-ignore \
+                -g '!.git' \
+                -g '!Library' \
+                -g '!.cache' \
+                -g '!.Trash' \
+                -g '!node_modules' \
+                -g '!dist' \
+                -g '!build' \
+                | fzf < /dev/tty
+        )" || {
+            zle reset-prompt
+            return
+        }
+    else
+        file="$(find . -type f | fzf < /dev/tty)" || {
+            zle reset-prompt
+            return
+        }
+    fi
+
+    [[ -n "$file" ]] || {
+        zle reset-prompt
+        return
+    }
+
+    editor_cmd=(${(z)${EDITOR:-nvim}})
+
+    zle -I
+    "${editor_cmd[@]}" -- "$file" < /dev/tty > /dev/tty 2>&1
+    zle reset-prompt
+}
+zle -N fzf-edit-all-widget
+
 # url quote magic
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic
