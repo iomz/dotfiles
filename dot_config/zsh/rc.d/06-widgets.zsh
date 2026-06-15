@@ -1,11 +1,36 @@
 #!/usr/bin/env zsh
 #
-# Widget
+# ZLE Widgets
 #
 
 # ZLE widgets require an interactive shell attached to a terminal.
 [[ -o interactive && -t 0 ]] || return
 [[ -o zle ]] || return
+
+# open $EDITOR with fzf
+fzf-edit-widget() {
+    local file
+    local -a editor_cmd
+
+    command -v fzf >/dev/null 2>&1 || return
+
+    file="$(fzf < /dev/tty)" || {
+        zle reset-prompt
+        return
+    }
+
+    [[ -n "$file" ]] || {
+        zle reset-prompt
+        return
+    }
+
+    editor_cmd=(${(z)${EDITOR:-nvim}})
+
+    zle -I
+    "${editor_cmd[@]}" -- "$file" < /dev/tty > /dev/tty 2>&1
+    zle reset-prompt
+}
+zle -N fzf-edit-widget
 
 # url quote magic
 autoload -Uz url-quote-magic

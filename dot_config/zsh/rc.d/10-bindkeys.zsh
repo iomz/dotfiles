@@ -42,6 +42,9 @@ bindkey -e
 #"^W" backward-kill-word
 # }}}
 
+# open $EDITOR with fzf
+bind_widget_if_exists '^o' fzf-edit-widget
+
 # back-tab key
 bindkey "$terminfo[kcbt]" reverse-menu-complete
 
@@ -56,10 +59,6 @@ if whence emoji::cli >/dev/null 2>&1; then
     zle -N emoji::cli
     bind_widget_if_exists '^h' emoji::cli
 fi
-
-# open nvim with fzf
-# The -s flag to bindkey specifies that you are binding the key to a string, not a command.
-bindkey -s '^o' '$EDITOR $(fzf)^J'
 
 # menu select {{{
 #bindkey -M menuselect '^H' undo

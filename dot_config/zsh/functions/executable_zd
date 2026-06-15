@@ -1,0 +1,23 @@
+#autoload
+
+local flag_help flag_verbose
+local -a arg_extension=()
+
+local -a usage=(
+    "zd [-h|--help]"
+    "zd [<function>]"
+)
+
+zmodload zsh/zutil
+zparseopts -D -F -K -- \
+    {h,-help}=flag_help  ||
+return 1
+
+[[ -z "$flag_help" ]] || { print -l $usage && return }
+if (( $#@ )); then
+    $EDITOR $1
+    return 0
+else
+    cd $HOME/.config/zsh
+    return 0
+fi
