@@ -1,0 +1,16 @@
+#autoload
+
+[[ $# -eq 1 ]] || {
+  print -u2 "usage: chezpurge <path>"
+  return 2
+}
+
+local target=$1
+
+[[ -e "$target" ]] || {
+  print -u2 "chezpurge: not found: $target"
+  return 1
+}
+
+chezmoi forget --force -- "$target" &&
+  rm -- "$target"

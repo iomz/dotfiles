@@ -14,7 +14,12 @@ fzf-edit-widget() {
 
     command -v fzf >/dev/null 2>&1 || return
 
-    file="$(fzf < /dev/tty)" || {
+    file="$(
+        fzf \
+            --preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {}' \
+            --preview-window 'right:60%:wrap' \
+            < /dev/tty
+    )"|| {
         zle reset-prompt
         return
     }
@@ -49,7 +54,10 @@ fzf-edit-all-widget() {
                 -g '!node_modules' \
                 -g '!dist' \
                 -g '!build' \
-                | fzf < /dev/tty
+                | fzf \
+                --preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {} 2>/dev/null || file {}' \
+                --preview-window 'right:60%:wrap'
+                < /dev/tty
         )" || {
             zle reset-prompt
             return

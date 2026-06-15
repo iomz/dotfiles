@@ -14,6 +14,7 @@ keybinds clear-defaults=true {
         bind "d" { Detach; SwitchToMode "locked"; }
         bind "[" { SwitchToMode "scroll"; }
         bind "Tab" { SwitchToMode "tab"; GoToNextTab; }
+        bind "f" { ToggleFloatingPanes; SwitchToMode "locked"; }
 
         // Pane
         bind "-" { NewPane "down"; SwitchToMode "locked"; }
