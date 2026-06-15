@@ -1,8 +1,0 @@
-#!autoload
-#
-# ls-containers
-#
-
-watch --no-title eval 'figlet "containers : $(docker images --quiet  | wc -l)"'
-
-# vim: set expandtab filetype=zsh shiftwidth=4 softtabstop=4 tabstop=4:

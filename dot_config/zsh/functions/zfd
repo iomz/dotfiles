@@ -22,9 +22,9 @@ return 1
 
 [[ -z "$flag_help" ]] || { print -l $usage && return }
 if (( $#@ )); then
-    $EDITOR $1
+    ${EDITOR:-nvim} "$1"
     return 0
 else
-    cd $HOME/.config/zsh/functions
+    cd "$HOME/.config/zsh/functions"
     return 0
 fi

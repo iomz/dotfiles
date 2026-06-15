@@ -7,6 +7,7 @@
 # │ CONFIG │
 # +────────+
 alias cdot='cd "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"'
+alias cdv='cd "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"'
 
 # +───────────────────+
 # │ COMMAND SHORTCUTS │

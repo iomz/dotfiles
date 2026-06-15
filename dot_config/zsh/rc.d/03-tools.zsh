@@ -36,10 +36,6 @@ else
         @Songmu/ghg \
         @x-motemen/ghq \
         @sharkdp/hyperfine \
-        lbin'!nvim' \
-        nocompletions \
-        ver'v0.11.5' \
-        @neovim/neovim \
         lbin'!rg' \
         @BurntSushi/ripgrep \
         @r-darwish/topgrade \

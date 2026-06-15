@@ -1,0 +1,89 @@
+#autoload
+#
+# spinner
+#
+
+builtin emulate -L zsh
+setopt local_options no_monitor
+
+local message="Running"
+local log_file=""
+local pid=""
+local rc=0
+local frame
+local -a cmd
+local -a frames=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+
+if (( $# < 1 )); then
+    print -u2 "usage: spinner [-l|--log <file>] [message] -- <command> [args...]"
+    return 2
+fi
+
+while (( $# )); do
+    case "$1" in
+        -l|--log)
+            shift
+            if (( $# == 0 )); then
+                print -u2 "spinner: missing log file"
+                return 2
+            fi
+            log_file="$1"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            message="$1"
+            shift
+            ;;
+    esac
+done
+
+cmd=("$@")
+
+if (( $#cmd == 0 )); then
+    print -u2 "usage: spinner [-l|--log <file>] [message] -- <command> [args...]"
+    return 2
+fi
+
+{
+    tput civis 2>/dev/null || true
+
+    if [[ -n "$log_file" ]]; then
+        "${cmd[@]}" >| "$log_file" 2>&1 &
+    else
+        "${cmd[@]}" >/dev/null 2>&1 &
+    fi
+    pid=$!
+
+    while kill -0 "$pid" 2>/dev/null; do
+        for frame in "${frames[@]}"; do
+            printf "\r %s  %s" "$frame" "$message"
+            sleep 0.05
+            kill -0 "$pid" 2>/dev/null || break
+        done
+    done
+
+    wait "$pid"
+    rc=$?
+
+    printf "\r\033[2K"
+
+    if (( rc == 0 )); then
+        print -P -- "%F{green}✔%f ${message}"
+    else
+        print -P -- "%F{red}✘%f ${message} failed"
+        if [[ -n "$log_file" ]]; then
+            print -u2 "log: $log_file"
+        fi
+    fi
+
+    return "$rc"
+} always {
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null || true
+    fi
+    tput cnorm 2>/dev/null || true
+}

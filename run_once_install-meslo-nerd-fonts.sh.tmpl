@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+# Install MesloLGS NF fonts for macOS user font directory.
+# This is intentionally limited to font installation only.
+# Terminal/font selection is managed manually by the terminal app.
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  exit 0
+fi
+
+font_dir="$HOME/Library/Fonts"
+base_url="https://github.com/romkatv/powerlevel10k-media/raw/master"
+
+mkdir -p "$font_dir"
+
+install_font() {
+  file="$1"
+  dest="$font_dir/$file"
+
+  if [ -f "$dest" ]; then
+    echo "font already installed: $file"
+    return 0
+  fi
+
+  tmp="$dest.tmp.$$"
+  echo "installing font: $file"
+
+  curl -fsSL -o "$tmp" "$base_url/$(printf '%s' "$file" | sed 's/ /%20/g')"
+  mv -f "$tmp" "$dest"
+}
+
+install_font "MesloLGS NF Regular.ttf"
+install_font "MesloLGS NF Bold.ttf"
+install_font "MesloLGS NF Italic.ttf"
+install_font "MesloLGS NF Bold Italic.ttf"
+
+echo "MesloLGS NF fonts installed."
