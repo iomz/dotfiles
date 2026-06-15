@@ -1,6 +1,0 @@
-#!autoload
-#
-# cmd
-#
-
-builtin cd ${XDG_DATA_HOME:-~/.local/share/}/chezmoi
