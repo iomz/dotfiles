@@ -50,7 +50,13 @@ After bootstrapping, install the configured runtimes and developer CLIs:
 
 ```zsh
 mise install
+mise reshim
 ```
+
+Run `mise reshim` after installing or changing tools so newly managed CLIs are
+available through mise shims. The chezmoi
+`run_onchange_after_mise-install.sh.tmpl` script also runs these commands when
+the tool version configuration changes.
 
 Verify the runtime environment:
 
