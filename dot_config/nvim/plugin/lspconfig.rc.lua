@@ -46,16 +46,23 @@ local function on_attach(client, bufnr)
     -- format on save (clear only this buffer's autocmds)
     -- Skip for Go files since they have their own goimports formatter
     local ft = vim.bo[bufnr].filetype
-    if not vim.tbl_contains({ "go", "gomod" }, ft) then
+    local format_on_save = false
+
+    if format_on_save and not vim.tbl_contains({ "go", "gomod" }, ft) then
         vim.api.nvim_clear_autocmds({ group = format_augroup, buffer = bufnr })
+
         vim.api.nvim_create_autocmd("BufWritePre", {
             group = format_augroup,
             buffer = bufnr,
             callback = function()
                 vim.lsp.buf.format({ bufnr = bufnr, async = false })
-            end
+            end,
         })
     end
+
+    vim.keymap.set("n", "<leader>fo", function()
+        vim.lsp.buf.format({ async = true })
+    end, { desc = "Format buffer" })
 end
 
 mason_lspconfig.setup({
@@ -237,29 +244,19 @@ keymap('n', ']d', "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
 keymap('n', '<leader>e', "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
 keymap('n', '<leader>q', "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 
--- on_publish_diagnostics
-vim.lsp.handlers["textDocument/publishDiagnostics"] =
-    vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-        underline = true,
-        update_in_insert = true,
-        virtual_text = { spacing = 4, prefix = "●" },
-        severity_sort = true
-    })
-
--- DiagnosticSign in the gutter
+-- diagnostic config (e.g., gutter sings)
 vim.diagnostic.config({
-    signs = {
-        text = {
-            [vim.diagnostic.severity.ERROR] = " ",
-            [vim.diagnostic.severity.WARN] = " ",
-            [vim.diagnostic.severity.HINT] = " ",
-            [vim.diagnostic.severity.INFO] = " ",
-        },
-    },
-    virtual_text = { prefix = '●' },
-    update_in_insert = false,
     underline = true,
+    update_in_insert = false,
     severity_sort = true,
+
+    virtual_text = {
+        spacing = 4,
+        prefix = "●",
+    },
+
+    signs = true,
+
     float = {
         focusable = true,
         style = "minimal",

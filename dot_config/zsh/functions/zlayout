@@ -1,0 +1,8 @@
+#autoload
+
+if [[ -z "$1" ]]; then
+  print -u2 "usage: zlayout <layout>"
+  return 1
+fi
+
+zellij action new-tab --layout "$1"

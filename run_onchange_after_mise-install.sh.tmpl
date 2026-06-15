@@ -1,6 +1,5 @@
 #!/bin/sh
-# chezmoi template dependency:
-# {{ include "dot_tool-versions" | sha256sum }}
+# chezmoi trigger: {{ include "dot_config/mise/config.toml" | sha256sum }}
 set -eu
 
 if command -v mise >/dev/null 2>&1; then
