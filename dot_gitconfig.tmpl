@@ -1,9 +1,7 @@
 [user]
     name = Iori Mizutani
     email = iomz@sazanka.io
-{{- if eq .chezmoi.os "darwin" }}
-    signingkey = {{ onepasswordRead "op://chezmoi/gnupg/signingkey" }}
-{{- end }}
+    signingkey = AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A
 {{- if eq .chezmoi.os "darwin" }}
 [gpg]
     program = /opt/homebrew/bin/gpg

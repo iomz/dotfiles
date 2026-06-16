@@ -95,3 +95,15 @@ These tools are intentionally kept out of apt/brew unless they are required for 
 On macOS, MesloLGS NF fonts are installed into the user font directory by the chezmoi `run_once_install-meslo-nerd-fonts.sh.tmpl` script during the first `chezmoi apply`.
 
 Only the font files are installed. Terminal application font selection is managed manually.
+
+## WakaTime
+
+WakaTime is intentionally not managed by chezmoi because its API key is a
+machine-local secret and should not make `chezmoi apply` depend on a password
+manager session.
+
+Configure it manually on machines where WakaTime is used:
+
+```zsh
+wakatime --api-key
+```
