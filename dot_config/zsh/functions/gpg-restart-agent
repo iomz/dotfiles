@@ -1,0 +1,50 @@
+#autoload
+#
+# Restart the GnuPG agent and reload gpg-agent.conf.
+#
+
+builtin emulate -L zsh
+
+local pinentry_program
+local gpg_agent_conf="${GNUPGHOME:-$HOME/.gnupg}/gpg-agent.conf"
+
+if ! whence gpgconf >/dev/null 2>&1; then
+    print -u2 "gpg-restart-agent: gpgconf not found"
+    return 127
+fi
+
+if ! whence gpg-connect-agent >/dev/null 2>&1; then
+    print -u2 "gpg-restart-agent: gpg-connect-agent not found"
+    return 127
+fi
+
+if [[ -r "$gpg_agent_conf" ]]; then
+    pinentry_program="$(
+        command awk '
+            $1 == "pinentry-program" {
+                $1 = ""
+                sub(/^[[:space:]]+/, "")
+                print
+                exit
+            }
+        ' "$gpg_agent_conf"
+    )"
+
+    if [[ -n "$pinentry_program" && ! -x "$pinentry_program" ]]; then
+        print -u2 "gpg-restart-agent: pinentry-program is not executable: $pinentry_program"
+        return 1
+    fi
+fi
+
+gpgconf --check-options gpg-agent || return
+
+gpgconf --kill gpg-agent
+command killall gpg-agent 2>/dev/null || true
+gpgconf --launch gpg-agent
+
+if [[ -o interactive && -t 0 ]]; then
+    export GPG_TTY="$(tty)"
+    gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1 || true
+fi
+
+print "gpg-agent restarted"

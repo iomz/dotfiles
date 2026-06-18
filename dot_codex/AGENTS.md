@@ -31,6 +31,10 @@ Keep commits small and reviewable.
 
 Do not rewrite history unless explicitly requested.
 
+For GitHub operations, run `gh` with elevated permissions by default.
+
+Do not diagnose sandbox `gh auth status` unless elevated `gh` also fails.
+
 Do not force-push unless explicitly requested.
 
 # Design
