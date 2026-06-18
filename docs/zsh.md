@@ -28,9 +28,11 @@ Files in `rc.d` are loaded numerically:
 - `01-options.zsh`: shell options and history
 - `02-plugin-manager.zsh`: Zinit bootstrap and plugins
 - `03-tools.zsh`: Zinit-managed binary tools
-- `05-mise.zsh`: mise activation
+- `04-mise.zsh`: mise activation
+- `05-zeno.zsh`: zeno-relevant config
 - `06-widgets.zsh`: ZLE widgets
 - `07-style.zsh`: colors, completion styles, prompt colors
+- `08-hooks.zsh`: useful hooks
 - `10-bindkeys.zsh`: key bindings
 - `20-aliases.zsh`: aliases and command shortcuts
 - `21-dirs.zsh`: named directories
@@ -61,13 +63,4 @@ Clean broken links:
 
 ```zsh
 zinit cclean
-```
-
-## Neovim Nightly
-
-The Neovim binary is installed by Zinit. The `nightly` tag does not always move
-for new commits. To force reinstall, remove the plugin directory and reopen zsh:
-
-```zsh
-rm -fr ${XDG_DATA_HOME}/zinit/plugins/neovim---neovim
 ```

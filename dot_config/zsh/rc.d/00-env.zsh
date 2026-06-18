@@ -112,3 +112,13 @@ ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
     zeno-auto-snippet-and-accept-line
 )
 # }}}
+
+# MeCab UniDic NEologd {{{
+_mecab_dic_path="${XDG_DATA_HOME:-$HOME/.local/share}/mecab-unidic-NEologd"
+
+if [[ -d "$_mecab_dic_path" ]]; then
+    export MECAB_DIC_PATH="$_mecab_dic_path"
+fi
+
+unset _mecab_dic_path
+# }}}

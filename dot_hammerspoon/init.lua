@@ -33,5 +33,5 @@ hs.hotkey.bind({"ctrl", "alt"}, "F", function()
   moveTo({x = 0, y = 0, w = 1, h = 1})
 end)
 
--- ChatGPT return guard
-require("modules.chatgpt_return_guard").start()
+-- Accidental return guard
+require("modules.return_guard").start()
