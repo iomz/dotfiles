@@ -127,7 +127,7 @@ vim.lsp.config('lua_ls', {
                 version = 'LuaJIT',
             },
             diagnostics = {
-                globals = { 'exepath', 'vim' },
+                globals = { 'exepath', 'hs', 'vim' },
             },
             workspace = {
                 library = vim.api.nvim_get_runtime_file("", true),

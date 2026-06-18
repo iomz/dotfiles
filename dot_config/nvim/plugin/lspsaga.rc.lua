@@ -2,6 +2,11 @@ local status, lspsaga = pcall(require, "lspsaga")
 if (not status) then return end
 
 lspsaga.setup({
+    lightbulb = {
+        enable = false,
+        sign = false,
+        virtual_text = false,
+    },
     ui = {
         -- This option only works in Neovim 0.9
         title = true,
