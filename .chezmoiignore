@@ -57,3 +57,7 @@ run_once_install-packages.sh.tmpl
 .codex/skills/.local/**
 .codex/skills/.system/
 .codex/skills/.system/**
+.codex/skills/**/.git/
+.codex/skills/**/.git/**
+.codex/skills/**/node_modules/
+.codex/skills/**/node_modules/**
