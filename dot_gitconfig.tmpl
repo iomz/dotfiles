@@ -1,6 +1,6 @@
 [user]
-    name = Iori Mizutani
-    email = iomz@sazanka.io
+    name = {{ get . "git_name" | default "Iori Mizutani" | quote }}
+    email = {{ get . "git_email" | default "iomz@sazanka.io" | quote }}
     signingkey = AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A
 {{- if eq .chezmoi.os "darwin" }}
 [gpg]
