@@ -24,6 +24,11 @@ In practice:
 
 Avoid installing the same tool through multiple layers unless there is a clear bootstrap reason.
 
+Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools.
+Homebrew refuses direct installs of those formula names and any package that
+depends on them. Versioned or differently named formulae still require review;
+the variable is a guardrail, not a complete package-policy audit.
+
 ## System Dependencies
 
 System dependencies are installed by the chezmoi `run_once_install-packages.sh.tmpl` script during `chezmoi apply`.

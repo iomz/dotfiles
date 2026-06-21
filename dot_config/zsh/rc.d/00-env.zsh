@@ -39,6 +39,7 @@ if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
     if [[ -n "${BREW_LOCATION}" ]]; then
         eval "$("$BREW_LOCATION" shellenv)"
         unset BREW_LOCATION
+        export HOMEBREW_FORBIDDEN_FORMULAE="deno direnv go just lua node pnpm poetry python python3 ruby zellij"
         path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
         fpath=( $HOMEBREW_PREFIX/share/zsh/site-functions(/N) $fpath )
         # brew curl
