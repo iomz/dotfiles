@@ -72,9 +72,9 @@ fi
 #!/bin/sh
 set -eu
 
+# Core packages required to bootstrap or maintain this dotfiles environment.
 brew install \
   ca-certificates \
-  chafa \
   cmake \
   coreutils \
   git \
@@ -89,9 +89,26 @@ brew install \
   readline \
   sqlite3 \
   tcl-tk \
+  xz \
+  zlib
+
+# Daily convenience CLIs managed by Homebrew.
+brew install \
+  bat \
+  bat-extras \
+  delta \
+  duf \
+  dust \
+  eza \
+  hyperfine \
   trash \
   watch \
   wget \
-  xz \
-  zlib
+
+# Specialized tools that are useful on this host but not part of the core bootstrap.
+brew install \
+  act \
+  antigravity-cli \
+  chafa \
+  goreleaser
 {{ end -}}

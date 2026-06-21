@@ -38,20 +38,26 @@ chezmoi apply
 
 ## Responsibility Split
 
-| Layer    | Owns                                                                                     | Source of truth                             |
-| -------- | ---------------------------------------------------------------------------------------- | ------------------------------------------- |
-| apt/brew | OS bootstrap packages, compiler dependencies, GUI-adjacent tools, and system integration | `run_once_install-packages.sh.tmpl`         |
-| mise     | Pinned development runtimes and developer CLIs, including Bitwarden CLI                  | `dot_config/mise/config.toml`               |
-| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
-| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                              | Managed files in this repository            |
+| Layer    | Owns                                                                                                                                                           | Source of truth                             |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `run_once_install-packages.sh.tmpl`         |
+| mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `dot_config/mise/config.toml`               |
+| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
+| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
 
 Each tool should have one owner. Duplicate installation is reserved for explicit bootstrap or package-dependency requirements.
 
 In practice:
 
-- apt/brew owns OS bootstrap dependencies such as `git`, `gpg`, `gawk`, `mise`, build dependencies for Python, Ruby, and Lua, and tools that are better handled as system packages.
-- mise owns Python, Node.js, Ruby, Go, Lua, Deno, `pnpm`, Poetry, `pipx`, `uv`, `just`, `direnv`, Neovim, Zellij, Starship, Bitwarden CLI, and most developer CLIs such as `bat`, `delta`, `eza`, `fd`, `fzf`, `ghq`, `ripgrep`, and `hyperfine`.
-- zinit owns zsh-specific integrations such as zsh plugins, selected completion snippets, Pure fallback prompt, autosuggestions, syntax highlighting, zeno.zsh, and navigation helpers.
+- apt/brew owns system-level packages: bootstrap dependencies, OS integration, native build dependencies, GUI-adjacent tools, and packages that should follow the host package manager.
+- mise owns versioned developer environments: language runtimes, runtime-adjacent package managers, editor/runtime foundations, and developer CLIs that need reproducible versions across machines.
+- zinit owns zsh-only integrations: plugins, completion snippets, prompt fallback, widgets, syntax highlighting, autosuggestions, and navigation helpers.
+
+Ownership is based on responsibility, not installability. If multiple layers can install a tool, choose the layer that best matches the tool's role and document exceptions near the configuration that declares them.
+
+Use mise global for tools whose version or availability is part of the reproducible development environment. Use Homebrew for convenience CLIs that can follow the host package manager and do not need cross-machine version control.
+
+Do not keep a tool in mise global only because mise can install it.
 
 Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
 

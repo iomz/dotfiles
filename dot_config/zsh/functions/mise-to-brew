@@ -1,0 +1,168 @@
+#autoload
+
+builtin emulate -L zsh
+setopt pipefail
+
+[[ $# -eq 1 && -n $1 ]] || {
+    print -u2 "usage: mise-to-brew <tool>"
+    return 2
+}
+
+local tool=$1
+local -A formula_by_tool=(
+    gh github-cli
+    golang go
+    nodejs node
+)
+local -A executable_by_tool=(
+    bat-extras batgrep
+    github-cli gh
+    gh gh
+    go go
+    golang go
+    maven mvn
+    node node
+    nodejs node
+    r R
+    ripgrep rg
+    universal-ctags ctags
+)
+local formula=${formula_by_tool[$tool]:-$tool}
+local command_name=${executable_by_tool[$tool]:-${executable_by_tool[$formula]:-$tool}}
+local brew_bin
+local brew_prefix
+local mise_config
+local required_command
+local source_root
+
+for required_command in brew chezmoi mise python3; do
+    whence -p "$required_command" >/dev/null 2>&1 || {
+        print -u2 "mise-to-brew: required command not found: $required_command"
+        return 127
+    }
+done
+
+mise_config="$(command chezmoi source-path "$HOME/.config/mise/config.toml")" || {
+    print -u2 "mise-to-brew: mise config is not managed by chezmoi"
+    return 1
+}
+source_root=${mise_config:h:h:h}
+
+command grep -Eq "^[[:space:]]*(\"${tool}\"|${tool})[[:space:]]*=" "$mise_config" || {
+    print -u2 "mise-to-brew: tool is not declared in mise config: $tool"
+    return 1
+}
+
+brew_prefix="$(command brew --prefix)" || {
+    print -u2 "mise-to-brew: failed to resolve Homebrew prefix"
+    return 1
+}
+
+if command brew list --formula "$formula" >/dev/null 2>&1; then
+    print "mise-to-brew: Homebrew formula already installed: $formula"
+else
+    print "mise-to-brew: installing $formula with Homebrew"
+
+    # This command intentionally bypasses the local Homebrew guard for one
+    # migration operation. The mise config update below removes the conflict.
+    HOMEBREW_FORBIDDEN_FORMULAE= command brew install "$formula" || {
+        print -u2 "mise-to-brew: Homebrew install failed; mise config retained"
+        return 1
+    }
+fi
+
+brew_bin="$(command brew --prefix "$formula" 2>/dev/null)/bin/$command_name"
+
+if [[ ! -x "$brew_bin" ]]; then
+    brew_bin="$(whence -p "$command_name" 2>/dev/null)" || {
+        print -u2 "mise-to-brew: executable not found after brew install: $command_name"
+        print -u2 "mise-to-brew: mise config retained"
+        return 1
+    }
+fi
+
+[[ $brew_bin == "$brew_prefix"/* ]] || {
+    print -u2 "mise-to-brew: unexpected executable path before migration: $brew_bin"
+    print -u2 "mise-to-brew: mise config retained"
+    return 1
+}
+
+print "mise-to-brew: verified $command_name at $brew_bin"
+
+command python3 - "$mise_config" "$tool" <<'PY' || {
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+tool = sys.argv[2]
+
+def toml_basic_quote(s: str) -> str:
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+keys = {tool, toml_basic_quote(tool), "'" + tool.replace("'", "\\'") + "'"}
+
+lines = path.read_text().splitlines(keepends=True)
+out = []
+in_tools = False
+removed = False
+
+for line in lines:
+    stripped = line.strip()
+
+    if re.match(r"^\[tools\]\s*(#.*)?$", stripped):
+        in_tools = True
+        out.append(line)
+        continue
+
+    if in_tools and re.match(r"^\[.+\]\s*(#.*)?$", stripped):
+        in_tools = False
+
+    if in_tools and stripped and not stripped.startswith("#") and "=" in line:
+        lhs = line.split("=", 1)[0].strip()
+        if lhs in keys:
+            removed = True
+            continue
+
+    out.append(line)
+
+if not removed:
+    print(f"mise-to-brew: tool not found in [tools]: {tool}", file=sys.stderr)
+    sys.exit(3)
+
+path.write_text("".join(out))
+PY
+    print -u2 "mise-to-brew: failed to remove $tool from mise config"
+    print -u2 "mise-to-brew: Homebrew formula remains installed"
+    return 1
+}
+
+command chezmoi apply "$HOME/.config/mise/config.toml" || {
+    print -u2 "mise-to-brew: chezmoi apply failed; Homebrew formula remains installed"
+    return 1
+}
+
+command mise reshim || {
+    print -u2 "mise-to-brew: mise reshim failed; check PATH manually"
+    return 1
+}
+
+rehash
+
+brew_bin="$(whence -p "$command_name" 2>/dev/null)" || {
+    print -u2 "mise-to-brew: executable disappeared after migration: $command_name"
+    return 1
+}
+
+[[ $brew_bin == "$brew_prefix"/* ]] || {
+    print -u2 "mise-to-brew: executable is not resolved from Homebrew after migration: $brew_bin"
+    return 1
+}
+
+print "mise-to-brew: moved $tool from mise to Homebrew as $formula"
+print "mise-to-brew: verified $command_name at $brew_bin"
+
+if ! command grep -q -F "  $formula \\" "$source_root/run_once_install-packages.sh.tmpl" 2>/dev/null &&
+    ! command grep -q -x "  $formula" "$source_root/run_once_install-packages.sh.tmpl" 2>/dev/null; then
+    print -u2 "mise-to-brew: warning: $formula is not declared in run_once_install-packages.sh.tmpl"
+fi
