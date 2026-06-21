@@ -1,0 +1,93 @@
+#autoload
+
+builtin emulate -L zsh
+setopt pipefail
+
+[[ $# -eq 1 && -n $1 ]] || {
+    print -u2 "usage: brew-to-mise <tool>"
+    return 2
+}
+
+local tool=$1
+local -A executable_by_tool=(
+    github-cli gh
+    maven mvn
+    r R
+    ripgrep rg
+    universal-ctags ctags
+)
+local command_name=${executable_by_tool[$tool]:-$tool}
+local mise_config
+local mise_bin
+local registry_backend
+local required_command
+local source_root
+
+for required_command in brew chezmoi mise; do
+    whence -p "$required_command" >/dev/null 2>&1 || {
+        print -u2 "brew-to-mise: required command not found: $required_command"
+        return 127
+    }
+done
+
+command brew list --formula "$tool" >/dev/null 2>&1 || {
+    print -u2 "brew-to-mise: Homebrew formula is not installed: $tool"
+    return 1
+}
+
+registry_backend="$(command mise registry "$tool" 2>/dev/null)" || {
+    print -u2 "brew-to-mise: failed to query mise registry: $tool"
+    return 1
+}
+
+[[ -n $registry_backend ]] || {
+    print -u2 "brew-to-mise: tool not found in mise registry: $tool"
+    return 1
+}
+
+mise_config="$(command chezmoi source-path "$HOME/.config/mise/config.toml")" || {
+    print -u2 "brew-to-mise: mise config is not managed by chezmoi"
+    return 1
+}
+source_root=${mise_config:h:h:h}
+
+print "brew-to-mise: installing $tool with mise ($registry_backend)"
+command mise use --path "$mise_config" --pin "${tool}@latest" || {
+    print -u2 "brew-to-mise: mise install failed; Homebrew formula retained"
+    return 1
+}
+
+command chezmoi apply "$HOME/.config/mise/config.toml" || {
+    print -u2 "brew-to-mise: chezmoi apply failed; Homebrew formula retained"
+    return 1
+}
+
+command mise reshim || {
+    print -u2 "brew-to-mise: mise reshim failed; Homebrew formula retained"
+    return 1
+}
+
+mise_bin="$(command mise which "$command_name" 2>/dev/null)" || {
+    print -u2 "brew-to-mise: mise did not activate executable '$command_name'; Homebrew formula retained"
+    return 1
+}
+
+[[ $mise_bin == ${MISE_DATA_DIR:-$HOME/.local/share/mise}/installs/* ]] || {
+    print -u2 "brew-to-mise: unexpected executable path: $mise_bin"
+    print -u2 "brew-to-mise: Homebrew formula retained"
+    return 1
+}
+
+print "brew-to-mise: verified $command_name at $mise_bin"
+command brew uninstall "$tool" || {
+    print -u2 "brew-to-mise: Homebrew uninstall failed; mise remains configured"
+    return 1
+}
+
+rehash
+print "brew-to-mise: moved $tool from Homebrew to mise"
+
+if command grep -q -F "  $tool \\" "$source_root/run_once_install-packages.sh.tmpl" 2>/dev/null ||
+    command grep -q -x "  $tool" "$source_root/run_once_install-packages.sh.tmpl" 2>/dev/null; then
+    print -u2 "brew-to-mise: warning: $tool is still declared in run_once_install-packages.sh.tmpl"
+fi

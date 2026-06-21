@@ -17,10 +17,9 @@ ZI+=(
     PLUGINS_DIR "$ZI[HOME_DIR]"/plugins
     SNIPPETS_DIR "$ZI[HOME_DIR]"/snippets
     SRC 'zdharma-continuum'
-    ZCOMPDUMP_PATH "$ZI[HOME_DIR]"/zcompdump
-    ZPFX "$ZI[HOME_DIR]"/polaris
+    ZCOMPDUMP_DIR "$ZI[HOME_DIR]"/zcompdump
 )
-mkdir -p "$ZI[ZCOMPDUMP_PATH]" || true
+mkdir -p "$ZI[ZCOMPDUMP_DIR]" || true
 if [[ ! -e $ZI[BIN_DIR]/zinit.zsh ]]; then
     {
         log::info 'downloading zinit'
@@ -29,6 +28,7 @@ if [[ ! -e $ZI[BIN_DIR]/zinit.zsh ]]; then
             https://github.com/${ZI[FORK]:-${ZI[SRC]}}/zinit.git \
             ${ZI[BIN_DIR]}
         log::info 'setting up zinit'
+        # Avoid insecure completion directory warnings.
         command chmod g-rwX ${ZI[HOME_DIR]} && \
             zcompile "${ZI[BIN_DIR]}/zinit.zsh"
         log::info 'installed zinit'
@@ -45,77 +45,65 @@ else
 fi
 # }}}
 
-
-# Static zsh binary {{{
-#
-# zinit for atpull"%atclone" depth"1" lucid nocompile nocompletions as"null" \
-    #     atclone"./install -e no -d ~/.local" atinit"export PATH=$HOME/.local/bin:$PATH" \
-    #   @romkatv/zsh-bin
-# }}}
-
-
 # Snippets {{{
 #
-local GH_RAW_URL='https://raw.githubusercontent.com'
+typeset -g GH_RAW_URL='https://raw.githubusercontent.com'
+
 znippet() {
-    zinit for \
+    local command_name=$1
+    local snippet_path=$2
+    local snippet_url="${GH_RAW_URL}/${snippet_path}/_${command_name}"
+
+    zinit ice \
         as'completion' \
-        depth'1' \
-        has"${1}" \
-        is-snippet \
+        has"${command_name}" \
+        id-as"_${command_name}" \
         light-mode \
-        nocompile \
-        "${GH_RAW_URL}/${2}/_${1}";
+        nocompile
+
+    zinit snippet "${snippet_url}"
 }
-znippet 'brew'   'Homebrew/brew/master/completions/zsh'
+
 znippet 'docker' 'docker/cli/master/contrib/completion/zsh'
-znippet 'exa'    'ogham/exa/master/completions/zsh'
 znippet 'fd'     'sharkdp/fd/master/contrib/completion'
-zinit as'completion' id-as'auto' is-snippet light-mode for \
-    "${GH_RAW_URL}/git/git/master/contrib/completion/git-completion.zsh" \
-    "${GH_RAW_URL}/Homebrew/homebrew-services/master/completions/zsh/_brew_services"
+
+zinit ice \
+    as'completion' \
+    id-as'git-completion.zsh' \
+    light-mode
+
+zinit snippet "${GH_RAW_URL}/git/git/master/contrib/completion/git-completion.zsh"
 # }}}
-
-
-# Prompt {{{
-# For a minmal prompt
-#(( MINIMAL )) || {
-#    eval "MODE_CURSOR_"{'SEARCH="#ff00ff blinking underline"','VICMD="green block"','VIINS="#ffff00  bar"'}";"
-#    zinit for light-mode compile'(async|pure).zsh' multisrc'(async|pure).zsh' atinit"
-#    PURE_GIT_DOWN_ARROW='%1{↓%}'; PURE_GIT_UP_ARROW='%1{↑%}'
-#    PURE_PROMPT_SYMBOL='${HOST}%2{ ᐳ%}'; PURE_PROMPT_VICMD_SYMBOL='${HOST}%2{ ᐸ%}'
-#    zstyle ':prompt:pure:git:action' color 'yellow'
-#    zstyle ':prompt:pure:git:branch' color 'blue'
-#    zstyle ':prompt:pure:git:dirty' color 'red'
-#    zstyle ':prompt:pure:path' color 'cyan'
-#    zstyle ':prompt:pure:prompt:success' color 'green'" \
-    #        @sindresorhus/pure
-#}
-# }}}
-
 
 # Annexes {{{
-# Load zinit-annex
-zinit id-as'auto' for @"${ZI[SRC]}/zinit-annex-"{'linkman','patch-dl','submods','binary-symlink','bin-gem-node'}
+# Load only annexes still required by remaining Zinit-managed tools.
+zinit id-as'auto' for \
+    @"${ZI[SRC]}/zinit-annex-patch-dl" \
+    @"${ZI[SRC]}/zinit-annex-binary-symlink"
 # }}}
 
-
-# unit testing {{{
+# Editing {{{
 zinit light-mode for \
-    compile \
-    @vladdoster/plugin-zinit-aliases \
     atinit'bindkey -M vicmd "^v" edit-command-line' \
-    @softmoth/zsh-vim-mode \
-    as'null' \
-    lbin'!build/zsd-*' \
-    make'--always-make' \
-    @zdharma-continuum/zshelldoc \
-    atclone'./build.zsh' \
-    as'null' \
-    lbin'!' \
-    @zdharma-continuum/zunit
+    @softmoth/zsh-vim-mode
 # }}}
 
+# Zsh development {{{
+if [[ -n "${ZSH_DEV}" ]]; then
+    zinit light-mode for \
+        compile \
+        @vladdoster/plugin-zinit-aliases \
+        as'null' \
+        lbin'!build/zsd-*' \
+        make'--always-make' \
+        @zdharma-continuum/zshelldoc \
+        atclone'./build.zsh' \
+        as'null' \
+        lbin'!' \
+        @zdharma-continuum/zunit
+fi
+[[ -n "${ZSH_BENCH}" ]] && zinit light @romkatv/zsh-prompt-benchmark
+# }}}
 
 # Highlight {{{
 zle_highlight=('paste:fg=white,bg=black')
@@ -133,20 +121,10 @@ zinit wait'0a' lucid for \
 # }}}
 
 
-# compinit {{{
-#zinit lucid wait'0b' for \
-    #    as'null' atload'<do something>' \
-    #    id-as'init-zinit' \
-    #    nocd \
-    #    @zdharma-continuum/null
-# }}}
-
-
 # miscellaneous {{{
 zinit light-mode for \
     @chriskempson/base16-shell \
     @iomz/emoji-cli \
     @woefe/git-prompt.zsh \
-    @romkatv/zsh-prompt-benchmark \
     @agkozak/zsh-z
 # }}}

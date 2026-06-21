@@ -75,6 +75,13 @@ local function has_no_modifiers(flags)
   return not (flags.cmd or flags.alt or flags.ctrl or flags.shift or flags.fn)
 end
 
+local function plain_return_events()
+  return {
+    event.newKeyEvent({}, "return", true),
+    event.newKeyEvent({}, "return", false),
+  }
+end
+
 function M.start()
   if guard then
     guard:stop()
@@ -96,21 +103,19 @@ function M.start()
       return false
     end
 
-    -- Disable the guard while Google Japanese Input is active, so composition
-    -- confirmation with Return is not blocked.
-    if is_google_japanese() then
-      return false
-    end
-
     local flags = e:getFlags()
 
     -- Cmd+Return => send plain Return to the target app.
-    -- These apps usually use Return as "send", so Cmd+Return becomes Return.
+    --
+    -- This must run before the Japanese input check so Cmd+Return still sends
+    -- while Google Japanese Input is active.
     if has_only_cmd(flags) then
-      return true, {
-        event.newKeyEvent({}, "return", true),
-        event.newKeyEvent({}, "return", false),
-      }
+      return true, plain_return_events()
+    end
+
+    -- Keep plain Return available for Japanese composition confirmation.
+    if is_google_japanese() then
+      return false
     end
 
     -- Plain Return => block accidental send.

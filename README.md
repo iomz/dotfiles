@@ -29,8 +29,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 
 Use `TINY_CHEZMOI=1` for a smaller shell setup.
 
-When `.chezmoi.toml.tmpl` changes, regenerate machine-local chezmoi data before
-applying files:
+When `.chezmoi.toml.tmpl` changes, regenerate machine-local chezmoi data before applying files:
 
 ```zsh
 chezmoi init
@@ -39,33 +38,26 @@ chezmoi apply
 
 ## Responsibility Split
 
-| Layer | Owns | Source of truth |
-|---|---|---|
-| apt/brew | OS bootstrap packages, compiler dependencies, and system integration | `run_once_install-packages.sh.tmpl` |
-| mise | Pinned development runtimes and developer CLIs, including Bitwarden CLI | `dot_config/mise/config.toml` |
-| zinit | Interactive shell tools, portable GitHub release binaries, and zsh integrations | `dot_config/zsh/rc.d/02-plugin-manager.zsh`, `03-tools.zsh` |
-| chezmoi | Reproducible dotfiles, templates, and public helper scripts | Managed files in this repository |
+| Layer    | Owns                                                                                     | Source of truth                             |
+| -------- | ---------------------------------------------------------------------------------------- | ------------------------------------------- |
+| apt/brew | OS bootstrap packages, compiler dependencies, GUI-adjacent tools, and system integration | `run_once_install-packages.sh.tmpl`         |
+| mise     | Pinned development runtimes and developer CLIs, including Bitwarden CLI                  | `dot_config/mise/config.toml`               |
+| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
+| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                              | Managed files in this repository            |
 
-Each tool should have one owner. Duplicate installation is reserved for explicit
-bootstrap or package-dependency requirements.
+Each tool should have one owner. Duplicate installation is reserved for explicit bootstrap or package-dependency requirements.
 
 In practice:
 
-- apt/brew owns `git`, `gpg`, `gawk`, `mise`, and build dependencies for Python,
-  Ruby, and Lua.
-- mise owns Python, Node.js, Ruby, Go, Lua, Deno, `pnpm`, Poetry, `just`,
-  `direnv`, Neovim, Zellij, and Bitwarden CLI.
-- zinit owns interactive tools such as `bat`, `delta`, `fzf`, `ripgrep`, `ghq`,
-  `hyperfine`, and `viu`.
+- apt/brew owns OS bootstrap dependencies such as `git`, `gpg`, `gawk`, `mise`, build dependencies for Python, Ruby, and Lua, and tools that are better handled as system packages.
+- mise owns Python, Node.js, Ruby, Go, Lua, Deno, `pnpm`, Poetry, `pipx`, `uv`, `just`, `direnv`, Neovim, Zellij, Starship, Bitwarden CLI, and most developer CLIs such as `bat`, `delta`, `eza`, `fd`, `fzf`, `ghq`, `ripgrep`, and `hyperfine`.
+- zinit owns zsh-specific integrations such as zsh plugins, selected completion snippets, Pure fallback prompt, autosuggestions, syntax highlighting, zeno.zsh, and navigation helpers.
 
-Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools.
-Homebrew refuses direct installs of listed formula names and packages depending
-on them. Versioned or differently named formulae still require review.
+Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
 
 ## Public Dotfiles Safety
 
-This repository is public. Add files by allowlist, not by whole application
-directory.
+This repository is public. Add files by allowlist, not by whole application directory.
 
 Allowed:
 
@@ -82,29 +74,26 @@ Denied:
 - logs, caches, and browser data
 - generated or vendored content
 
-Use `chezmoi add` for new managed files when possible. Keep repo-only files such
-as `README.md`, `LICENSE`, and root `AGENTS.md` ignored by chezmoi.
+Use `chezmoi add` for new managed files when possible. Keep repo-only files such as `README.md`, `LICENSE`, and root `AGENTS.md` ignored by chezmoi.
 
-`.chezmoiignore` contains target paths. Source paths use chezmoi naming, for
-example `dot_config/` for `~/.config/`.
+`.chezmoiignore` contains target paths. Source paths use chezmoi naming, for example `dot_config/` for `~/.config/`.
 
 ## Common Operations
 
-| Change | Edit | Apply or verify |
-|---|---|---|
-| Add OS dependency | `run_once_install-packages.sh.tmpl` | Review target OS branch; run package manager manually on existing hosts |
-| Add or update runtime/CLI | `dot_config/mise/config.toml` | `mise install`, `mise reshim`, then `mise current` |
-| Add interactive shell tool | `dot_config/zsh/rc.d/03-tools.zsh` | Start interactive zsh and verify command resolution |
-| Change zsh integration | Relevant numbered file under `dot_config/zsh/rc.d/` | `zsh -n <file>`, then start interactive zsh |
-| Change managed dotfile | Corresponding chezmoi source path | `chezmoi diff`, then `chezmoi apply` |
-| Add managed file | Target file through `chezmoi add` | Inspect source and `chezmoi diff` before commit |
+| Change                               | Edit                                                | Apply or verify                                                         |
+| ------------------------------------ | --------------------------------------------------- | ----------------------------------------------------------------------- |
+| Add OS dependency                    | `run_once_install-packages.sh.tmpl`                 | Review target OS branch; run package manager manually on existing hosts |
+| Add or update runtime/CLI            | `dot_config/mise/config.toml`                       | `mise install`, `mise reshim`, then `mise current`                      |
+| Add zsh plugin or completion snippet | `dot_config/zsh/rc.d/02-plugin-manager.zsh`         | Start interactive zsh and verify plugin/widget/completion availability  |
+| Change zsh integration               | Relevant numbered file under `dot_config/zsh/rc.d/` | `zsh -n <file>`, then start interactive zsh                             |
+| Change managed dotfile               | Corresponding chezmoi source path                   | `chezmoi diff`, then `chezmoi apply`                                    |
+| Add managed file                     | Target file through `chezmoi add`                   | Inspect source and `chezmoi diff` before commit                         |
 
 ## Installation and Package Management
 
 ### System Dependencies
 
-`run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies
-during `chezmoi apply`:
+`run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
 - macOS uses Homebrew.
 - Debian and Ubuntu use apt.
@@ -112,8 +101,7 @@ during `chezmoi apply`:
 
 ### Mise Runtimes and CLIs
 
-Global versions live in `~/.config/mise/config.toml`, managed from
-`dot_config/mise/config.toml`.
+Global versions live in `~/.config/mise/config.toml`, managed from `dot_config/mise/config.toml`.
 
 Install and verify configured tools:
 
@@ -126,13 +114,14 @@ mise outdated
 ```
 
 Run `mise reshim` after changing tools so new executables become available.
-`run_onchange_after_mise-install.sh.tmpl` also runs installation and reshim when
-managed mise configuration changes.
+`run_onchange_after_mise-install.sh.tmpl` also runs installation and reshim when managed mise configuration changes.
+
+Most developer CLIs are intentionally managed by mise rather than Homebrew or zinit.
+This keeps command availability independent from zsh plugin loading order.
 
 ### Bitwarden CLI
 
-Bitwarden CLI is pinned through mise's npm backend. Managed tool name is
-`npm:@bitwarden/cli`; executable name is `bw`.
+Bitwarden CLI is pinned through mise's npm backend. Managed tool name is `npm:@bitwarden/cli`; executable name is `bw`.
 
 Apply and verify:
 
@@ -146,9 +135,7 @@ bw --version
 
 Do not run `mise use bw`; `bw` is not a mise registry tool.
 
-Homebrew's `bitwarden-cli` formula depends on Homebrew Node.js. After
-mise-managed `bw` works, remove duplicate formula and check remaining Node.js
-dependents:
+Homebrew's `bitwarden-cli` formula depends on Homebrew Node.js. After mise-managed `bw` works, remove duplicate formula and check remaining Node.js dependents:
 
 ```zsh
 brew uninstall bitwarden-cli
@@ -167,11 +154,26 @@ gem install neovim
 nvim +'checkhealth provider' +qa
 ```
 
-### Interactive Shell Tools
+### Interactive Shell Integrations
 
-Zinit manages interactive shell tools and portable GitHub release binaries.
-These tools stay outside apt/brew unless bootstrap or OS integration requires
-them.
+Zinit manages zsh-specific integrations only. It should not be used as a general binary installer.
+
+Managed by zinit:
+
+- zsh plugins
+- zsh completion snippets
+- Pure fallback prompt
+- zsh-autosuggestions
+- fast-syntax-highlighting
+- zeno.zsh
+- zsh-z and other shell-only helpers
+
+Managed by mise or brew instead:
+
+- standalone CLI binaries
+- language runtimes
+- GitHub release binaries used outside zsh
+- tools that need OS integration
 
 ## Zsh
 
@@ -191,8 +193,7 @@ Default zsh order:
 .zshenv -> .zprofile -> .zshrc -> .zlogin -> .zlogout
 ```
 
-`~/.profile` contains local options such as `TINY_CHEZMOI` and is loaded only
-when zsh runs in sh compatibility mode. `TINY_CHEZMOI=1` skips heavy setup.
+`~/.profile` contains local options such as `TINY_CHEZMOI` and is loaded only when zsh runs in sh compatibility mode. `TINY_CHEZMOI=1` skips heavy setup.
 
 ### rc.d Layout
 
@@ -200,21 +201,21 @@ Files load numerically:
 
 - `00-env.zsh`: environment values not set in `.zshenv`
 - `01-options.zsh`: shell options and history
-- `02-plugin-manager.zsh`: zinit bootstrap and plugins
-- `03-tools.zsh`: zinit-managed binary tools
+- `02-plugin-manager.zsh`: zinit bootstrap, zsh plugins, and completion snippets
+- `03-tools.zsh`: temporary placeholder for remaining zinit-managed tools
 - `04-mise.zsh`: mise activation
 - `05-zeno.zsh`: zeno configuration
 - `06-widgets.zsh`: ZLE widgets
-- `07-style.zsh`: colors, completion styles, and prompt colors
-- `08-hooks.zsh`: shell hooks
+- `07-style.zsh`: colors, prompt, ZLE highlighting, pager styling, and optional stderr coloring
+- `08-completion.zsh`: completion paths, `compinit`, and completion styles
+- `09-hooks.zsh`: shell hooks
 - `10-bindkeys.zsh`: key bindings
 - `20-aliases.zsh`: aliases and command shortcuts
 - `21-dirs.zsh`: named directories
 
 ### Startup Profiling
 
-Set `ZPROF` before starting zsh to enable `zprof`. Set `ENABLE_ZPROFTIME` to
-write trace logs under `/tmp/zproftime.XXXX`.
+Set `ZPROF` before starting zsh to enable `zprof`. Set `ENABLE_ZPROFTIME` to write trace logs under `/tmp/zproftime.XXXX`.
 
 ```console
 zproftime-sort /tmp/zproftime.* | head
@@ -222,9 +223,21 @@ zproftime-sort /tmp/zproftime.* | head
 
 See [How to profile your zsh startup time](https://esham.io/2018/02/zsh-profiling).
 
-### Zinit Completion Links
+### Completion Maintenance
 
-After `zinit update`, inspect and clean broken completion links:
+Completion setup is split between zinit snippets, Homebrew-managed completion directories, and local zstyle configuration.
+
+Homebrew completions are discovered through `fpath`, not through zinit snippets.
+If `compinit` reports insecure directories, inspect and fix them:
+
+```zsh
+compaudit
+compaudit | xargs chmod go-w
+```
+
+Set `ZSH_TRUST_INSECURE_COMPLETIONS=1` only as a temporary escape hatch.
+
+After zinit snippet updates, inspect and clean completion links when needed:
 
 ```zsh
 zinit completions
@@ -250,12 +263,9 @@ after/plugin/
 plugin/
 ```
 
-`init.lua` handles global startup, theme loading, lazy.nvim bootstrap, base
-modules, and OS-specific modules. Plugin specs live in
-`lua/iomz/plugins.lua`.
+`init.lua` handles global startup, theme loading, lazy.nvim bootstrap, base modules, and OS-specific modules. Plugin specs live in `lua/iomz/plugins.lua`.
 
-Runtime plugin configuration remains under `after/plugin/` and `plugin/` to
-preserve Neovim load semantics.
+Runtime plugin configuration remains under `after/plugin/` and `plugin/` to preserve Neovim load semantics.
 
 ## Codex
 
@@ -274,17 +284,15 @@ Not tracked:
 
 ### Skill Ownership
 
-| Category | Location | Owner | Chezmoi policy |
-|---|---|---|---|
-| Personal and public-safe | `~/.codex/skills/<name>/` | chezmoi | Track only after inspecting every file |
-| Private or machine-local | `~/.codex/skills/.local/<name>/` | local machine | Always ignored |
-| Codex system skills | `~/.codex/skills/.system/` | Codex | Always ignored |
-| Generated skill cache | `~/.codex/skills/.cache/` | Codex or skill tooling | Always ignored |
-| Nested metadata and dependencies | `.git/`, `node_modules/` below a skill | upstream tooling | Always ignored |
+| Category                         | Location                               | Owner                  | Chezmoi policy                         |
+| -------------------------------- | -------------------------------------- | ---------------------- | -------------------------------------- |
+| Personal and public-safe         | `~/.codex/skills/<name>/`              | chezmoi                | Track only after inspecting every file |
+| Private or machine-local         | `~/.codex/skills/.local/<name>/`       | local machine          | Always ignored                         |
+| Codex system skills              | `~/.codex/skills/.system/`             | Codex                  | Always ignored                         |
+| Generated skill cache            | `~/.codex/skills/.cache/`              | Codex or skill tooling | Always ignored                         |
+| Nested metadata and dependencies | `.git/`, `node_modules/` below a skill | upstream tooling       | Always ignored                         |
 
-Keep independently reusable public skills in their own repositories. Chezmoi
-manages only intentionally selected personal skills, not installer output,
-cloned repository metadata, or dependencies.
+Keep independently reusable public skills in their own repositories. Chezmoi manages only intentionally selected personal skills, not installer output, cloned repository metadata, or dependencies.
 
 Caveman mode is installed through Codex hooks, not through `AGENTS.md`.
 `~/.codex/hooks.json` runs caveman activation at session start.
@@ -310,14 +318,11 @@ pipx upgrade --include-injected ansible
 
 ## Fonts
 
-On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF into
-user font directory during first `chezmoi apply`. Terminal font selection stays
-manual.
+On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF into user font directory during first `chezmoi apply`. Terminal font selection stays manual.
 
 ## WakaTime
 
-WakaTime is not managed by chezmoi. Its API key is machine-local, and
-`chezmoi apply` should not require password-manager access.
+WakaTime is not managed by chezmoi. Its API key is machine-local, and `chezmoi apply` should not require password-manager access.
 
 Configure WakaTime manually where needed:
 

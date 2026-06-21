@@ -1,10 +1,11 @@
 # Inspection
 
-For commands that may produce large output, use:
+For commands expected to produce more than 200 lines, use `runlog`.
 
-`runlog <command>`
+Do not use `runlog` for commands expected to take more than 10 seconds.
+Run long commands directly with bounded output and poll their session.
 
-Then summarize the failure and inspect the log only as needed.
+Prefer narrow queries before broad scans.
 
 Before diagnosing environment issues, run `ai-check`.
 
@@ -36,6 +37,16 @@ For GitHub operations, run `gh` with elevated permissions by default.
 Do not diagnose sandbox `gh auth status` unless elevated `gh` also fails.
 
 Do not force-push unless explicitly requested.
+
+# Markdown Editing
+
+Do not auto-wrap Markdown prose.
+
+Preserve existing line breaks, paragraph structure, and document shape unless the requested change requires modifying them.
+
+When editing Markdown, make the smallest semantic diff possible.
+
+Do not reflow paragraphs to 80 columns.
 
 # Design
 

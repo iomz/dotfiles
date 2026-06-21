@@ -1,10 +1,25 @@
-runlog() {
-  local log="${TMPDIR:-/tmp}/ai-run-$(date +%Y%m%d-%H%M%S).log"
-  echo "log: $log"
-  "$@" >"$log" 2>&1
-  local status=$?
-  echo "exit: $status"
-  echo "---- tail ----"
-  tail -n 120 "$log"
-  return $status
-}
+#!/usr/bin/env zsh
+
+log=$(mktemp "${TMPDIR:-/tmp}/ai-run.XXXXXX")
+print -r -- "log: $log"
+
+"$@" >"$log" 2>&1 &
+pid=$!
+
+for _ in {1..20}; do
+    kill -0 "$pid" 2>/dev/null || break
+    sleep 1
+done
+
+if kill -0 "$pid" 2>/dev/null; then
+    kill "$pid"
+    print -r -- "timeout: 20s"
+    tail -n 80 "$log"
+    exit 124
+fi
+
+wait "$pid"
+status=$?
+print -r -- "exit: $status"
+tail -n 80 "$log"
+exit "$status"

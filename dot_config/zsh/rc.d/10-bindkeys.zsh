@@ -72,18 +72,15 @@ fi
 # }}}
 
 # zeno.zsh {{{
-if [[ -n $ZENO_LOADED ]]; then
-    bindkey -M isearch ' ' self-insert
-    bind_widget_if_exists ' ' zeno-auto-snippet
-    bind_widget_if_exists '^i' zeno-completion
-    bind_widget_if_exists '^g' zeno-ghq-cd # switch ghq dir
-    bind_widget_if_exists '^m' zeno-auto-snippet-and-accept-line
-    #bind_widget_if_exists '^r' zeno-history-selection # search history
-    bind_widget_if_exists '^s' zeno-insert-snippet # search snippets
-    #bind_widget_if_exists '^x ' zeno-insert-space # insert space
-    #bindkey '^x^m' accept-line
-    bind_widget_if_exists '^xz' zeno-toggle-auto-snippet
-fi
+bindkey -M isearch ' ' self-insert
+
+bind_widget_if_exists ' '  zeno-auto-snippet
+bind_widget_if_exists '^I' zeno-completion
+bind_widget_if_exists '^G' zeno-ghq-cd
+bind_widget_if_exists '^M' zeno-auto-snippet-and-accept-line
+bind_widget_if_exists '^R' zeno-history-selection
+bind_widget_if_exists '^S' zeno-insert-snippet
+bind_widget_if_exists '^Xz' zeno-toggle-auto-snippet
 # }}}
 
 # zsh-autosuggestions {{{

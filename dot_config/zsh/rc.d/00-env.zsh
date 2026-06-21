@@ -85,12 +85,16 @@ fi
 path=($HOME/.local/bin(N-/) $HOME/bin(N-/) $path)
 
 # fzf {{{
-# default command
-if whence rg > /dev/null; then
-    export FZF_DEFAULT_COMMAND="rg --files --hidden --follow -g '!.git' -g '!Library' -g '!.cache' -g '!.Trash'"
+# Default file source for fzf.
+# Resolve rg at execution time because plugin-managed commands may be loaded later.
+export FZF_DEFAULT_COMMAND='
+if command -v rg >/dev/null 2>&1; then
+    rg --files --hidden --follow -g "!.git" -g "!Library" -g "!.cache" -g "!.Trash"
 else
-    export FZF_DEFAULT_COMMAND="find -path '*.git/*' -prune -o -path '*Library/*' -prune -o -print"
+    find . \( -name .git -o -name Library -o -name .cache -o -name .Trash \) -prune -o -type f -print
 fi
+'
+# }}}
 
 # default options
 export FZF_DEFAULT_OPTS="--info inline --layout reverse"

@@ -43,16 +43,16 @@ if whence bat > /dev/null; then
     alias bat="bat --color=always"
 fi
 
-# exa
-if whence exa > /dev/null; then
-    alias l='exa -blF'
-    alias la='exa -abghilmu'
-    #alias la="exa -alh --git --time-style long-iso"
-    alias ll="exa -lh  --git --time-style long-iso"
-    #alias ll='exa -al'
-    alias ls='exa --git --group-directories-first'
-    #alias ls="exa"
-    alias tree='exa --tree'
+# eza
+if whence eza > /dev/null; then
+    alias l='eza -blF'
+    alias la='eza -abghilmu'
+    #alias la="eza -alh --git --time-style long-iso"
+    alias ll="eza -lh  --git --time-style long-iso"
+    #alias ll='eza -al'
+    alias ls='eza --git --group-directories-first'
+    #alias ls="eza"
+    alias tree='eza --tree'
 elif whence gls > /dev/null; then
     alias ls='gls --color=auto'
     alias ll='ls -lh'
