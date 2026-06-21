@@ -10,6 +10,8 @@
 [credential]
     helper = osxkeychain
 {{- end }}
+[commit]
+    verbose = true
 [alias]
     amend = commit --amend
     br = branch -a
@@ -34,7 +36,14 @@
     unmerged = diff --name-only --diff-filter=U
     unstage = reset -q HEAD --
 [diff]
+	algorithm = histogram
+	colorMoved = plain
+	mnemonicPrefix = true
+	renames = true
     tool = vimdiff
+[fetch]
+	prune = true
+	pruneTags = true
 [merge]
 	tool = vimdiff
 	conflictstyle = diff3
@@ -42,6 +51,10 @@
     defaultBranch = main
 [pull]
 	rebase = false
+[push]
+	autoSetupRemote = true
+	default = simple
+	followTags = true
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
