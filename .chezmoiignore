@@ -39,10 +39,21 @@ run_once_install-packages.sh.tmpl
 # local
 .zprofile
 
+# private key material and host state
+.config/age/**
+.ssh/id_*
+.ssh/*.pem
+.ssh/known_hosts*
+.ssh/authorized_keys
+
 # codex
 .codex/*
 !.codex/AGENTS.md
 !.codex/skills/
 !.codex/skills/**
+.codex/skills/.cache/
+.codex/skills/.cache/**
+.codex/skills/.local/
+.codex/skills/.local/**
 .codex/skills/.system/
 .codex/skills/.system/**
