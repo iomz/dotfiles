@@ -7,6 +7,16 @@ AGENTS.md
 # LICENSE
 LICENSE
 
+# repository tooling
+.gitignore
+.githooks/**
+.secretlintignore
+.secretlintrc.json
+justfile
+node_modules/**
+package-lock.json
+package.json
+
 # backup
 *.bak
 **/*.bak
