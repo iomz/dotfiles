@@ -15,6 +15,28 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 
 Use `TINY_CHEZMOI=1` for a smaller shell setup.
 
+## Responsibility Split
+
+| Layer | Owns | Source of truth |
+|---|---|---|
+| apt/brew | OS bootstrap packages, compiler dependencies, and system integration | `run_once_install-packages.sh.tmpl` |
+| mise | Pinned development runtimes and developer CLIs | `dot_tool-versions` |
+| zinit | Interactive shell tools, portable GitHub release binaries, and zsh integrations | `dot_config/zsh/rc.d/02-plugin-manager.zsh` and `03-tools.zsh` |
+| chezmoi | Reproducible dotfiles, templates, and public helper scripts | Managed files in this repository |
+
+Each tool should have one owner. Duplicate installation is reserved for explicit bootstrap requirements.
+
+## Common Operations
+
+| Change | Edit | Apply or verify |
+|---|---|---|
+| Add OS dependency | `run_once_install-packages.sh.tmpl` | Review script branch for target OS; run package manager manually on existing hosts |
+| Add or update runtime/CLI | `dot_tool-versions` | `mise install`, then `mise current` |
+| Add interactive shell tool | `dot_config/zsh/rc.d/03-tools.zsh` | Start interactive zsh and verify command resolution |
+| Change zsh integration | Relevant numbered file under `dot_config/zsh/rc.d/` | `zsh -n <file>`, then start interactive zsh |
+| Change managed dotfile | Corresponding chezmoi source path | `chezmoi diff`, then `chezmoi apply` |
+| Add managed file | Target file through `chezmoi add` | Inspect source and `chezmoi diff` before commit |
+
 ## Docs
 
 - [Installation](docs/install.md)
