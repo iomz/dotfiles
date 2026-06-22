@@ -71,8 +71,8 @@ REPORTTIME=10               # display process taken longer than 10 second
 # }}}
 
 # history {{{
-HISTFILE=${XDG_DATA_HOME:-$HOME/.local/share}/zsh/history
-mkdir -p ${HISTFILE:h}
+HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
+[[ -d "${HISTFILE:h}" ]] || mkdir -p "${HISTFILE:h}"
 HISTSIZE=9999999                 # The maximum number of events to save in the internal history.
 SAVEHIST=9999999                 # The maximum number of events to save in the history file.
 # }}}
