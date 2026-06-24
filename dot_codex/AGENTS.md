@@ -1,19 +1,18 @@
 # Inspection
 
-For commands expected to produce more than 200 lines, use `runlog`.
-
-Do not use `runlog` for commands expected to take more than 10 seconds.
-Run long commands directly with bounded output and poll their session.
-
 Prefer narrow queries before broad scans.
 
-Before diagnosing environment issues, run `ai-check`.
+Use `runlog` for commands expected to produce more than 200 lines, unless they may run longer than 10 seconds.
+
+Run long commands directly with bounded output and poll their session.
+
+Run `ai-check` before diagnosing environment issues.
 
 # Git
 
-Always use Conventional Commits for commit messages unless repository history clearly uses another strict format.
+Use Conventional Commits unless repository history requires another strict format.
 
-Use lowercase type/scope style, imperative subject, and no trailing period.
+Use lowercase type and scope, an imperative subject, and no trailing period.
 
 Examples:
 
@@ -21,45 +20,54 @@ Examples:
 - chore(git): stop tracking vault password file
 - docs(certbot): document forced cloudflare renewal
 
-Add detailed commit bodies explaining:
+For non-trivial commits, add a body explaining:
 
 - what changed
 - why it changed
 - architectural impact
-- migration notes when relevant
+- migration requirements, when relevant
 
 Keep commits small and reviewable.
 
 Do not rewrite history unless explicitly requested.
 
-For GitHub operations, run `gh` with elevated permissions by default.
+Run GitHub CLI operations with elevated permissions by default.
+Do not diagnose sandbox `gh` authentication unless elevated `gh` also fails.
 
-Do not diagnose sandbox `gh auth status` unless elevated `gh` also fails.
+Do not push commits or branches unless explicitly authorized.
+Permission to commit does not imply permission to push.
+Requests to publish, open a pull request, or update a remote pull request authorize pushing required commits.
 
-Do not force-push unless explicitly requested.
+## AI Attribution
+
+For commits materially authored by Codex in repositories owned by this user, append:
+
+```text
+Co-authored-by: Codex <noreply@openai.com>
+```
+
+For external repositories, follow repository policy and disclose material AI assistance in the pull request body.
+
+Minor research, review, and mechanical assistance require no attribution.
 
 # Markdown Editing
 
-Do not auto-wrap Markdown prose.
+Preserve existing line breaks, paragraph structure, and document shape unless the requested change requires otherwise.
 
-Preserve existing line breaks, paragraph structure, and document shape unless the requested change requires modifying them.
+Make the smallest semantic diff possible.
 
-When editing Markdown, make the smallest semantic diff possible.
-
-Do not reflow paragraphs to 80 columns.
+Do not auto-wrap or reflow prose to a fixed column width.
 
 # Design
 
-Prefer simple designs.
+Prefer simple designs with clear responsibility boundaries.
 
-Respect responsibility boundaries.
+Treat proposed designs as drafts subject to evaluation.
 
-Treat ideas as drafts rather than finished designs.
+When proposing an abstraction, document:
 
-When proposing abstractions, explain in the docs:
-
-- why they are needed
-- alternatives
+- why it is needed
+- viable alternatives
 - tradeoffs
 
 Prefer:
@@ -79,36 +87,33 @@ Avoid:
 - global mutable state
 
 Keep the core thin.
+Place domain-specific logic in plugins, adapters, or external systems where practical.
 
-Push domain-specific logic to plugins, adapters, or external systems whenever possible.
-
-Do not require external tools to implement repository-specific interfaces unless there is a compelling reason.
+Do not make external tools implement repository-specific interfaces without a documented architectural reason.
 
 # Safety
 
-Before running destructive operations, explain the impact and ask for confirmation.
+Before running a destructive operation, explain its impact and request confirmation.
 
-Examples include:
+Examples:
 
-- rm -rf
-- git reset --hard
-- git clean -fd
-- docker system prune
-- terraform destroy
+- `rm -rf`
+- `git reset --hard`
+- `git clean -fd`
+- `docker system prune`
+- `terraform destroy`
 
-Prefer reversible operations when possible.
+Prefer reversible operations.
 
 # Evaluation
 
-Do not automatically agree with proposals.
+Do not accept proposals without evaluation.
 
-Identify:
+Before implementation, identify:
 
 - assumptions
 - risks
 - alternatives
 - maintenance burden
-
-before implementation.
 
 Prefer long-term maintainability over short-term cleverness.

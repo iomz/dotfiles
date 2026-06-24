@@ -1,4 +1,5 @@
 -- ~/.hammerspoon/modules/return_guard.lua
+-- Accidental return guard
 
 local M = {}
 
@@ -147,3 +148,4 @@ function M.setTargetApps(apps)
 end
 
 return M
+

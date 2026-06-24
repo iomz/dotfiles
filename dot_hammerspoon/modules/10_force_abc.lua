@@ -1,4 +1,5 @@
 -- ~/.hammerspoon/modules/force_abc.lua
+-- Force ABC input source for selected apps and panels.
 
 local M = {}
 
@@ -140,3 +141,4 @@ function M.setTargetApps(apps)
 end
 
 return M
+
