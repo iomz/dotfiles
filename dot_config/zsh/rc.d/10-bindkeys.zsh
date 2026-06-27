@@ -72,14 +72,22 @@ fi
 # }}}
 
 # zeno.zsh {{{
-bindkey -M isearch ' ' self-insert
 
-bind_widget_if_exists '^I' zeno-completion
+# Useful explicit zeno widgets.
 bind_widget_if_exists '^G' zeno-ghq-cd
-bind_widget_if_exists '^M' zeno-auto-snippet-and-accept-line
 bind_widget_if_exists '^R' zeno-history-selection
-bind_widget_if_exists '^S' zeno-insert-snippet
-bind_widget_if_exists '^Xz' zeno-toggle-auto-snippet
+
+# Keep core editing keys on plain zsh defaults.
+# zeno-completion / auto-snippet widgets break redraw on Linux.
+bindkey '^I' expand-or-complete
+bindkey ' ' self-insert
+bindkey '^M' .accept-line
+
+# Disabled until their behavior is understood.
+# bind_widget_if_exists '^I' zeno-completion
+# bind_widget_if_exists '^S' zeno-insert-snippet
+# bind_widget_if_exists '^Xz' zeno-toggle-auto-snippet
+
 # }}}
 
 # zsh-autosuggestions {{{
