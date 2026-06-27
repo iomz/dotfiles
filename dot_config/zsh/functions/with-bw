@@ -1,0 +1,22 @@
+#autoload
+#
+# Run a command with a Bitwarden CLI session.
+#
+
+builtin emulate -L zsh
+
+if (( $# == 0 )); then
+    print -u2 "usage: with-bw <command> [args...]"
+    return 2
+fi
+
+if ! whence bw >/dev/null 2>&1; then
+    print -u2 "with-bw: bw not found"
+    return 127
+fi
+
+if [[ -z "${BW_SESSION:-}" ]]; then
+    export BW_SESSION="$(bw unlock --raw)"
+fi
+
+command "$@"

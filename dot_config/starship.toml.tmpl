@@ -10,7 +10,11 @@ truncate_to_repo = false
 
 [hostname]
 format = "@[$hostname]($style):"
+{{- if eq .chezmoi.os "linux" }}
+style = "bold fg:#c71585"
+{{- else }}
 style = "bold bright-blue"
+{{- end }}
 ssh_only = false
 
 [time]

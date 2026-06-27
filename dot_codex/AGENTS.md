@@ -38,6 +38,11 @@ Do not push commits or branches unless explicitly authorized.
 Permission to commit does not imply permission to push.
 Requests to publish, open a pull request, or update a remote pull request authorize pushing required commits.
 
+## Pull Requests
+
+- Never prefix pull request titles with `[codex]`.
+- Use Conventional Commit-style PR titles: lowercase type and optional scope.
+
 ## AI Attribution
 
 For commits materially authored by Codex in repositories owned by this user, append:

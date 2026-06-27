@@ -74,7 +74,6 @@ fi
 # zeno.zsh {{{
 bindkey -M isearch ' ' self-insert
 
-bind_widget_if_exists ' '  zeno-auto-snippet
 bind_widget_if_exists '^I' zeno-completion
 bind_widget_if_exists '^G' zeno-ghq-cd
 bind_widget_if_exists '^M' zeno-auto-snippet-and-accept-line

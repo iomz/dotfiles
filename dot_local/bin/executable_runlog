@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+unsetopt BG_NICE
+
 log=$(mktemp "${TMPDIR:-/tmp}/ai-run.XXXXXX")
 print -r -- "log: $log"
 
@@ -19,7 +21,7 @@ if kill -0 "$pid" 2>/dev/null; then
 fi
 
 wait "$pid"
-status=$?
-print -r -- "exit: $status"
+exit_status=$?
+print -r -- "exit: $exit_status"
 tail -n 80 "$log"
-exit "$status"
+exit "$exit_status"
