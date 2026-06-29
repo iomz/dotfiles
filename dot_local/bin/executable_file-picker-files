@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eu
+
+if command -v rg >/dev/null 2>&1; then
+    {
+        # Normal candidates: respect ignore files.
+        rg --files --hidden --follow \
+            -g '!.git/**' \
+            -g '!Library/**' \
+            -g '!.cache/**' \
+            -g '!.Trash/**' \
+            -g '!node_modules/**' \
+            -g '!dist/**' \
+            -g '!build/**' \
+            2>/dev/null || true
+
+        # Useful ignored local config files.
+        rg --files --hidden --follow --no-ignore \
+            -g '.env' \
+            -g '.env.*' \
+            -g '.envrc' \
+            -g 'config' \
+            -g 'config*' \
+            -g '!.git/**' \
+            -g '!Library/**' \
+            -g '!.cache/**' \
+            -g '!.Trash/**' \
+            -g '!node_modules/**' \
+            -g '!dist/**' \
+            -g '!build/**' \
+            2>/dev/null || true
+    } | awk '!seen[$0]++'
+else
+    find . -type f 2>/dev/null
+fi

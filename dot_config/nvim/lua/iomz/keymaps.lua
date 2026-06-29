@@ -28,9 +28,9 @@ local keymap = vim.api.nvim_set_keymap
 keymap('', 'H', '^', { noremap = true })
 -- move cursor to the end of the line
 keymap('', 'L', '$', { noremap = true })
--- keymap('', '<leader>c', 'gg0vG$y', {noremap = true})
+-- keymap('', '<Leader>c', 'gg0vG$y', {noremap = true})
 -- move cursor to the beginning of the line (hard)
-keymap('', '<leader>H', '0', { noremap = true })
+keymap('', '<Leader>H', '0', { noremap = true })
 -- scroll up
 -- keymap('n', '<C-b>', ':call comfortable_motion#flick(-40)<CR>', { noremap=true })
 -- scroll down
@@ -43,36 +43,39 @@ keymap('', '<leader>H', '0', { noremap = true })
 -- unhighlight search result
 keymap('n', '<Esc><Esc>', ':<C-u>nohlsearch<CR>', { noremap = true })
 -- reload config
--- keymap('n', '<leader><Leader>', '<cmd>lua ReloadConfig()<CR>', {noremap = true})
--- keymap('n', '<leader><Leader>', ':source $MYVIMRC<CR>', {noremap = true})
+-- keymap('n', '<Leader><Leader>', '<cmd>lua ReloadConfig()<CR>', {noremap = true})
+-- keymap('n', '<Leader><Leader>', ':source $MYVIMRC<CR>', {noremap = true})
 -- move window
--- keymap('n', '<leader><Tab>', '<C-w>w', { noremap=true })
+-- keymap('n', '<Leader><Tab>', '<C-w>w', { noremap=true })
 -- buffer
-keymap('n', '<leader>bp', ':bprevious<CR>', { noremap = true })
-keymap('n', '<leader>bn', ':bnext<CR>', { noremap = true })
-keymap('n', '<leader>bd', ':bdelete<CR>', { noremap = true })
---keymap('n', '<leader>gn', ':lnext<CR>', { noremap = true })
---keymap('n', '<leader>gp', ':lprevious<CR>', { noremap = true })
-keymap('n', '<leader>nt', '<cmd>lua require("neotest").run.run()<CR>', { noremap = true })
-keymap('n', '<leader>S', '<cmd>lua require("spectre").toggle()<CR>', { noremap = true })
+keymap('n', '<Leader>bp', ':bprevious<CR>', { noremap = true })
+keymap('n', '<Leader>bn', ':bnext<CR>', { noremap = true })
+keymap('n', '<Leader>bd', ':bdelete<CR>', { noremap = true })
+--keymap('n', '<Leader>gn', ':lnext<CR>', { noremap = true })
+--keymap('n', '<Leader>gp', ':lprevious<CR>', { noremap = true })
+keymap('n', '<Leader>nt', '<cmd>lua require("neotest").run.run()<CR>', { noremap = true })
+keymap('n', '<Leader>S', '<cmd>lua require("spectre").toggle()<CR>', { noremap = true })
 -- open tig with current file
-keymap('n', '<leader>T', ':TigOpenCurrentFile<CR>', { noremap = true })
+keymap('n', '<Leader>T', ':TigOpenCurrentFile<CR>', { noremap = true })
 -- open tig with Project root path
-keymap('n', '<leader>tt', ':TigOpenProjectRootDir<CR>', { noremap = true })
+keymap('n', '<Leader>tt', ':TigOpenProjectRootDir<CR>', { noremap = true })
 -- open tig grep
-keymap('n', '<leader>tg', ':TigGrep<CR>', { noremap = true })
+keymap('n', '<Leader>tg', ':TigGrep<CR>', { noremap = true })
 -- resume from last grep
-keymap('n', '<leader>tr', ':TigGrepResume<CR>', { noremap = true })
+keymap('n', '<Leader>tr', ':TigGrepResume<CR>', { noremap = true })
 -- open tig grep with the word under the cursor
-keymap('n', '<leader>tc', ':<C-u>:TigGrep<Space><C-R><C-W><CR>', { noremap = true })
+keymap('n', '<Leader>tc', ':<C-u>:TigGrep<Space><C-R><C-W><CR>', { noremap = true })
 -- open tig blame with current file
-keymap('n', '<leader>tb', ':TigBlame<CR>', { noremap = true })
+keymap('n', '<Leader>tb', ':TigBlame<CR>', { noremap = true })
 -- select all
 keymap('n', '<C-a>', 'gg0vG$', { noremap = true })
 -- tagbar
 keymap('n', '<C-l>', ':Tagbar<CR>', { noremap = true })
 -- minimap
 --keymap('n', '<C-m>', ':MinimapToggle<CR>', { noremap = true })
+-- Preserve Vim's original <C-o> behavior on <C-p>.
+-- This must be non-recursive, otherwise it may call the new <C-o> mapping.
+keymap('n', '<C-p>', '<C-o>', { noremap = true, silent = true })
 -- quickrun
 keymap('n', '<C-q>', ':Jaq<CR>', { noremap = true })
 -- reload init.lua

@@ -53,8 +53,8 @@ telescope.setup {
             ignore_current_buffer = false,
             sort_mru = true,
             mappings = {
-                i = { ['<c-d>'] = actions.delete_buffer },
-                n = { ['<c-d>'] = actions.delete_buffer }
+                i = { ['<C-d>'] = actions.delete_buffer },
+                n = { ['<C-d>'] = actions.delete_buffer }
             }
         }
     },
@@ -93,22 +93,32 @@ telescope.load_extension("file_browser")
 -- keymap
 local keymap = vim.keymap.set
 local opts = { noremap = true }
-keymap('n', '<c-p>', "<cmd>lua require('telescope.builtin').find_files()<CR>", opts)
-keymap('n', '<c-g>', function()
+keymap('n', '<C-o>', function()
+    if vim.fn.executable('file-picker-files') == 1 then
+        builtin.find_files({
+            find_command = { 'file-picker-files' },
+        })
+    else
+        builtin.find_files({
+            hidden = true,
+        })
+    end
+end, opts)
+keymap('n', '<C-g>', function()
     builtin.find_files({
         cwd = '~/ghq',
         hidden = false,
         no_ignore = true,
     })
 end, opts)
-keymap('n', '<leader>ff', function()
+keymap('n', '<Leader>ff', function()
     builtin.find_files({
         cwd = telescope_buffer_dir(),
         hidden = true,
         no_ignore = true,
     })
 end, opts)
-keymap("n", "<leader>fe", function()
+keymap("n", "<Leader>fe", function()
     telescope.extensions.file_browser.file_browser({
         path = "%:p:h",
         cwd = telescope_buffer_dir(),
@@ -120,11 +130,11 @@ keymap("n", "<leader>fe", function()
         layout_config = { height = 40 },
     })
 end, opts)
-keymap('n', '<leader>fb', "<cmd>lua require('telescope.builtin').buffers()<cr>", opts)
-keymap('n', '<leader>fd', "<cmd>lua require('telescope.builtin').diagnostics()<CR>", opts)
-keymap('n', '<leader>fg', "<cmd>lua require('telescope.builtin').live_grep()<CR>", opts)
-keymap('n', '<leader>fh', "<cmd>lua require('telescope.builtin').help_tags()<CR>", opts)
-keymap('n', '<leader>fr', "<cmd>lua require('telescope.builtin').resume()<CR>", opts)
+keymap('n', '<Leader>fb', "<cmd>lua require('telescope.builtin').buffers()<CR>", opts)
+keymap('n', '<Leader>fd', "<cmd>lua require('telescope.builtin').diagnostics()<CR>", opts)
+keymap('n', '<Leader>fg', "<cmd>lua require('telescope.builtin').live_grep()<CR>", opts)
+keymap('n', '<Leader>fh', "<cmd>lua require('telescope.builtin').help_tags()<CR>", opts)
+keymap('n', '<Leader>fr', "<cmd>lua require('telescope.builtin').resume()<CR>", opts)
 
 -- fzf
 ---- FZF syntax:
@@ -145,8 +155,8 @@ keymap('n', '<leader>fr', "<cmd>lua require('telescope.builtin').resume()<CR>", 
 --
 -- local builtins = require 'telescope.builtin'
 -- local mappings = {
---    ['<leader>'] = {
---        ['<space>'] = { builtins.find_files, 'Find files' },
+--    ['<Leader>'] = {
+--        ['<Space>'] = { builtins.find_files, 'Find files' },
 --        ['f'] = {
 --            name = 'Find',
 --            ['a'] = { builtins.builtin, 'All builtins' },

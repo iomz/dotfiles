@@ -31,6 +31,9 @@ Keep commits small and reviewable.
 
 Do not rewrite history unless explicitly requested.
 
+Do not use `codex/` branch prefixes unless explicitly requested.
+Prefer user- or repo-specific prefixes such as `fix/`, `feat/`, or `chore/` when creating branches.
+
 Run GitHub CLI operations with elevated permissions by default.
 Do not diagnose sandbox `gh` authentication unless elevated `gh` also fails.
 
@@ -62,6 +65,9 @@ Preserve existing line breaks, paragraph structure, and document shape unless th
 Make the smallest semantic diff possible.
 
 Do not auto-wrap or reflow prose to a fixed column width.
+
+When editing Markdown prose, prefer sentence-per-line formatting: one sentence per source line within a paragraph.
+Preserve existing wrapping unless the edit already touches that paragraph or the user asks to reflow it.
 
 # Design
 

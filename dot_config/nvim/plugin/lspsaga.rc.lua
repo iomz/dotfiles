@@ -39,13 +39,13 @@ local opts = { noremap = true, silent = true }
 keymap("n", "gh", "<cmd>Lspsaga lsp_finder<CR>", opts)
 
 -- Code action
-keymap({ "n", "v" }, "<leader>ca", "<cmd>Lspsaga code_action<CR>", opts)
+keymap({ "n", "v" }, "<Leader>ca", "<cmd>Lspsaga code_action<CR>", opts)
 
 -- Rename all occurrences of the hovered word for the entire file
-keymap("n", "<leader>rnf", "<cmd>Lspsaga rename<CR>", opts)
+keymap("n", "<Leader>rnf", "<cmd>Lspsaga rename<CR>", opts)
 
 -- Rename all occurrences of the hovered word for the selected files
-keymap("n", "<leader>rnp", "<cmd>Lspsaga rename ++project<CR>", opts)
+keymap("n", "<Leader>rnp", "<cmd>Lspsaga rename ++project<CR>", opts)
 
 -- Peek definition
 -- You can edit the file containing the definition in the floating window
@@ -71,16 +71,16 @@ keymap("n", "gT", "<cmd>Lspsaga goto_type_definition<CR>", opts)
 -- Show line diagnostics
 -- You can pass argument ++unfocus to
 -- unfocus the show_line_diagnostics floating window
-keymap("n", "<leader>sl", "<cmd>Lspsaga show_line_diagnostics<CR>", opts)
+keymap("n", "<Leader>sl", "<cmd>Lspsaga show_line_diagnostics<CR>", opts)
 
 -- Show buffer diagnostics
-keymap("n", "<leader>sb", "<cmd>Lspsaga show_buf_diagnostics<CR>", opts)
+keymap("n", "<Leader>sb", "<cmd>Lspsaga show_buf_diagnostics<CR>", opts)
 
 -- Show workspace diagnostics
-keymap("n", "<leader>sw", "<cmd>Lspsaga show_workspace_diagnostics<CR>", opts)
+keymap("n", "<Leader>sw", "<cmd>Lspsaga show_workspace_diagnostics<CR>", opts)
 
 -- Show cursor diagnostics
-keymap("n", "<leader>sc", "<cmd>Lspsaga show_cursor_diagnostics<CR>", opts)
+keymap("n", "<Leader>sc", "<cmd>Lspsaga show_cursor_diagnostics<CR>", opts)
 
 -- Diagnostic jump
 -- You can use <C-o> to jump back to your previous location
@@ -96,7 +96,7 @@ keymap("n", "]E", function()
 end)
 
 -- Toggle outline
-keymap("n", "<leader>o", "<cmd>Lspsaga outline<CR>", opts)
+keymap("n", "<Leader>o", "<cmd>Lspsaga outline<CR>", opts)
 
 -- Hover Doc
 -- If there is no hover doc,
@@ -114,11 +114,11 @@ keymap("n", "K", "<cmd>Lspsaga hover_doc<CR>", opts)
 --keymap("n", "K", "<cmd>Lspsaga hover_doc ++keep<CR>", opts)
 
 -- Call hierarchy
-keymap("n", "<leader>ci", "<cmd>Lspsaga incoming_calls<CR>", opts)
-keymap("n", "<leader>co", "<cmd>Lspsaga outgoing_calls<CR>", opts)
+keymap("n", "<Leader>ci", "<cmd>Lspsaga incoming_calls<CR>", opts)
+keymap("n", "<Leader>co", "<cmd>Lspsaga outgoing_calls<CR>", opts)
 
 -- Floating terminal
-keymap({ "n", "t" }, "<leader>sh", "<cmd>Lspsaga term_toggle<CR>", opts)
+keymap({ "n", "t" }, "<Leader>sh", "<cmd>Lspsaga term_toggle<CR>", opts)
 
 -- Signature help
-keymap("i", "<c-K>", "<cmd>Lspsaga signature_help<CR>", opts)
+keymap("i", "<C-K>", "<cmd>Lspsaga signature_help<CR>", opts)

@@ -94,3 +94,9 @@ bindkey '^M' .accept-line
 bind_widget_if_exists '^_' autosuggest-execute
 bind_widget_if_exists '^ ' autosuggest-accept
 # }}}
+
+# Shift+Enter inserts a literal newline instead of accepting the command line. {{{
+bind_widget_if_exists $'\e[13;2u' insert-line-break
+bind_widget_if_exists $'\e[13;2~' insert-line-break
+bind_widget_if_exists $'\e[27;2;13~' insert-line-break
+# }}}

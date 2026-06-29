@@ -25,21 +25,21 @@ local format_augroup = vim.api.nvim_create_augroup("Format", { clear = true })
 
 -- Function executed when the LSP server startup
 local function on_attach(client, bufnr)
-    -- Enable completion triggered by <c-x><c-o>
+    -- Enable completion triggered by <C-x><C-o>
     vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
     -- Mappings (mostly replaced by lspsaga)
     local keymap = vim.keymap.set
     local bufopts = { noremap = true, silent = true, buffer = bufnr }
     ---- See `:help vim.lsp.*` for documentation on any of the below functions
-    keymap('n', '<leader>gD', "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
-    keymap('n', '<leader>gi', "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
-    keymap('n', '<leader>gr', "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
-    --keymap('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
-    keymap('n', '<leader>gf', '<cmd>lua vim.lsp.buf.format()<CR>', bufopts)
-    keymap('n', '<leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
-    keymap('n', '<leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
-    keymap('n', '<leader>gwl', function()
+    keymap('n', '<Leader>gD', "<cmd>lua vim.lsp.buf.declaration()<CR>", bufopts)
+    keymap('n', '<Leader>gi', "<cmd>lua vim.lsp.buf.implementation()<CR>", bufopts)
+    keymap('n', '<Leader>gr', "<cmd>lua vim.lsp.buf.references()<CR>", bufopts)
+    --keymap('n', '<Leader>D', vim.lsp.buf.type_definition, bufopts)
+    keymap('n', '<Leader>gf', '<cmd>lua vim.lsp.buf.format()<CR>', bufopts)
+    keymap('n', '<Leader>gwa', "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", bufopts)
+    keymap('n', '<Leader>gwr', "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", bufopts)
+    keymap('n', '<Leader>gwl', function()
         print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, bufopts)
 
@@ -60,7 +60,7 @@ local function on_attach(client, bufnr)
         })
     end
 
-    vim.keymap.set("n", "<leader>fo", function()
+    vim.keymap.set("n", "<Leader>fo", function()
         vim.lsp.buf.format({ async = true })
     end, { desc = "Format buffer" })
 end
@@ -241,8 +241,8 @@ local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 keymap('n', '[d', "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
 keymap('n', ']d', "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
-keymap('n', '<leader>e', "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
-keymap('n', '<leader>q', "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
+keymap('n', '<Leader>e', "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
+keymap('n', '<Leader>q', "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
 
 -- diagnostic config (e.g., gutter sings)
 vim.diagnostic.config({

@@ -7,19 +7,39 @@
 [[ -o interactive && -t 0 ]] || return
 [[ -o zle ]] || return
 
+# inserts a literal newline
+insert-line-break() {
+    LBUFFER+=$'\n'
+}
+zle -N insert-line-break
+
 # open $EDITOR with fzf
+_fzf_edit_candidates() {
+    if whence file-picker-files >/dev/null 2>&1; then
+        # Shared file candidate generator managed by chezmoi:
+        # dot_local/bin/executable_file-picker-files
+        file-picker-files
+    elif whence rg >/dev/null 2>&1; then
+        rg --files --hidden --follow 2>/dev/null
+    else
+        find . -type f 2>/dev/null
+    fi
+}
+
 fzf-edit-widget() {
     local file
     local -a editor_cmd
 
     command -v fzf >/dev/null 2>&1 || return
 
+    zle -I
+
     file="$(
-        fzf \
-            --preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {}' \
-            --preview-window 'right:60%:wrap' \
-            < /dev/tty
-    )"|| {
+        _fzf_edit_candidates |
+            fzf \
+                --preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {} 2>/dev/null || file {}' \
+                --preview-window 'right:60%:wrap'
+    )" || {
         zle reset-prompt
         return
     }
@@ -31,7 +51,6 @@ fzf-edit-widget() {
 
     editor_cmd=(${(z)${EDITOR:-nvim}})
 
-    zle -I
     "${editor_cmd[@]}" -- "$file" < /dev/tty > /dev/tty 2>&1
     zle reset-prompt
 }
