@@ -15,7 +15,6 @@ vim.opt.termguicolors = true
 vim.scriptencoding = 'utf-8'
 vim.wo.number = true
 
-
 -- base16 color
 local current_theme_name = os.getenv('BASE16_THEME')
 if current_theme_name and vim.g.colors_name ~= 'base16-' .. current_theme_name then
@@ -31,6 +30,23 @@ if is_set_theme_file_readable then
     vim.cmd("source " .. set_theme_path)
 end
 
+-- Use OSC 52 clipboard when running over SSH.
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+    },
+    paste = {
+      ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+    },
+  }
+
+  vim.opt.clipboard = "unnamedplus"
+end
+
 -- lazy.vim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -41,7 +57,7 @@ if not vim.loop.fs_stat(lazypath) then
     })
 end
 vim.opt.rtp:prepend(lazypath)
-require('lazy').setup(require('iomz.plugins'), {
+require('lazy').setup(require('config.plugins'), {
     -- defaults = {lazy = true},
     performance = {
         rtp = {
@@ -66,26 +82,9 @@ require('lazy').setup(require('iomz.plugins'), {
 -- Add asterisks in block comments
 -- vim.opt.formatoptions:append { 'r' }
 
-require('iomz.options')
-require('iomz.keymaps')
-require('iomz.commands')
-
--- Use OSC 52 clipboard when running over SSH.
-if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
-  vim.g.clipboard = {
-    name = "OSC 52",
-    copy = {
-      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
-      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
-    },
-    paste = {
-      ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
-      ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
-    },
-  }
-
-  vim.opt.clipboard = "unnamedplus"
-end
+require('config.options')
+require('config.keymaps')
+require('config.commands')
 
 --
 -- OS-specific
@@ -95,6 +94,6 @@ local is_mac = has "macunix"
 local is_win = has "win32"
 local is_wsl = has "wsl"
 
-if is_mac == 1 then require('iomz.os.macos') end
-if is_win == 1 then require('iomz.os.windows') end
-if is_wsl == 1 then require('iomz.os.wsl') end
+if is_mac == 1 then require('config.platform.macos') end
+if is_win == 1 then require('config.platform.windows') end
+if is_wsl == 1 then require('config.platform.wsl') end
