@@ -74,6 +74,7 @@ keybinds clear-defaults=true {
 }
 
 pane_frames false
-// simplified_ui true
+session_serialization false
 show_startup_tips false
 show_release_notes false
+// simplified_ui true

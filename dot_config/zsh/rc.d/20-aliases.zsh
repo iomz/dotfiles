@@ -12,19 +12,14 @@ alias cdv='cd "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"'
 # +───────────────────+
 # │ COMMAND SHORTCUTS │
 # +───────────────────+
-alias auld='builtin autoload'
 alias me='builtin print -P "%F{blue}$(whoami)%f @ %F{cyan}$(uname -a)%f"'
-alias mk='make'
-alias zc='zinit compile'
-alias zht='hyperfine --warmup 100 --runs 10000 "/bin/ls"'
-alias zmld="builtin zmodload"
 
 # +───────+
 # │ MISC. │
 # +───────+
 #alias -- +x='chmod +x'
 #alias -- \?='which'
-alias gen-pwd='openssl rand -base64 24'
+alias gen-pwd='openssl rand -base64 32'
 alias show-env='print -lio $(env)'
 alias show-path='print -l ${(@s[:])PATH}'
 alias show-sys='echo OSTYPE=${OSTYPE} MACHTYPE=${MACHTYPE} CPUTYPE=${CPUTYPE} hardware=$(uname -m) processor=$(uname -p)'

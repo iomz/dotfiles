@@ -43,7 +43,7 @@ bindkey -e
 # }}}
 
 # fzf zle widgets
-bind_widget_if_exists '^f' fzf-insert-file-path-widget
+bind_widget_if_exists '^ ' fzf-insert-file-path-widget
 bind_widget_if_exists '^o' fzf-edit-widget
 bind_widget_if_exists '^x^o' fzf-edit-all-widget
 
@@ -75,17 +75,18 @@ fi
 # zeno.zsh {{{
 
 # Useful explicit zeno widgets.
-bind_widget_if_exists '^G' zeno-ghq-cd
-bind_widget_if_exists '^R' zeno-history-selection
+bind_widget_if_exists '^g' zeno-ghq-cd
+bind_widget_if_exists '^r' zeno-history-selection
 
 # Keep core editing keys on plain zsh defaults.
 # zeno-completion / auto-snippet widgets break redraw on Linux.
-bindkey '^I' expand-or-complete
+# bindkey '^i' expand-or-complete
 bindkey ' ' self-insert
-bindkey '^M' .accept-line
+bindkey '^m' .accept-line
 
 # Disabled until their behavior is understood.
 # bind_widget_if_exists '^I' zeno-completion
+# bind_widget_if_exists $'\e[105;5u' zeno-completion
 # bind_widget_if_exists '^S' zeno-insert-snippet
 # bind_widget_if_exists '^Xz' zeno-toggle-auto-snippet
 
