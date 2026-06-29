@@ -2,11 +2,6 @@
 -- plugins for lazy.vim
 --
 return {
-    -- autoclose; auto pairs & close brackets
-    {
-        'm4xshen/autoclose.nvim',
-        config = function() require('autoclose').setup() end
-    },
     -- bclose: for tig-explorer
     'rbgrouleff/bclose.vim',
     -- snazzy buffer line
@@ -185,8 +180,6 @@ return {
     },
     -- inject LSP diagnostics, code actions, and more via Lua
     { 'nvimtools/none-ls.nvim' },
-    -- autopair: https://github.com/windwp/nvim-autopairs
-    --'windwp/nvim-autopairs',
     -- base16
     {
         'RRethy/nvim-base16',

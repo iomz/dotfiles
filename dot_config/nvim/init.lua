@@ -7,7 +7,6 @@
 -- =============================================================
 -- Initialization
 vim.cmd("autocmd!")
-vim.g.loaded_matchparen = 1 -- disable the built-in for Matchparen.nvim
 vim.g.loaded_perl_provider = 0
 vim.g.mapleader = ' '       -- Remap space as leader key
 vim.g.python3_host_prog = vim.fn.expand("~/.local/share/mise/shims/python3")
@@ -47,7 +46,7 @@ require('lazy').setup(require('iomz.plugins'), {
     performance = {
         rtp = {
             disabled_plugins = {
-                'gzip', 'matchit', 'matchparen', 'netrwPlugin', 'tarPlugin',
+                'gzip', 'matchit', 'netrwPlugin', 'tarPlugin',
                 'tohtml', 'tutor', 'zipPlugin'
             }
         }
@@ -70,6 +69,23 @@ require('lazy').setup(require('iomz.plugins'), {
 require('iomz.options')
 require('iomz.keymaps')
 require('iomz.commands')
+
+-- Use OSC 52 clipboard when running over SSH.
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+    },
+    paste = {
+      ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+    },
+  }
+
+  vim.opt.clipboard = "unnamedplus"
+end
 
 --
 -- OS-specific
