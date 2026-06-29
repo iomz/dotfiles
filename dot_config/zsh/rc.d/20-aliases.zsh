@@ -28,7 +28,6 @@ alias gen-pwd='openssl rand -base64 24'
 alias show-env='print -lio $(env)'
 alias show-path='print -l ${(@s[:])PATH}'
 alias show-sys='echo OSTYPE=${OSTYPE} MACHTYPE=${MACHTYPE} CPUTYPE=${CPUTYPE} hardware=$(uname -m) processor=$(uname -p)'
-alias tmp='$EDITOR $(mktemp -t scratch.XXX.md)'
 
 # +──────────────+
 # │ NETWORK INFO │

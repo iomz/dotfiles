@@ -1,0 +1,17 @@
+# Create and open a temporary Markdown scratch file.
+local dir file editor ret
+
+dir="$(mktemp -d "${${TMPDIR:-/tmp}%/}/scratch.XXXXXX")" || return
+file="$dir/scratch.md"
+: >| "$file" || return
+
+editor="${EDITOR:-nvim}"
+
+print -r -- "scratch: $file"
+
+${(z)editor} "$file"
+ret=$?
+
+print -r -- "scratch saved at: $file"
+
+return "$ret"

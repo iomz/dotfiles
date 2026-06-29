@@ -13,8 +13,8 @@ insert-line-break() {
 }
 zle -N insert-line-break
 
-# open $EDITOR with fzf
-_fzf_edit_candidates() {
+# File candidate generator for normal file picking.
+_fzf_file_candidates() {
     if whence file-picker-files >/dev/null 2>&1; then
         # Shared file candidate generator managed by chezmoi:
         # dot_local/bin/executable_file-picker-files
@@ -26,25 +26,104 @@ _fzf_edit_candidates() {
     fi
 }
 
-fzf-edit-widget() {
-    local file
-    local -a editor_cmd
+# File candidate generator for no-ignore file picking.
+_fzf_file_candidates_all() {
+    if whence rg >/dev/null 2>&1; then
+        rg --files --hidden --follow --no-ignore \
+            -g '!.git' \
+            -g '!Library' \
+            -g '!.cache' \
+            -g '!.Trash' \
+            -g '!node_modules' \
+            -g '!dist' \
+            -g '!build' \
+            2>/dev/null
+    else
+        find . -type f 2>/dev/null
+    fi
+}
 
-    command -v fzf >/dev/null 2>&1 || return
+_fzf_file_preview() {
+    print -r -- 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {} 2>/dev/null || file {}'
+}
+
+# Pick a file with fzf.
+#
+# Usage:
+#   _fzf_pick_file normal
+#   _fzf_pick_file all
+_fzf_pick_file() {
+    emulate -L zsh
+
+    local mode="${1:-normal}"
+    local file
+    local preview_cmd
+
+    command -v fzf >/dev/null 2>&1 || return 1
+
+    preview_cmd="$(_fzf_file_preview)"
+
+    case "$mode" in
+        all)
+            file="$(
+                _fzf_file_candidates_all |
+                    fzf \
+                        --height '40%' \
+                        --reverse \
+                        --prompt='file> ' \
+                        --preview "$preview_cmd" \
+                        --preview-window 'right:60%:wrap'
+            )" || return 1
+            ;;
+        normal|*)
+            file="$(
+                _fzf_file_candidates |
+                    fzf \
+                        --height '40%' \
+                        --reverse \
+                        --prompt='file> ' \
+                        --preview "$preview_cmd" \
+                        --preview-window 'right:60%:wrap'
+            )" || return 1
+            ;;
+    esac
+
+    [[ -n "$file" ]] || return 1
+
+    print -r -- "$file"
+}
+
+# Insert a file path selected by fzf at the current cursor position.
+fzf-insert-file-path-widget() {
+    emulate -L zsh
+
+    local file
 
     zle -I
 
-    file="$(
-        _fzf_edit_candidates |
-            fzf \
-                --preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {} 2>/dev/null || file {}' \
-                --preview-window 'right:60%:wrap'
-    )" || {
+    file="$(_fzf_pick_file normal)" || {
         zle reset-prompt
         return
     }
 
-    [[ -n "$file" ]] || {
+    file="${file#./}"
+
+    LBUFFER+="${(q)file}"
+
+    zle reset-prompt
+}
+zle -N fzf-insert-file-path-widget
+
+# Open $EDITOR with fzf.
+fzf-edit-widget() {
+    emulate -L zsh
+
+    local file
+    local -a editor_cmd
+
+    zle -I
+
+    file="$(_fzf_pick_file normal)" || {
         zle reset-prompt
         return
     }
@@ -56,46 +135,22 @@ fzf-edit-widget() {
 }
 zle -N fzf-edit-widget
 
-# open $EDITOR with fzf without ignore
+# Open $EDITOR with fzf without ignore.
 fzf-edit-all-widget() {
+    emulate -L zsh
+
     local file
     local -a editor_cmd
 
-    command -v fzf >/dev/null 2>&1 || return
+    zle -I
 
-    if command -v rg >/dev/null 2>&1; then
-        file="$(
-            rg --files --hidden --follow --no-ignore \
-                -g '!.git' \
-                -g '!Library' \
-                -g '!.cache' \
-                -g '!.Trash' \
-                -g '!node_modules' \
-                -g '!dist' \
-                -g '!build' \
-                | fzf \
-                --preview 'bat --color=always --style=numbers --line-range=:200 {} 2>/dev/null || sed -n "1,200p" {} 2>/dev/null || file {}' \
-                --preview-window 'right:60%:wrap'
-                < /dev/tty
-        )" || {
-            zle reset-prompt
-            return
-        }
-    else
-        file="$(find . -type f | fzf < /dev/tty)" || {
-            zle reset-prompt
-            return
-        }
-    fi
-
-    [[ -n "$file" ]] || {
+    file="$(_fzf_pick_file all)" || {
         zle reset-prompt
         return
     }
 
     editor_cmd=(${(z)${EDITOR:-nvim}})
 
-    zle -I
     "${editor_cmd[@]}" -- "$file" < /dev/tty > /dev/tty 2>&1
     zle reset-prompt
 }

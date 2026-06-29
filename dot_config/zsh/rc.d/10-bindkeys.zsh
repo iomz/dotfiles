@@ -42,7 +42,8 @@ bindkey -e
 #"^W" backward-kill-word
 # }}}
 
-# open $EDITOR with fzf
+# fzf zle widgets
+bind_widget_if_exists '^f' fzf-insert-file-path-widget
 bind_widget_if_exists '^o' fzf-edit-widget
 bind_widget_if_exists '^x^o' fzf-edit-all-widget
 
