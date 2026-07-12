@@ -82,7 +82,8 @@ bind_widget_if_exists '^r' zeno-history-selection
 # zeno-completion / auto-snippet widgets break redraw on Linux.
 # bindkey '^i' expand-or-complete
 bindkey ' ' self-insert
-bindkey '^m' .accept-line
+bindkey -M emacs '^M' accept-line
+bindkey -M viins '^M' accept-line
 
 # Disabled until their behavior is understood.
 # bind_widget_if_exists '^I' zeno-completion
@@ -102,3 +103,15 @@ bind_widget_if_exists $'\e[13;2u' insert-line-break
 bind_widget_if_exists $'\e[13;2~' insert-line-break
 bind_widget_if_exists $'\e[27;2;13~' insert-line-break
 # }}}
+
+# Word movement with Option+Left / Option+Right
+bindkey '\e[1;3D' backward-word
+bindkey '\e[1;3C' forward-word
+
+# Some terminals send these instead
+bindkey '\eb' backward-word
+bindkey '\ef' forward-word
+
+# Scroll up/down the history, not the lines
+bindkey '^x^p' up-history
+bindkey '^x^n' down-history

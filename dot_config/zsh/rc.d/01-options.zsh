@@ -35,6 +35,7 @@ setopt HIST_REDUCE_BLANKS   # shrink history removing blanks
 setopt HIST_SAVE_NO_DUPS    # do not write a duplicate event to the history file.
 setopt HIST_VERIFY          # do not execute immediately upon history expansion.
 setopt INC_APPEND_HISTORY_TIME  # write only after when command finishes (to have proper duration time)
+setopt INTERACTIVE_COMMENTS # allow interactive comments (e.g., # foo bar)
 setopt LIST_AMBIGUOUS       # silent cmp
 unsetopt LIST_BEEP          # no cmp beep
 setopt LIST_PACKED          # make completion list smaller

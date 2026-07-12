@@ -7,6 +7,12 @@
 [[ -o interactive && -t 0 ]] || return
 [[ -o zle ]] || return
 
+# bracketed-paste/url-quote-magic
+#autoload -Uz bracketed-paste-magic
+#zle -N bracketed-paste bracketed-paste-magic
+#autoload -Uz url-quote-magic
+#zle -N self-insert url-quote-magic
+
 # inserts a literal newline
 insert-line-break() {
     LBUFFER+=$'\n'

@@ -72,10 +72,7 @@ fi
 # zellij
 if whence zellij > /dev/null; then
     alias zj='zellij attach --create main'
-    alias za='zellij attach alter -c'
-    alias zb='zellij attach brain -c'
-    alias zd='zellij attach dotfiles -c'
-    alias zs='zellij attach scratch -c'
+    alias za='zellij attach --create'
 fi
 
 # tail
