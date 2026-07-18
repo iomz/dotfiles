@@ -14,6 +14,7 @@ local event = eventtap.event
 local RETURN = keycodes.map["return"]
 
 local TARGET_APPS = {
+  ["ChatGPT Classic"] = true,
   ["ChatGPT"] = true,
   ["Codex"] = true,
   ["Claude"] = true,
