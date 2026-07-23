@@ -315,11 +315,11 @@ commit_attribution = "Co-authored-by: Codex <noreply@openai.com>"
 
 ## Ansible
 
-pipx manages Ansible as an isolated Python CLI application.
+Mise manages Ansible through its pipx backend as an isolated Python CLI application.
 
 ```zsh
-pipx install --include-deps ansible
-pipx upgrade --include-injected ansible
+mise install pipx:ansible
+mise which ansible
 ```
 
 ## Fonts
