@@ -8,15 +8,17 @@ local keycodes = require("hs.keycodes")
 local application = require("hs.application")
 local window = require("hs.window")
 local alert = require("hs.alert")
+local timer = require("hs.timer")
 
 local event = eventtap.event
 
 local RETURN = keycodes.map["return"]
+local ABC_SOURCE_ID = "com.apple.keylayout.ABC"
+local INPUT_SOURCE_SETTLE_SECONDS = 0.05
 
 local TARGET_APPS = {
   ["ChatGPT Classic"] = true,
   ["ChatGPT"] = true,
-  ["Codex"] = true,
   ["Claude"] = true,
   ["Antigravity"] = true,
 }
@@ -84,6 +86,37 @@ local function plain_return_events()
   }
 end
 
+local function send_plain_return_with_ime_bypass()
+  local original_source = keycodes.currentSourceID()
+  local target_app = application.frontmostApplication()
+
+  if not keycodes.currentSourceID(ABC_SOURCE_ID) then
+    return false
+  end
+
+  timer.doAfter(INPUT_SOURCE_SETTLE_SECONDS, function()
+    local guard_was_enabled = guard and guard:isEnabled()
+
+    if guard_was_enabled then
+      guard:stop()
+    end
+
+    eventtap.keyStroke({}, "return", 0, target_app)
+
+    if guard_was_enabled then
+      guard:start()
+    end
+
+    timer.doAfter(INPUT_SOURCE_SETTLE_SECONDS, function()
+      if keycodes.currentSourceID() == ABC_SOURCE_ID then
+        keycodes.currentSourceID(original_source)
+      end
+    end)
+  end)
+
+  return true
+end
+
 function M.start()
   if guard then
     guard:stop()
@@ -108,10 +141,11 @@ function M.start()
     local flags = e:getFlags()
 
     -- Cmd+Return => send plain Return to the target app.
-    --
-    -- This must run before the Japanese input check so Cmd+Return still sends
-    -- while Google Japanese Input is active.
     if has_only_cmd(flags) then
+      if is_google_japanese() and send_plain_return_with_ime_bypass() then
+        return true
+      end
+
       return true, plain_return_events()
     end
 
@@ -149,4 +183,3 @@ function M.setTargetApps(apps)
 end
 
 return M
-
