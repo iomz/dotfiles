@@ -3,14 +3,17 @@
 emulate -L zsh
 setopt pipefail
 
-local prefix="${1:-local.iomz}"
+local prefix="${1:-}"
 local domain="gui/$(id -u)"
 
 printf '%-7s %-8s %s\n' "PID" "STATUS" "LABEL"
 
 launchctl list |
   awk -v prefix="$prefix" '
-    NR > 1 && $3 ~ ("^" prefix) {
+    NR > 1 && (
+      (prefix == "" && $3 ~ /(^|\.)iomz(\.|$)/) ||
+      (prefix != "" && $3 ~ ("^" prefix))
+    ) {
       printf "%-7s %-8s %s\n", $1, $2, $3
     }
   '

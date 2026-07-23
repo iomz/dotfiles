@@ -25,6 +25,7 @@ keybinds clear-defaults=true {
 
         // Tab
         bind "n" { GoToNextTab; SwitchToMode "locked"; }
+        bind "b" { GoToPreviousTab; SwitchToMode "locked"; }
         bind "t" { NewTab; SwitchToMode "locked"; }
         bind "q" { CloseTab; SwitchToMode "locked"; }
 
