@@ -33,6 +33,15 @@ local function start_all_modules()
       goto continue
     end
 
+    if type(mod) ~= "table" then
+      hs.printf(
+        "[modules] skipped %s: expected table, got %s",
+        require_name,
+        type(mod)
+      )
+      goto continue
+    end
+
     if type(mod.start) == "function" then
       local started, err = pcall(mod.start)
       if not started then
@@ -49,4 +58,3 @@ local function start_all_modules()
 end
 
 start_all_modules()
-
