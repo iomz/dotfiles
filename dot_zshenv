@@ -5,8 +5,11 @@ skip_global_compinit=1
 # uncomment to analyze init time
 #ENABLE_ZPROFTIME=true
 
-# set ZDOTDIR
+# set XDG base directories and ZDOTDIR
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 export ZDOTDIR="${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}"
 
 # extended globbing
@@ -16,9 +19,6 @@ setopt NO_GLOBAL_RCS
 
 (( ${+TERM} )) || export TERM="xterm-256color"; COLORTERM="truecolor"
 (( ${+USER} )) || export USER="${USERNAME}"
-(( ${+XDG_CACHE_HOME} )) || export XDG_CACHE_HOME="${HOME}/.cache"
-(( ${+XDG_CONFIG_HOME} )) || export XDG_CONFIG_HOME="${HOME}/.config"
-(( ${+XDG_DATA_HOME} )) || export XDG_DATA_HOME="${HOME}/.local/share"
 
 # Mirror the only current .profile-managed shell option without sourcing .profile
 # for every zsh process.
