@@ -1,0 +1,87 @@
+#!/usr/bin/env zsh
+
+emulate -L zsh
+set -euo pipefail
+
+if (( $# != 1 )); then
+  print -u2 "Usage: music-playlist-size PLAYLIST"
+  print -u2 'Example: music-playlist-size "Treasure Trove"'
+  exit 2
+fi
+
+playlist_name="$1"
+
+result="$(
+  osascript - "$playlist_name" <<'APPLESCRIPT'
+on run argv
+    set playlistName to item 1 of argv
+
+    tell application "Music"
+        set matchingPlaylists to every user playlist whose name is playlistName
+
+        if (count of matchingPlaylists) is 0 then
+            error "Playlist not found: " & playlistName
+        end if
+
+        if (count of matchingPlaylists) is greater than 1 then
+            error "Multiple playlists found with the name: " & playlistName
+        end if
+
+        set targetPlaylist to item 1 of matchingPlaylists
+        set playlistTracks to every track of targetPlaylist
+
+        set totalTracks to count of playlistTracks
+        set sizedTracks to 0
+        set totalBytes to 0
+
+        repeat with currentTrack in playlistTracks
+            try
+                set trackSize to size of currentTrack
+
+                if trackSize is not missing value and trackSize is greater than 0 then
+                    set totalBytes to totalBytes + trackSize
+                    set sizedTracks to sizedTracks + 1
+                end if
+            end try
+        end repeat
+
+        return (totalTracks as text) & tab & ¬
+            (sizedTracks as text) & tab & ¬
+            (totalBytes as text)
+    end tell
+end run
+APPLESCRIPT
+)"
+
+IFS=$'\t' read -r total_tracks sized_tracks total_bytes <<< "$result"
+
+human_size="$(
+  awk -v bytes="$total_bytes" '
+    BEGIN {
+      split("B KiB MiB GiB TiB", units, " ")
+      value = bytes + 0
+      unit = 1
+
+      while (value >= 1024 && unit < 5) {
+        value /= 1024
+        unit++
+      }
+
+      if (unit == 1) {
+        printf "%.0f %s", value, units[unit]
+      } else {
+        printf "%.2f %s", value, units[unit]
+      }
+    }
+  '
+)"
+
+printf '%s\n' "$playlist_name"
+printf '  Tracks:     %s\n' "$total_tracks"
+printf '  With size:  %s\n' "$sized_tracks"
+printf '  Total size: %s\n' "$human_size"
+
+if (( sized_tracks < total_tracks )); then
+  printf '  Uncounted:  %s\n' "$(( total_tracks - sized_tracks ))"
+  printf '\nSome tracks have no locally available size, usually because they are not downloaded.\n'
+fi

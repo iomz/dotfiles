@@ -37,6 +37,10 @@ Prefer user- or repo-specific prefixes such as `fix/`, `feat/`, or `chore/` when
 Run GitHub CLI operations with elevated permissions by default.
 Do not diagnose sandbox `gh` authentication unless elevated `gh` also fails.
 
+Use authenticated `gh` directly from the beginning for GitHub write operations, including creating, editing, commenting on, labeling, closing, or reopening issues and pull requests, creating releases, and resolving review threads.
+Do not attempt the GitHub connector first for those writes unless the user explicitly requests the connector or `gh` lacks coverage for the operation.
+Prefer the GitHub connector for structured read-only repository, issue, and pull-request inspection when it avoids extra parsing.
+
 Do not push commits or branches unless explicitly authorized.
 Permission to commit does not imply permission to push.
 Requests to publish, open a pull request, or update a remote pull request authorize pushing required commits.

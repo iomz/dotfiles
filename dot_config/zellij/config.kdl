@@ -9,8 +9,11 @@ keybinds clear-defaults=true {
 
     normal {
         bind "esc" { SwitchToMode "locked"; }
-        bind "Ctrl u" { SwitchToMode "locked"; }
         bind "Ctrl c" { SwitchToMode "locked"; }
+
+        // Pass Ctrl-u through to the application (eg. nested tmux)
+        bind "Ctrl u" { Write 21; SwitchToMode "locked"; }
+
         bind "d" { Detach; SwitchToMode "locked"; }
         bind "[" { SwitchToMode "scroll"; }
         bind "Tab" { SwitchToMode "tab"; GoToNextTab; }

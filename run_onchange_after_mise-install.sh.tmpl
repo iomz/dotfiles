@@ -5,4 +5,10 @@ set -eu
 if command -v mise >/dev/null 2>&1; then
   mise install
   mise reshim
+
+  poetry_version=2.4.1
+  uv_bin="$(mise exec -- uv tool dir --bin)"
+  if [ ! -x "${uv_bin}/poetry" ] || [ "$(${uv_bin}/poetry --version)" != "Poetry (version ${poetry_version})" ]; then
+    mise exec -- uv tool install "poetry==${poetry_version}"
+  fi
 fi
