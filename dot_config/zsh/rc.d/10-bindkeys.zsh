@@ -80,7 +80,8 @@ bind_widget_if_exists '^r' zeno-history-selection
 
 # Keep core editing keys on plain zsh defaults.
 # zeno-completion / auto-snippet widgets break redraw on Linux.
-# bindkey '^i' expand-or-complete
+bindkey -M emacs '^I' expand-or-complete
+bindkey -M viins '^I' expand-or-complete
 bindkey ' ' self-insert
 bindkey -M emacs '^M' accept-line
 bindkey -M viins '^M' accept-line

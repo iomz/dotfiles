@@ -1,26 +1,277 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*
+# -*- coding: utf-8 -*-
 import argparse
+import json
+import os
+import re
 import subprocess
+import sys
+import tempfile
+from fractions import Fraction
 from pathlib import Path
 from shutil import which
-from getch import getch
+
+TIMESTAMP_ERROR = re.compile(
+    r"non-monotonic dts; previous: (-?\d+), current: (-?\d+)", re.IGNORECASE
+)
+TIMESTAMP_ERROR_TEXT = "non monotonically increasing dts"
+MAX_SMALL_TIMESTAMP_WARNINGS = 9
+LARGE_TIMESTAMP_ROLLBACK = 10_000
 
 
-def get_base(lst):
-    for i, ss in enumerate(lst):
-        others = lst[:i] + lst[i + 1 :]
-        fragment = ss.name.replace(".mp4", "")
-        if all(fragment in o.name for o in others):
-            return ss, others
-    return None, lst
+def get_base(paths):
+    for i, path in enumerate(paths):
+        others = paths[:i] + paths[i + 1 :]
+        if all(path.stem in other.name for other in others):
+            return path, others
+    return None, paths
 
 
-def main():
-    if which("ffmpeg") is None:
-        print("ffmpeg not found")
-        exit(1)
+def get_inputs(cwd, reverse=False):
+    paths = sorted(
+        path
+        for path in cwd.iterdir()
+        if path.is_file()
+        and path.suffix.lower() == ".mp4"
+        and not path.stem.lower().endswith("-out")
+        and not path.name.startswith(".concat-mp4-")
+    )
+    base, paths = get_base(paths)
+    paths = sorted(set(paths), reverse=reverse)
+    if base:
+        paths.insert(0, base)
+    return base, paths
 
+
+def probe(path):
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-show_entries",
+        (
+            "stream=index,codec_type,codec_name,codec_tag_string,width,height,"
+            "pix_fmt,sample_rate,channel_layout,time_base,avg_frame_rate"
+        ),
+        "-of",
+        "json",
+        str(path),
+    ]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "unknown ffprobe error"
+        raise RuntimeError(f"cannot inspect {path.name}: {detail}")
+    return json.loads(result.stdout).get("streams", [])
+
+
+def stream_signature(stream):
+    stream_type = stream.get("codec_type")
+    common = (
+        stream_type,
+        stream.get("codec_name"),
+        stream.get("codec_tag_string"),
+        stream.get("time_base"),
+    )
+    if stream_type == "video":
+        return common + (
+            stream.get("width"),
+            stream.get("height"),
+            stream.get("pix_fmt"),
+        )
+    if stream_type == "audio":
+        return common + (
+            stream.get("sample_rate"),
+            stream.get("channel_layout"),
+        )
+    return common
+
+
+def copy_compatible(probes):
+    expected = [stream_signature(stream) for stream in probes[0]]
+    for streams in probes[1:]:
+        if [stream_signature(stream) for stream in streams] != expected:
+            return False
+    return True
+
+
+def ffconcat_quote(path):
+    return str(path).replace("'", "'\\''")
+
+
+def make_concat_file(paths):
+    concat_file = tempfile.NamedTemporaryFile(
+        mode="w", prefix="concat-mp4-", suffix=".txt", delete=False
+    )
+    try:
+        for path in paths:
+            concat_file.write(f"file '{ffconcat_quote(path.resolve())}'\n")
+    finally:
+        concat_file.close()
+    return Path(concat_file.name)
+
+
+def temporary_output(cwd):
+    handle = tempfile.NamedTemporaryFile(
+        prefix=".concat-mp4-", suffix=".mp4", dir=cwd, delete=False
+    )
+    path = Path(handle.name)
+    handle.close()
+    return path
+
+
+def run_ffmpeg(command):
+    timestamp_warnings = 0
+    largest_rollback = 0
+    process = subprocess.Popen(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+        errors="replace",
+    )
+    assert process.stderr is not None
+    for line in process.stderr:
+        print(line, end="", file=sys.stderr)
+        match = TIMESTAMP_ERROR.search(line)
+        if match:
+            timestamp_warnings += 1
+            previous, current = (int(value) for value in match.groups())
+            largest_rollback = max(largest_rollback, previous - current)
+        elif TIMESTAMP_ERROR_TEXT in line.lower():
+            timestamp_warnings += 1
+    timestamp_error = (
+        timestamp_warnings > MAX_SMALL_TIMESTAMP_WARNINGS
+        or largest_rollback > LARGE_TIMESTAMP_ROLLBACK
+    )
+    return process.wait(), timestamp_error
+
+
+def concat_copy(paths, output):
+    concat_file = make_concat_file(paths)
+    temp_output = temporary_output(output.parent)
+    try:
+        return_code, timestamp_error = run_ffmpeg(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-y",
+                "-f",
+                "concat",
+                "-safe",
+                "0",
+                "-i",
+                str(concat_file),
+                "-map",
+                "0",
+                "-c",
+                "copy",
+                "-movflags",
+                "+faststart",
+                str(temp_output),
+            ]
+        )
+        if return_code == 0 and not timestamp_error:
+            os.replace(temp_output, output)
+            return True
+        return False
+    finally:
+        concat_file.unlink(missing_ok=True)
+        temp_output.unlink(missing_ok=True)
+
+
+def primary_stream(streams, stream_type):
+    return next(
+        (stream for stream in streams if stream.get("codec_type") == stream_type),
+        None,
+    )
+
+
+def output_frame_rate(video_stream):
+    value = video_stream.get("avg_frame_rate", "0/0")
+    try:
+        rate = Fraction(value)
+    except (ValueError, ZeroDivisionError):
+        rate = Fraction(30, 1)
+    if rate <= 0 or rate > 240:
+        rate = Fraction(30, 1)
+    return f"{rate.numerator}/{rate.denominator}"
+
+
+def concat_reencode(paths, probes, output):
+    videos = [primary_stream(streams, "video") for streams in probes]
+    audios = [primary_stream(streams, "audio") for streams in probes]
+    if any(video is None for video in videos):
+        raise RuntimeError("robust fallback requires one video stream per input")
+    if any(audio is None for audio in audios) and any(audio is not None for audio in audios):
+        raise RuntimeError("robust fallback cannot mix inputs with and without audio")
+
+    first_video = videos[0]
+    width = int(first_video.get("width", 0)) // 2 * 2
+    height = int(first_video.get("height", 0)) // 2 * 2
+    if width <= 0 or height <= 0:
+        raise RuntimeError("cannot determine output dimensions")
+    frame_rate = output_frame_rate(first_video)
+    has_audio = all(audio is not None for audio in audios)
+
+    temp_output = temporary_output(output.parent)
+    command = ["ffmpeg", "-hide_banner", "-y"]
+    for path in paths:
+        command.extend(["-i", str(path.resolve())])
+
+    filters = []
+    concat_inputs = []
+    for index in range(len(paths)):
+        filters.append(
+            f"[{index}:v:0]"
+            f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
+            f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
+            f"setsar=1,fps={frame_rate},setpts=N/({frame_rate}*TB)"
+            f"[v{index}]"
+        )
+        concat_inputs.append(f"[v{index}]")
+        if has_audio:
+            filters.append(
+                f"[{index}:a:0]"
+                "aresample=48000:async=1:first_pts=0,"
+                "aformat=sample_rates=48000:channel_layouts=stereo,"
+                "asetpts=N/SR/TB"
+                f"[a{index}]"
+            )
+            concat_inputs.append(f"[a{index}]")
+
+    filters.append(
+        "".join(concat_inputs)
+        + f"concat=n={len(paths)}:v=1:a={1 if has_audio else 0}"
+        + ("[v][a]" if has_audio else "[v]")
+    )
+    command.extend(["-filter_complex", ";".join(filters), "-map", "[v]"])
+    if has_audio:
+        command.extend(["-map", "[a]", "-c:a", "aac", "-b:a", "192k"])
+    command.extend(
+        [
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            "18",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(temp_output),
+        ]
+    )
+    try:
+        return_code, timestamp_error = run_ffmpeg(command)
+        if return_code != 0 or timestamp_error:
+            raise RuntimeError("timestamp-normalizing re-encode failed")
+        os.replace(temp_output, output)
+    finally:
+        temp_output.unlink(missing_ok=True)
+
+
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--reverse",
@@ -28,54 +279,84 @@ def main():
         action="store_true",
         help="reverse the order",
     )
-
-    args = parser.parse_args()
-    cwd = Path.cwd()
-
-    lst = [c for c in cwd.iterdir() if c.is_file() and c.name.endswith(".mp4")]
-
-    base, lst = get_base(lst)
-    lst = sorted(set(lst), reverse=args.reverse)
-    if base:
-        print(f"base: {base.name}")
-        print()
-        lst.insert(0, base)
-
-    for p in lst:
-        print(p.absolute())
-
-    print()
-    print("alright? [Y/n]")
-
-    if getch().lower() == "n":
-        print("cancelled")
-        exit(0)
-
-    with open("/tmp/concat.txt", "w") as f:
-        for p in lst:
-            print(f"file '{p.absolute()}'", file=f)
-
-    filename = lst[0].name.strip(".mp4") + "-out.mp4"
-    if filename.startswith("-"):
-        filename = filename[1:]
-
-    subprocess.run(
-        [
-            "ffmpeg",
-            "-f",
-            "concat",
-            "-fflags",
-            "+genpts",
-            "-safe",
-            "0",
-            "-i",
-            "/tmp/concat.txt",
-            "-c",
-            "copy",
-            filename,
-        ]
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--copy-only",
+        action="store_true",
+        help="fail instead of re-encoding when stream copy is unsafe",
     )
+    mode.add_argument(
+        "--reencode",
+        action="store_true",
+        help="always rebuild timestamps by re-encoding",
+    )
+    parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="skip confirmation",
+    )
+    return parser.parse_args()
+
+
+def main():
+    for executable in ("ffmpeg", "ffprobe"):
+        if which(executable) is None:
+            print(f"{executable} not found", file=sys.stderr)
+            return 1
+
+    args = parse_args()
+    cwd = Path.cwd()
+    base, paths = get_inputs(cwd, reverse=args.reverse)
+    if len(paths) < 2:
+        print("need at least two input MP4 files", file=sys.stderr)
+        return 1
+
+    if base:
+        print(f"base: {base.name}\n")
+    for path in paths:
+        print(path.resolve())
+
+    output = cwd / f"{paths[0].stem}-out.mp4"
+    print(f"\noutput: {output}")
+    if output.exists():
+        print("output already exists; move or remove it first", file=sys.stderr)
+        return 1
+
+    if not args.yes:
+        print("\nalright? [Y/n]")
+        if input().strip().lower() == "n":
+            print("cancelled")
+            return 0
+
+    try:
+        probes = [probe(path) for path in paths]
+        compatible = copy_compatible(probes)
+        if not args.reencode and compatible:
+            print("\nattempting lossless stream copy")
+            if concat_copy(paths, output):
+                print(f"\ncreated: {output}")
+                return 0
+            print(
+                "\nstream copy failed or produced invalid timestamps",
+                file=sys.stderr,
+            )
+        elif not args.reencode:
+            print("\ninput streams differ; stream copy is unsafe", file=sys.stderr)
+
+        if args.copy_only:
+            print("copy-only mode: no output created", file=sys.stderr)
+            return 1
+
+        print("falling back to timestamp-normalizing re-encode", file=sys.stderr)
+        concat_reencode(paths, probes, output)
+        print(f"\ncreated: {output}")
+        return 0
+    except (OSError, RuntimeError, json.JSONDecodeError) as error:
+        output.unlink(missing_ok=True)
+        print(f"concat-mp4: {error}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
