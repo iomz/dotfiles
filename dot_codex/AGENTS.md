@@ -70,6 +70,9 @@ Make the smallest semantic diff possible.
 
 Do not auto-wrap or reflow prose to a fixed column width.
 
+When providing Markdown source that contains fenced code blocks, wrap full source in an outer backtick fence longer than every nested fence.
+Use four backticks around Markdown containing triple-backtick fences, then increase outer fence length as needed.
+
 When editing Markdown prose, prefer sentence-per-line formatting: one sentence per source line within a paragraph.
 Preserve existing wrapping unless the edit already touches that paragraph or the user asks to reflow it.
 
