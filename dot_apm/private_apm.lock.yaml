@@ -1,0 +1,289 @@
+lockfile_version: '1'
+generated_at: '2026-08-23T01:55:02.976846+00:00'
+apm_version: 0.28.0
+dependencies:
+- repo_url: iomz/skills
+  name: cognitive-rhythm-writing
+  host: github.com
+  resolved_commit: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  resolved_ref: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  version: unknown
+  virtual_path: skills/cognitive-rhythm-writing
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/cognitive-rhythm-writing
+  - .agents/skills/cognitive-rhythm-writing/SKILL.md
+  - .agents/skills/cognitive-rhythm-writing/agents/openai.yaml
+  deployed_file_hashes:
+    .agents/skills/cognitive-rhythm-writing/SKILL.md: sha256:a9161a9efbc0a93031af77bca8f2067cbd963424d9119a9bcbed13cc0cdf4ab6
+    .agents/skills/cognitive-rhythm-writing/agents/openai.yaml: sha256:9dd4cbedd5ae547360e46734cc4eab52efc5fe67ae0dfb69443e1b21ecf64b73
+  content_hash: sha256:58675221c5764e1eed73d65a2467ff1a78795a3776f61b56376e38f2205012e3
+- repo_url: iomz/skills
+  name: empirical-prompt-tuning
+  host: github.com
+  resolved_commit: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  resolved_ref: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  version: unknown
+  virtual_path: skills/empirical-prompt-tuning
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/empirical-prompt-tuning
+  - .agents/skills/empirical-prompt-tuning/SKILL.md
+  - .agents/skills/empirical-prompt-tuning/agents/openai.yaml
+  deployed_file_hashes:
+    .agents/skills/empirical-prompt-tuning/SKILL.md: sha256:a2fb976e3ee2736d30b105d39f1ea7fe0bec4aab9bffed96908b2db00738a7cb
+    .agents/skills/empirical-prompt-tuning/agents/openai.yaml: sha256:cba3da918c37fec6d61175f1a9c57b159f216debbb3209886f8a4cd42d75bbb8
+  content_hash: sha256:8b81ca329574eca2d053aaa5261d458a71ed1b6ffcbeb51ed2742efade7b9b07
+- repo_url: iomz/skills
+  name: japanese-tech-writing
+  host: github.com
+  resolved_commit: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  resolved_ref: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  version: unknown
+  virtual_path: skills/japanese-tech-writing
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/japanese-tech-writing
+  - .agents/skills/japanese-tech-writing/SKILL.md
+  - .agents/skills/japanese-tech-writing/agents/openai.yaml
+  deployed_file_hashes:
+    .agents/skills/japanese-tech-writing/SKILL.md: sha256:ed59a6db478956a6ebb176d32b04b6cb55139b4d7e302bc8f89b4be46739c47d
+    .agents/skills/japanese-tech-writing/agents/openai.yaml: sha256:b487b57cdba9b4cd2797958d7835f023919028eaacdfb0daba5d44ae0be7500d
+  content_hash: sha256:5e996b308b08c9452cb09280f721ac9cb58eba19f36711229db55e87d14b6034
+- repo_url: iomz/skills
+  name: retrospective-codify
+  host: github.com
+  resolved_commit: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  resolved_ref: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  version: unknown
+  virtual_path: skills/retrospective-codify
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/retrospective-codify
+  - .agents/skills/retrospective-codify/SKILL.md
+  - .agents/skills/retrospective-codify/agents/openai.yaml
+  deployed_file_hashes:
+    .agents/skills/retrospective-codify/SKILL.md: sha256:1ced3dd40f1fc924bc67e92e5e39fc2a5e918e0775066934b8b3da38466c9a46
+    .agents/skills/retrospective-codify/agents/openai.yaml: sha256:aa55b722d97c4218930bc2bb6d50e23eb4633a810bf8c6d2ba461c2c035c3c18
+  content_hash: sha256:45a4877d305ed3f5aca3d3f976ed77f912d1a5de298c8cff6d91dd8950aa27c7
+- repo_url: iomz/skills
+  name: say-what-it-is
+  host: github.com
+  resolved_commit: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  resolved_ref: 9cd6f94399773b7c42631a0a7e37846a41f2443e
+  version: unknown
+  virtual_path: skills/say-what-it-is
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/say-what-it-is
+  - .agents/skills/say-what-it-is/SKILL.md
+  - .agents/skills/say-what-it-is/agents/openai.yaml
+  deployed_file_hashes:
+    .agents/skills/say-what-it-is/SKILL.md: sha256:64e13f4869c301c01be4708a51d3f497fd6499456cd04ac9be157cff150a3d58
+    .agents/skills/say-what-it-is/agents/openai.yaml: sha256:11a19c0363d83f3bf38622f189178e6cc7d9b82fb5e8e437d925b59cb35c3160
+  content_hash: sha256:2db8124eb53bc5e5d588ab60e9123d9697a79bed61ca55df01f10d728724fd4c
+- repo_url: vercel-labs/skills
+  name: find-skills
+  host: github.com
+  resolved_commit: 435076e78988e1e6ec40d00b0b1d76bdbbc5419a
+  resolved_ref: 435076e78988e1e6ec40d00b0b1d76bdbbc5419a
+  version: unknown
+  virtual_path: skills/find-skills
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/find-skills
+  - .agents/skills/find-skills/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/find-skills/SKILL.md: sha256:c00eeea0e13e74fe4a9d84ba0a8542205a1b736d65f13134fe1a6647eb14976f
+  content_hash: sha256:913b9d37d0d54047dd65222bb8c67b2bf04e3cb87dcad1729068d7a8b2c8c396
+- repo_url: yusukebe/ax
+  name: ax
+  host: github.com
+  resolved_commit: 8abbca2fc400c2ff4866248ba1ec9309b948812f
+  resolved_ref: 8abbca2fc400c2ff4866248ba1ec9309b948812f
+  version: unknown
+  package_type: skill_bundle
+  deployed_files:
+  - .agents/skills/ax
+  - .agents/skills/ax/SKILL.md
+  deployed_file_hashes:
+    .agents/skills/ax/SKILL.md: sha256:4acbbc5574e36a21c27fbc3099cc40638e074e7cada674e00d23698cef34d37c
+  content_hash: sha256:90a957026d94fd46b62a758428971c8377db8fe8b7d818cb6a1b7ed1cfbe6734
+deployments:
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/ax
+  runtime: null
+  scope: project
+  owners:
+  - yusukebe/ax
+  active_owner: yusukebe/ax
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/ax/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - yusukebe/ax
+  active_owner: yusukebe/ax
+  content_hash: sha256:4acbbc5574e36a21c27fbc3099cc40638e074e7cada674e00d23698cef34d37c
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/cognitive-rhythm-writing
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/cognitive-rhythm-writing
+  active_owner: iomz/skills/skills/cognitive-rhythm-writing
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/cognitive-rhythm-writing/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/cognitive-rhythm-writing
+  active_owner: iomz/skills/skills/cognitive-rhythm-writing
+  content_hash: sha256:a9161a9efbc0a93031af77bca8f2067cbd963424d9119a9bcbed13cc0cdf4ab6
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/cognitive-rhythm-writing/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/cognitive-rhythm-writing
+  active_owner: iomz/skills/skills/cognitive-rhythm-writing
+  content_hash: sha256:9dd4cbedd5ae547360e46734cc4eab52efc5fe67ae0dfb69443e1b21ecf64b73
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/empirical-prompt-tuning
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/empirical-prompt-tuning
+  active_owner: iomz/skills/skills/empirical-prompt-tuning
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/empirical-prompt-tuning/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/empirical-prompt-tuning
+  active_owner: iomz/skills/skills/empirical-prompt-tuning
+  content_hash: sha256:a2fb976e3ee2736d30b105d39f1ea7fe0bec4aab9bffed96908b2db00738a7cb
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/empirical-prompt-tuning/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/empirical-prompt-tuning
+  active_owner: iomz/skills/skills/empirical-prompt-tuning
+  content_hash: sha256:cba3da918c37fec6d61175f1a9c57b159f216debbb3209886f8a4cd42d75bbb8
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/find-skills
+  runtime: null
+  scope: project
+  owners:
+  - vercel-labs/skills/skills/find-skills
+  active_owner: vercel-labs/skills/skills/find-skills
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/find-skills/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - vercel-labs/skills/skills/find-skills
+  active_owner: vercel-labs/skills/skills/find-skills
+  content_hash: sha256:c00eeea0e13e74fe4a9d84ba0a8542205a1b736d65f13134fe1a6647eb14976f
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/japanese-tech-writing
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/japanese-tech-writing
+  active_owner: iomz/skills/skills/japanese-tech-writing
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/japanese-tech-writing/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/japanese-tech-writing
+  active_owner: iomz/skills/skills/japanese-tech-writing
+  content_hash: sha256:ed59a6db478956a6ebb176d32b04b6cb55139b4d7e302bc8f89b4be46739c47d
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/japanese-tech-writing/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/japanese-tech-writing
+  active_owner: iomz/skills/skills/japanese-tech-writing
+  content_hash: sha256:b487b57cdba9b4cd2797958d7835f023919028eaacdfb0daba5d44ae0be7500d
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/retrospective-codify
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/retrospective-codify
+  active_owner: iomz/skills/skills/retrospective-codify
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/retrospective-codify/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/retrospective-codify
+  active_owner: iomz/skills/skills/retrospective-codify
+  content_hash: sha256:1ced3dd40f1fc924bc67e92e5e39fc2a5e918e0775066934b8b3da38466c9a46
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/retrospective-codify/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/retrospective-codify
+  active_owner: iomz/skills/skills/retrospective-codify
+  content_hash: sha256:aa55b722d97c4218930bc2bb6d50e23eb4633a810bf8c6d2ba461c2c035c3c18
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/say-what-it-is
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/say-what-it-is
+  active_owner: iomz/skills/skills/say-what-it-is
+  content_hash: null
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/say-what-it-is/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/say-what-it-is
+  active_owner: iomz/skills/skills/say-what-it-is
+  content_hash: sha256:64e13f4869c301c01be4708a51d3f497fd6499456cd04ac9be157cff150a3d58
+- kind: project-relative
+  target: agent-skills
+  value: .agents/skills/say-what-it-is/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - iomz/skills/skills/say-what-it-is
+  active_owner: iomz/skills/skills/say-what-it-is
+  content_hash: sha256:11a19c0363d83f3bf38622f189178e6cc7d9b82fb5e8e437d925b59cb35c3160

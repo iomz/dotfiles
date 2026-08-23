@@ -20,6 +20,12 @@ machine-specific secrets.
 - For Codex, track repo/global instruction files and personal custom skills
   only. Do not track `~/.codex/config.toml`, hooks, sessions, auth, caches, or
   `~/.codex/skills/.system`.
+- Treat `~/.agents/skills` as a shared deployment surface. Track only
+  explicitly allowlisted, personally authored, public-safe skills. Keep
+  third-party skills, installer lock files, and package-manager output outside
+  chezmoi.
+- If APM manages shared skills, chezmoi may track an inspected public-safe
+  manifest and lockfile, but never `~/.apm/apm_modules` or deployed copies.
 
 ## Chezmoi Rules
 

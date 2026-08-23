@@ -61,3 +61,10 @@ run_once_install-packages.sh.tmpl
 .codex/skills/**/.git/**
 .codex/skills/**/node_modules/
 .codex/skills/**/node_modules/**
+
+# shared agent state and third-party skills
+.agents/**
+
+# agent package manager output
+.apm/apm_modules/
+.apm/apm_modules/**

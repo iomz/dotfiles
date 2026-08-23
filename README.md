@@ -300,6 +300,29 @@ Not tracked:
 
 Keep independently reusable public skills in their own repositories. Chezmoi manages only intentionally selected personal skills, not installer output, cloned repository metadata, or dependencies.
 
+### Shared Agent Skills
+
+`~/.agents/skills` is a cross-client deployment surface, not a directory for chezmoi to mirror wholesale.
+Its contents can come from personal source files, upstream installers, or skill package managers, so ownership must remain explicit.
+
+| Category | Owner | Chezmoi policy |
+| --- | --- | --- |
+| Personally authored, public-safe skill | chezmoi or its own repository | Track only through a per-skill allowlist |
+| Third-party skill | APM or upstream installer | Track a declarative manifest and lockfile when available, not deployed files |
+| `.skill-lock.json` and similar installer state | installer | Never track as hand-authored configuration |
+| Caches, cloned metadata, and dependencies | package manager | Never track |
+
+APM manages `ax` and `find-skills` under `~/.agents/skills` from pinned upstream commits.
+`iomz/skills` supplies selected personal skills through the same deployment path.
+Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
+
+APM manifest and lockfile live at `~/.apm/apm.yml` and `~/.apm/apm.lock.yaml`; chezmoi owns these inspected declarative inputs.
+Apply exact locked versions with `apm install -g --target agent-skills --frozen`.
+Do not let chezmoi and APM own the same deployed skill directory.
+
+Nix-based skill management is appropriate only as part of a broader Nix or Home Manager adoption.
+Adding Nix solely for agent skills would duplicate mise and chezmoi responsibilities.
+
 Caveman mode is installed through Codex hooks, not through `AGENTS.md`.
 `~/.codex/hooks.json` runs caveman activation at session start.
 
