@@ -8,8 +8,8 @@ dependencies:
   apm:
     - yusukebe/ax#8abbca2fc400c2ff4866248ba1ec9309b948812f
     - vercel-labs/skills/skills/find-skills#435076e78988e1e6ec40d00b0b1d76bdbbc5419a
-    - iomz/skills/skills/say-what-it-is#9cd6f94399773b7c42631a0a7e37846a41f2443e
-    - iomz/skills/skills/japanese-tech-writing#9cd6f94399773b7c42631a0a7e37846a41f2443e
-    - iomz/skills/skills/cognitive-rhythm-writing#9cd6f94399773b7c42631a0a7e37846a41f2443e
-    - iomz/skills/skills/retrospective-codify#9cd6f94399773b7c42631a0a7e37846a41f2443e
-    - iomz/skills/skills/empirical-prompt-tuning#9cd6f94399773b7c42631a0a7e37846a41f2443e
+    - iomz/skills/say-what-it-is#87a2cc489da64524c93c1dd9e2eadca930331aca
+    - iomz/skills/japanese-tech-writing#87a2cc489da64524c93c1dd9e2eadca930331aca
+    - iomz/skills/cognitive-rhythm-writing#87a2cc489da64524c93c1dd9e2eadca930331aca
+    - iomz/skills/retrospective-codify#87a2cc489da64524c93c1dd9e2eadca930331aca
+    - iomz/skills/empirical-prompt-tuning#87a2cc489da64524c93c1dd9e2eadca930331aca
