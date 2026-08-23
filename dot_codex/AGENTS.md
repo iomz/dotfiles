@@ -27,6 +27,23 @@ For non-trivial commits, add a body explaining:
 - architectural impact
 - migration requirements, when relevant
 
+## Commit Message Encoding
+
+Never embed `\\n`, `\\n\\n`, or shell escape sequences inside a `git commit -m` argument.
+Git stores those characters literally; they do not create commit-message paragraphs.
+
+Use one `-m` argument per paragraph and trailer:
+
+```sh
+git commit -m "type(scope): imperative subject" \
+  -m "First body paragraph." \
+  -m "Second body paragraph." \
+  -m "Co-authored-by: Codex <noreply@openai.com>"
+```
+
+Before pushing or rewriting commits, inspect `git log -1 --format=%B`.
+Stop and correct the message if it contains literal `\\n` or `\\r` sequences.
+
 Keep commits small and reviewable.
 
 Do not rewrite history unless explicitly requested.
