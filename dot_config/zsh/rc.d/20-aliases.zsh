@@ -57,7 +57,7 @@ else
 fi
 
 # nvim
-if whence nvim > /dev/null; then
+if command nvim --version > /dev/null 2>&1; then
     for i (v vi vim); do
         alias $i="nvim"
     done

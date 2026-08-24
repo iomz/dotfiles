@@ -7,9 +7,12 @@
 "---------------------------------------------
 " NeoBundle configuration
 "---------------------------------------------
+set nocompatible
+let s:neobundle_dir = expand('~/.local/share/vim/bundle/neobundle.vim')
+
+if filereadable(s:neobundle_dir . '/autoload/neobundle.vim')
 if has('vim_starting')
-    set nocompatible
-    set runtimepath+=~/.local/share/vim/bundle/neobundle.vim
+    execute 'set runtimepath+=' . fnameescape(s:neobundle_dir)
 endif
 
 "---------------------------------------------
@@ -122,9 +125,6 @@ endfunction
 
 call neobundle#end()
 
-" Use indentations from plugins
-filetype plugin indent on
-
 " Check if the plugin for the language is installed
 NeoBundleCheck
 
@@ -132,6 +132,10 @@ if !has('vim_starting')
     " #When .vimrc reloaded
     call neobundle#call_hook('on_source')
 endif
+endif
+
+" Use available built-in and optional plugin indentations
+filetype plugin indent on
 
 "---------------------------------------------
 " Indentation
