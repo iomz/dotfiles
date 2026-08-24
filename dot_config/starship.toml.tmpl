@@ -11,9 +11,9 @@ truncate_to_repo = false
 [hostname]
 format = "@[$hostname]($style):"
 {{- if eq .chezmoi.os "linux" }}
-{{- $hostnameColors := list "green" "cyan" "blue" "purple" "bright-green" "bright-cyan" "bright-purple" }}
+{{- $hostnameColors := list "#ff9e64" "#b8cc52" "#73daca" "#2ac3de" "#56b6c2" "#5ccfe6" "#4fd6be" "#79c2ff" "#74c7ec" "#c099ff" "#b4befe" "#d3869b" "#b48ead" "#b7c5d3" "#d5c4a1" "#d8dee9" }}
 {{- $hostnameColor := index $hostnameColors (mod (atoi (adler32sum .chezmoi.hostname)) (len $hostnameColors)) }}
-style = "bold {{ $hostnameColor }}"
+style = "bold fg:{{ $hostnameColor }}"
 {{- else }}
 style = "bold bright-blue"
 {{- end }}
