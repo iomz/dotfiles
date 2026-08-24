@@ -234,9 +234,14 @@ set autoindent
 set autoread
 set backspace=indent,eol,start
 set backup
-set backupdir=~/.local/share/vim/backup
+let s:vim_state_home = empty($XDG_STATE_HOME) ? expand('~/.local/state') : expand($XDG_STATE_HOME)
+let s:vim_backup_dir = s:vim_state_home . '/vim/backup'
+let s:vim_swap_dir = s:vim_state_home . '/vim/swap'
+call mkdir(s:vim_backup_dir, 'p', 0700)
+call mkdir(s:vim_swap_dir, 'p', 0700)
+execute 'set backupdir=' . fnameescape(s:vim_backup_dir . '//')
 set cursorline
-set directory=~/.local/share/vim/backup
+execute 'set directory=' . fnameescape(s:vim_swap_dir . '//')
 set display=lastline
 set equalalways
 set expandtab
