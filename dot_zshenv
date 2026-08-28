@@ -38,6 +38,11 @@ export \
     GTAGSLABEL=pygments \
     HOMEBREW_NO_ENV_HINTS=1 \
     OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES \
-    RIPGREP_CONFIG_PATH=${XDG_CONFIG_HOME}/ripgrep/config \
     SHELL_SESSIONS_DISABLE=1 \
     DOCKER_CLI_HINTS=false
+
+if [[ -r "${XDG_CONFIG_HOME}/ripgrep/config" ]]; then
+    export RIPGREP_CONFIG_PATH="${XDG_CONFIG_HOME}/ripgrep/config"
+else
+    unset RIPGREP_CONFIG_PATH
+fi
