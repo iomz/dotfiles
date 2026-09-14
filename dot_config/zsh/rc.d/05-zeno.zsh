@@ -34,8 +34,8 @@ else
     export ZENO_GIT_CAT="cat"
 fi
 
-if whence exa > /dev/null 2>&1; then
-    export ZENO_GIT_TREE="exa --tree"
+if whence eza > /dev/null 2>&1; then
+    export ZENO_GIT_TREE="eza --tree"
 else
     export ZENO_GIT_TREE="tree"
 fi

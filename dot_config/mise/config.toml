@@ -1,6 +1,8 @@
 [tools]
+bat = "latest"
 deno = "2.8.3"
 direnv = "latest"
+eza = "latest"
 fd = "latest"
 fzf = "latest"
 gh = "2.95.0"
