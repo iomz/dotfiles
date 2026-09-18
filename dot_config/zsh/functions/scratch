@@ -1,5 +1,21 @@
-# Create and open a temporary Markdown scratch file.
+# Create and open a temporary Markdown scratch file,
+# or reveal the most recently created scratch file with -r.
 local dir file editor ret
+
+if [[ "$1" == "-r" ]]; then
+    if [[ -z "${SCRATCH:-}" ]]; then
+        print -u2 -- "scratch: no scratch file available"
+        return 1
+    fi
+
+    if [[ ! -e "$SCRATCH" ]]; then
+        print -u2 -- "scratch: scratch file no longer exists: $SCRATCH"
+        return 1
+    fi
+
+    open -R "$SCRATCH"
+    return $?
+fi
 
 dir="$(mktemp -d "${${TMPDIR:-/tmp}%/}/scratch.XXXXXX")" || return
 file="$dir/scratch.md"
@@ -12,6 +28,7 @@ print -r -- "scratch: $file"
 ${(z)editor} "$file"
 ret=$?
 
-print -r -- "scratch saved at: $file"
+typeset -g SCRATCH="$file"
+print -r -- "scratch saved at: $SCRATCH"
 
 return "$ret"
