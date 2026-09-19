@@ -312,13 +312,45 @@ Its contents can come from personal source files, upstream installers, or skill 
 | `.skill-lock.json` and similar installer state | installer | Never track as hand-authored configuration |
 | Caches, cloned metadata, and dependencies | package manager | Never track |
 
-APM manages `ax` and `find-skills` under `~/.agents/skills` from pinned upstream commits.
+APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` under `~/.agents/skills` from pinned upstream commits.
 `iomz/skills` supplies selected personal skills through the same deployment path.
 Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
 
 APM manifest and lockfile live at `~/.apm/apm.yml` and `~/.apm/apm.lock.yaml`; chezmoi owns these inspected declarative inputs.
 Apply exact locked versions with `apm install -g --target agent-skills --frozen`.
 Do not let chezmoi and APM own the same deployed skill directory.
+
+#### Updating APM-managed skills
+
+Updates are manual and review-driven; no scheduled job updates skills in the background.
+Start with this read-only inventory:
+
+```sh
+apm outdated -g
+```
+
+An `outdated` result means APM found a newer annotated upstream tag.
+It does not prove the selected skill changed; compare the pinned and proposed skill subpaths before advancing the pin.
+An `unknown` result means APM could not establish a newer version for that commit-pinned dependency; it does not prove the dependency is current.
+
+Do not use `apm update -g --yes` as a blanket routine.
+Dependencies are deliberately pinned to commit SHAs, and APM will not replace a revision pin with a branch or lightweight tag.
+Inspect the authoritative upstream diff, release notes, skill contents, license, and provenance before changing only the intended pin in the chezmoi-managed manifest.
+
+```sh
+chezmoi edit ~/.apm/apm.yml
+chezmoi apply ~/.apm/apm.yml
+apm lock -g --target agent-skills
+apm install -g --target agent-skills --frozen
+chezmoi add ~/.apm/apm.lock.yaml
+chezmoi diff ~/.apm/apm.yml ~/.apm/apm.lock.yaml
+git diff --check
+git diff -- dot_apm/apm.yml dot_apm/private_apm.lock.yaml
+```
+
+Capture the lockfile after installation because APM records deployed files and hashes during integration.
+Verify changed skill frontmatter and any associated CLI before committing.
+Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
 
 Nix-based skill management is appropriate only as part of a broader Nix or Home Manager adoption.
 Adding Nix solely for agent skills would duplicate mise and chezmoi responsibilities.

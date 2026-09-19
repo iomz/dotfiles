@@ -7,7 +7,8 @@ targets:
 dependencies:
   apm:
     - yusukebe/ax#8abbca2fc400c2ff4866248ba1ec9309b948812f
-    - vercel-labs/skills/skills/find-skills#435076e78988e1e6ec40d00b0b1d76bdbbc5419a
+    - vercel-labs/skills/skills/find-skills#7407f3893ad4dceab546ac002c3ef806e4000c73
+    - typesafe-ai/skills/skills/typesafe-ai#65a39f393687675ce170e6094757de20370365b9
     - iomz/skills/say-what-it-is#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/japanese-tech-writing#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/cognitive-rhythm-writing#87a2cc489da64524c93c1dd9e2eadca930331aca

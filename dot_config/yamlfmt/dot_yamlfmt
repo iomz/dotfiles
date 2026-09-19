@@ -1,5 +1,7 @@
 formatter:
   type: basic
-  include_document_start: true
+  include_document_start: false
   retain_line_breaks: true
   pad_line_comments: 1
+  eof_newline: true
+  trim_trailing_whitespace: true
