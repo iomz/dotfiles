@@ -4,8 +4,6 @@ Prefer narrow queries before broad scans.
 
 Use `runlog` for commands expected to produce more than 200 lines, unless they may run longer than 10 seconds.
 
-Run long commands directly with bounded output and poll their session.
-
 Run `ai-check` before diagnosing environment issues.
 
 # Git
@@ -38,7 +36,7 @@ Use one `-m` argument per paragraph and trailer:
 git commit -m "type(scope): imperative subject" \
   -m "First body paragraph." \
   -m "Second body paragraph." \
-  -m "Co-authored-by: Codex <noreply@openai.com>"
+  -m "Co-authored-by: <tool> <noreply@example.com>"
 ```
 
 Before pushing or rewriting commits, inspect `git log -1 --format=%B`.
@@ -48,15 +46,9 @@ Keep commits small and reviewable.
 
 Do not rewrite history unless explicitly requested.
 
-Do not use `codex/` branch prefixes unless explicitly requested.
-Prefer user- or repo-specific prefixes such as `fix/`, `feat/`, or `chore/` when creating branches.
+Prefer user- or repo-specific branch prefixes such as `fix/`, `feat/`, or `chore/`.
 
-Run GitHub CLI operations with elevated permissions by default.
-Do not diagnose sandbox `gh` authentication unless elevated `gh` also fails.
-
-Use authenticated `gh` directly from the beginning for GitHub write operations, including creating, editing, commenting on, labeling, closing, or reopening issues and pull requests, creating releases, and resolving review threads.
-Do not attempt the GitHub connector first for those writes unless the user explicitly requests the connector or `gh` lacks coverage for the operation.
-Prefer the GitHub connector for structured read-only repository, issue, and pull-request inspection when it avoids extra parsing.
+Use authenticated `gh` directly for GitHub write operations, including creating, editing, commenting on, labeling, closing, or reopening issues and pull requests, creating releases, and resolving review threads.
 
 Do not push commits or branches unless explicitly authorized.
 Permission to commit does not imply permission to push.
@@ -64,16 +56,11 @@ Requests to publish, open a pull request, or update a remote pull request author
 
 ## Pull Requests
 
-- Never prefix pull request titles with `[codex]`.
-- Use Conventional Commit-style PR titles: lowercase type and optional scope.
+Use Conventional Commit-style PR titles: lowercase type and optional scope.
 
 ## AI Attribution
 
-For commits materially authored by Codex in repositories owned by this user, append:
-
-```text
-Co-authored-by: Codex <noreply@openai.com>
-```
+For commits materially authored by an AI tool in repositories owned by this user, append a `Co-authored-by` trailer naming that tool, using the trailer format the tool specifies.
 
 For external repositories, follow repository policy and disclose material AI assistance in the pull request body.
 
