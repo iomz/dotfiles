@@ -16,6 +16,11 @@ It must not contain credentials, local state, history, caches, or machine-specif
 - Keep generated, vendored, and system-managed content out of Git unless there is a clear reason to own it here.
 - For Codex, track repo/global instruction files and personal custom skills only.
   Do not track `~/.codex/config.toml`, hooks, sessions, auth, caches, or `~/.codex/skills/.system`.
+- Global instructions for Codex and Claude Code share one tool-neutral source, `.chezmoitemplates/agents-common.md`.
+  `private_dot_codex/AGENTS.md.tmpl` appends Codex-only rules and `private_dot_claude/CLAUDE.md.tmpl` renders the neutral text as is.
+  Put tool-specific rules in the matching template, not in the shared file.
+- For Claude Code, track only `~/.claude/CLAUDE.md`.
+  Do not track `~/.claude/settings.json`, skills, agents, hooks, plugins, sessions, or caches; APM deploys skills, agents, and hooks there.
 - Treat `~/.agents/skills` as a shared deployment surface.
   Track only explicitly allowlisted, personally authored, public-safe skills.
   Keep third-party skills, installer lock files, and package-manager output outside chezmoi.
@@ -37,12 +42,4 @@ It must not contain credentials, local state, history, caches, or machine-specif
 
 ## Git Commits
 
-Always use Conventional Commits unless repository history clearly uses another strict format.
-
-Use lowercase type/scope style, imperative subject, and no trailing period.
-
-Examples:
-
-- `feat(certbot): add cloudflare renewal migration flag`
-- `chore(git): stop tracking vault password file`
-- `docs(certbot): document forced cloudflare renewal`
+Use Conventional Commits with lowercase type and scope, an imperative subject, and no trailing period, unless repository history clearly uses another strict format.

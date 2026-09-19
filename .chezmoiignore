@@ -3,6 +3,7 @@ README.md
 
 # AGENTS
 AGENTS.md
+CLAUDE.md
 
 # LICENSE
 LICENSE
@@ -61,6 +62,11 @@ run_once_install-packages.sh.tmpl
 .codex/skills/**/.git/**
 .codex/skills/**/node_modules/
 .codex/skills/**/node_modules/**
+
+# claude code
+# settings.json holds APM-generated hooks with absolute paths, so APM owns it
+.claude/*
+!.claude/CLAUDE.md
 
 # shared agent state and third-party skills
 .agents/**
