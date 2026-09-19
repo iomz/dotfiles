@@ -308,16 +308,18 @@ Its contents can come from personal source files, upstream installers, or skill 
 | Category | Owner | Chezmoi policy |
 | --- | --- | --- |
 | Personally authored, public-safe skill | chezmoi or its own repository | Track only through a per-skill allowlist |
-| Third-party skill | APM or upstream installer | Track a declarative manifest and lockfile when available, not deployed files |
+| Third-party skill | APM or upstream installer | Track a declarative manifest with pinned SHAs, not deployed files or lockfiles |
 | `.skill-lock.json` and similar installer state | installer | Never track as hand-authored configuration |
 | Caches, cloned metadata, and dependencies | package manager | Never track |
 
-APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` under `~/.agents/skills` from pinned upstream commits.
+APM deploys to `~/.agents/skills` and `~/.claude/skills` (`agent-skills` and `claude` targets in `apm.yml`).
+It also owns Caveman: its skills, agents, and hooks land in `~/.claude`, and APM edits `~/.claude/settings.json`.
+APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
 `iomz/skills` supplies selected personal skills through the same deployment path.
 Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
 
-APM manifest and lockfile live at `~/.apm/apm.yml` and `~/.apm/apm.lock.yaml`; chezmoi owns these inspected declarative inputs.
-Apply exact locked versions with `apm install -g --target agent-skills --frozen`.
+The APM manifest lives at `~/.apm/apm.yml`; chezmoi owns this inspected declarative input, and the commit SHA pins in it are the source of truth.
+`~/.apm/apm.lock.yaml` is generated per machine and not tracked, because it records every deployed file and is large; install with `apm install -g`, not `--frozen`.
 Do not let chezmoi and APM own the same deployed skill directory.
 
 #### Updating APM-managed skills
@@ -340,15 +342,12 @@ Inspect the authoritative upstream diff, release notes, skill contents, license,
 ```sh
 chezmoi edit ~/.apm/apm.yml
 chezmoi apply ~/.apm/apm.yml
-apm lock -g --target agent-skills
-apm install -g --target agent-skills --frozen
-chezmoi add ~/.apm/apm.lock.yaml
-chezmoi diff ~/.apm/apm.yml ~/.apm/apm.lock.yaml
+apm install -g
+chezmoi diff ~/.apm/apm.yml
 git diff --check
-git diff -- dot_apm/apm.yml dot_apm/private_apm.lock.yaml
+git diff -- dot_apm/apm.yml
 ```
 
-Capture the lockfile after installation because APM records deployed files and hashes during integration.
 Verify changed skill frontmatter and any associated CLI before committing.
 Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
 

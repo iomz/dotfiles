@@ -3,6 +3,7 @@ version: "1.0.0"
 
 targets:
   - agent-skills
+  - claude
 
 dependencies:
   apm:
@@ -14,3 +15,4 @@ dependencies:
     - iomz/skills/cognitive-rhythm-writing#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/retrospective-codify#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/empirical-prompt-tuning#87a2cc489da64524c93c1dd9e2eadca930331aca
+    - JuliusBrussee/caveman#655b7d9c5431f822264b7732e9901c5578ac84cf

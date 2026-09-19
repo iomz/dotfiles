@@ -19,7 +19,7 @@ It must not contain credentials, local state, history, caches, or machine-specif
 - Treat `~/.agents/skills` as a shared deployment surface.
   Track only explicitly allowlisted, personally authored, public-safe skills.
   Keep third-party skills, installer lock files, and package-manager output outside chezmoi.
-- If APM manages shared skills, chezmoi may track an inspected public-safe manifest and lockfile, but never `~/.apm/apm_modules` or deployed copies.
+- If APM manages shared skills, chezmoi may track an inspected public-safe manifest with pinned SHAs, but never the generated `~/.apm/apm.lock.yaml`, `~/.apm/apm_modules` or deployed copies.
 
 ## Chezmoi Rules
 
