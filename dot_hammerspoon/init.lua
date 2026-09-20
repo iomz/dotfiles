@@ -1,5 +1,8 @@
 -- ~/.hammerspoon/init.lua
 
+-- Enables the `hs` command line tool (hs -c 'hs.reload()').
+require("hs.ipc")
+
 hs.hotkey.bind({ "ctrl", "alt" }, "R", function()
   hs.reload()
 end)
