@@ -316,6 +316,8 @@ APM deploys to `~/.agents/skills` and `~/.claude/skills` (`agent-skills` and `cl
 It also owns Caveman: its skills, agents, and hooks land in `~/.claude`, and APM edits `~/.claude/settings.json`.
 APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
 `iomz/skills` supplies selected personal skills through the same deployment path.
+The vault-specific `brain-vault` skill is owned by `iomz/brain-vault` (`Skills/Common/brain-vault`) and deployed the same way.
+Remove same-named copies from `~/.codex/skills`, since Codex would otherwise see each skill twice.
 Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
 
 The APM manifest lives at `~/.apm/apm.yml`; chezmoi owns this inspected declarative input, and the commit SHA pins in it are the source of truth.
