@@ -7,6 +7,18 @@ hs.hotkey.bind({ "ctrl", "alt" }, "R", function()
   hs.reload()
 end)
 
+hs.hotkey.bind({"ctrl", "alt"}, "V", function()
+    hs.task.new("/bin/zsh", nil, {
+        "-lc",
+        [[
+            dir="$(mktemp -d "${TMPDIR%/}/scratch.XXXXXX")" || exit
+            file="$dir/scratch.md"
+            pbpaste > "$file" || exit
+            open -R "$file"
+        ]]
+    }):start()
+end)
+
 hs.alert.show("Hammerspoon loaded")
 
 -- Modules are loaded in lexical order.

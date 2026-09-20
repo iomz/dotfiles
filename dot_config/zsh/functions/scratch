@@ -1,15 +1,10 @@
 # Create and open a temporary Markdown scratch file,
-# or reveal the most recently created scratch file with -r.
+# import the clipboard with -c, or reveal the latest scratch with -r.
 local dir file editor ret
 
 if [[ "$1" == "-r" ]]; then
-    if [[ -z "${SCRATCH:-}" ]]; then
+    if [[ -z "${SCRATCH:-}" || ! -e "$SCRATCH" ]]; then
         print -u2 -- "scratch: no scratch file available"
-        return 1
-    fi
-
-    if [[ ! -e "$SCRATCH" ]]; then
-        print -u2 -- "scratch: scratch file no longer exists: $SCRATCH"
         return 1
     fi
 
@@ -19,10 +14,18 @@ fi
 
 dir="$(mktemp -d "${${TMPDIR:-/tmp}%/}/scratch.XXXXXX")" || return
 file="$dir/scratch.md"
+
+if [[ "$1" == "-c" ]]; then
+    pbpaste >| "$file" || return
+    typeset -g SCRATCH="$file"
+    print -r -- "scratch: $SCRATCH"
+    open -R "$SCRATCH"
+    return $?
+fi
+
 : >| "$file" || return
 
 editor="${EDITOR:-nvim}"
-
 print -r -- "scratch: $file"
 
 ${(z)editor} "$file"
