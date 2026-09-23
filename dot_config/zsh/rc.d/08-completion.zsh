@@ -36,6 +36,11 @@ else
 fi
 # }}}
 
+# Docker's generated completion includes dynamically discovered CLI plugins
+# such as Docker Compose.
+if command -v docker >/dev/null 2>&1; then
+    source <(docker completion zsh)
+fi
 
 # Completion colors {{{
 zstyle ':completion:*:default' list-colors ${(s.:.)IOMZ_COLORS}
