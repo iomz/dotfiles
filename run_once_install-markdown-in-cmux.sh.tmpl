@@ -1,0 +1,68 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+set -euo pipefail
+
+APP="$HOME/Applications/Markdown in cmux.app"
+CMUX="/opt/homebrew/bin/cmux"
+
+if [[ ! -x "$CMUX" ]]; then
+    echo "cmux not found at $CMUX; skipping Markdown launcher installation."
+    exit 0
+fi
+
+mkdir -p "$HOME/Applications"
+rm -rf "$APP"
+
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+
+cat >"$tmpdir/main.applescript" <<'APPLESCRIPT'
+on open droppedFiles
+    repeat with f in droppedFiles
+        set filePath to POSIX path of f
+        do shell script "/opt/homebrew/bin/cmux markdown open " & quoted form of filePath
+    end repeat
+end open
+APPLESCRIPT
+
+/usr/bin/osacompile \
+    -o "$APP" \
+    "$tmpdir/main.applescript"
+
+# Register as a Markdown document viewer.
+PLIST="$APP/Contents/Info.plist"
+
+for key in CFBundleIdentifier CFBundleName CFBundleDisplayName; do
+    /usr/libexec/PlistBuddy -c "Delete :$key" "$PLIST" 2>/dev/null || true
+done
+
+/usr/libexec/PlistBuddy \
+    -c "Add :CFBundleIdentifier string io.sazanka.iomz.markdown-in-cmux" \
+    "$PLIST"
+
+/usr/libexec/PlistBuddy \
+    -c "Add :CFBundleName string 'Markdown in cmux'" \
+    "$PLIST"
+
+/usr/libexec/PlistBuddy \
+    -c "Add :CFBundleDisplayName string 'Markdown in cmux'" \
+    "$PLIST"
+
+/usr/libexec/PlistBuddy \
+    -c "Delete :CFBundleDocumentTypes" \
+    "$PLIST" 2>/dev/null || true
+
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes array" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0 dict" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0:CFBundleTypeName string 'Markdown document'" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0:CFBundleTypeRole string Viewer" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0:LSHandlerRank string Owner" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0:CFBundleTypeExtensions array" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0:CFBundleTypeExtensions:0 string md" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleDocumentTypes:0:CFBundleTypeExtensions:1 string markdown" "$PLIST"
+
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+    -f "$APP"
+
+echo "Installed: $APP"
+{{- end }}
