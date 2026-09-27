@@ -21,3 +21,4 @@ tab-inherit-working-directory = false
 
 # Prevent new split panes from inheriting the current directory
 #split-inherit-working-directory = false
+keybind = shift+enter=text:\x1b\r
