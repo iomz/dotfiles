@@ -1,4 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@wakatime/opencode-wakatime"]
+  "plugin": ["opencode-wakatime@1.4.0"]
 }
