@@ -1,0 +1,4 @@
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": ["opencode-codex-status@0.1.4"]
+}
