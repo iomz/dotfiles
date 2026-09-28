@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+OPENCODE_ROOT=${OPENCODE_UPDATE_ROOT:-"$HOME/.local/share/opencode"}
+SOURCE=${OPENCODE_UPDATE_SOURCE:-"$HOME/ghq/github.com/anomalyco/opencode-v2-build"}
+UPSTREAM_REF=${OPENCODE_UPDATE_REF:-origin/v2}
+LIB="$HOME/.local/lib/opencode-generation.sh"
+[[ -r $LIB ]] || { printf 'opencode-update: missing helper: %s\n' "$LIB" >&2; exit 1; }
+# shellcheck source=../lib/opencode-generation.sh
+source "$LIB"
+
+LOCKED=0
+WORKTREE=
+TMP=
+STAGING=
+SUCCESS=0
+cleanup() {
+  local status=$?
+  if [[ -n $STAGING && $STAGING = "$OPENCODE_ROOT"/releases/.staging-* && -d $STAGING && ! -L $STAGING ]]; then
+    rm -rf -- "$STAGING"
+  fi
+  if [[ -n $WORKTREE && -d $WORKTREE ]]; then
+    git -C "$SOURCE" worktree remove --force "$WORKTREE" >/dev/null 2>&1 || true
+  fi
+  if [[ -n $TMP && -d $TMP ]]; then
+    if (( SUCCESS )); then rm -rf -- "$TMP"
+    else printf 'opencode-update: diagnostic build files retained at %s\n' "$TMP" >&2
+    fi
+  fi
+  (( LOCKED )) && opencode_lock_release
+  exit "$status"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+for tool in git bun python3 lipo; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
+[[ $(uname -s) = Darwin ]] || { opencode_die 'native build target is macOS only'; exit 1; }
+[[ -x $HOME/.local/bin/opencode ]] || { opencode_die "public entrypoint is missing or not executable: $HOME/.local/bin/opencode"; exit 1; }
+mkdir -p "$OPENCODE_ROOT/releases" "$OPENCODE_ROOT/candidates"
+opencode_lock_acquire || exit 1
+LOCKED=1
+opencode_recover_transaction
+
+[[ -d $SOURCE/.git || -f $SOURCE/.git ]] || { opencode_die "source checkout missing: $SOURCE"; exit 1; }
+git -C "$SOURCE" config --get remote.origin.url | grep -Eq 'github\.com[:/]anomalyco/opencode([.]git)?$' || {
+  opencode_die "unexpected origin for source checkout: $SOURCE"; exit 1;
+}
+git -C "$SOURCE" fetch --quiet origin "+refs/heads/v2:refs/remotes/origin/v2" || {
+  opencode_die 'fetch of upstream V2 branch failed'; exit 1;
+}
+TARGET=$(git -C "$SOURCE" rev-parse --verify "$UPSTREAM_REF^{commit}") || { opencode_die "cannot resolve upstream ref: $UPSTREAM_REF"; exit 1; }
+[[ $TARGET =~ ^[0-9a-f]{40}$ ]] || { opencode_die 'resolved upstream commit is not a full Git SHA'; exit 1; }
+
+ACTIVE_GEN=$(opencode_link_target "$OPENCODE_ROOT/active") || { opencode_die 'active must point to a managed generation; bootstrap required'; exit 1; }
+PREVIOUS_GEN=$(opencode_link_target "$OPENCODE_ROOT/previous") || { opencode_die 'previous must point to a managed generation; bootstrap required'; exit 1; }
+[[ $(dirname "$ACTIVE_GEN") = "$OPENCODE_ROOT/releases" && $(dirname "$PREVIOUS_GEN") = "$OPENCODE_ROOT/releases" ]] || { opencode_die 'active/previous points outside releases/'; exit 1; }
+ACTIVE_EXE=$(opencode_generation_verify "$ACTIVE_GEN") || exit 1
+PREVIOUS_EXE=$(opencode_generation_verify "$PREVIOUS_GEN") || exit 1
+CURRENT_COMMIT=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["source_commit"])' "$ACTIVE_GEN/manifest.json")
+CURRENT_NAME=$(basename "$ACTIVE_GEN")
+UPSTREAM_VERSION=$(python3 - "$SOURCE" "$TARGET" <<'PY'
+import json, subprocess, sys
+root, commit = sys.argv[1:]
+raw = subprocess.check_output(["git", "-C", root, "show", f"{commit}:packages/cli/package.json"], text=True)
+print(json.loads(raw)["version"])
+PY
+)
+TARGET_NAME="v${UPSTREAM_VERSION}-${TARGET:0:10}"
+[[ $UPSTREAM_VERSION =~ ^[0-9A-Za-z][0-9A-Za-z.+_-]*$ ]] || { opencode_die "unsafe upstream version string: $UPSTREAM_VERSION"; exit 1; }
+printf 'Current:   %s\nUpstream:  %s\n' "$CURRENT_NAME" "$TARGET_NAME"
+
+if [[ $CURRENT_COMMIT = "$TARGET" ]] || git -C "$SOURCE" merge-base --is-ancestor "$TARGET" "$CURRENT_COMMIT"; then
+  printf 'OpenCode already contains upstream V2 commit %s; no changes made.\n' "${TARGET:0:10}"
+  SUCCESS=1
+  exit 0
+fi
+if ! git -C "$SOURCE" merge-base --is-ancestor "$CURRENT_COMMIT" "$TARGET"; then
+  opencode_die 'upstream and active commits diverge; refusing implicit downgrade/rebase'
+  exit 1
+fi
+
+[[ ! -e $OPENCODE_ROOT/releases/$TARGET_NAME && ! -L $OPENCODE_ROOT/releases/$TARGET_NAME ]] || {
+  opencode_die "target generation already exists; will not overwrite: $TARGET_NAME"; exit 1;
+}
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/opencode-update.XXXXXX")
+WORKTREE="$TMP/source"
+git -C "$SOURCE" worktree add --detach "$WORKTREE" "$TARGET" >"$TMP/git-worktree.log" 2>&1 || {
+  opencode_die "isolated worktree creation failed (see $TMP/git-worktree.log)"; exit 1;
+}
+VERSION=$(python3 - "$WORKTREE/packages/cli/package.json" <<'PY'
+import json,sys
+print(json.load(open(sys.argv[1]))["version"])
+PY
+)
+[[ $VERSION = "$UPSTREAM_VERSION" ]] || { opencode_die 'version changed between ref resolution and worktree'; exit 1; }
+BUILD_LOG="$TMP/build.log"
+printf 'Building %s...\n' "$TARGET_NAME"
+if ! (cd "$WORKTREE" && bun install --frozen-lockfile && OPENCODE_VERSION="$VERSION" bun run packages/cli/script/build.ts --single --skip-install --outdir="$TMP/output") >"$BUILD_LOG" 2>&1; then
+  opencode_die "V2 build failed (see $BUILD_LOG)"; tail -40 "$BUILD_LOG" >&2; exit 1
+fi
+BUILT_EXE="$TMP/output/cli-darwin-arm64/bin/opencode"
+[[ -x $BUILT_EXE ]] || { opencode_die "build did not produce expected executable: $BUILT_EXE"; exit 1; }
+
+printf 'Testing...\n'
+ARCHS=$(lipo -archs "$BUILT_EXE" 2>/dev/null || true)
+[[ $ARCHS = *arm64* ]] || { opencode_die "candidate lacks arm64 architecture: $ARCHS"; exit 1; }
+VERSION_OUTPUT=$("$BUILT_EXE" --version 2>&1) || { opencode_die "candidate --version failed: $VERSION_OUTPUT"; exit 1; }
+[[ $VERSION_OUTPUT = *"$VERSION"* ]] || { opencode_die "candidate version mismatch: $VERSION_OUTPUT"; exit 1; }
+"$BUILT_EXE" --help >"$TMP/help.txt" 2>&1 || { opencode_die 'candidate --help failed'; exit 1; }
+"$BUILT_EXE" debug paths >"$TMP/paths.txt" 2>&1 || { opencode_die 'candidate debug paths failed'; exit 1; }
+"$BUILT_EXE" debug config >"$TMP/config.txt" 2>&1 || { opencode_die "candidate config/plugin startup check failed (see $TMP/config.txt)"; tail -30 "$TMP/config.txt" >&2; exit 1; }
+
+SOURCE_BRANCH=$(git -C "$SOURCE" branch -r --contains "$TARGET" --format='%(refname:short)' | grep -E '(^|/)v2$' | head -1 || true)
+BUILD_TARGET=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/arm64/arm64/;s/x86_64/x64/')
+STAGING="$OPENCODE_ROOT/releases/.staging-${TARGET_NAME}-$$"
+DEST="$OPENCODE_ROOT/releases/$TARGET_NAME"
+mkdir "$STAGING"
+cp -p "$BUILT_EXE" "$STAGING/opencode"
+python3 - "$STAGING/manifest.json" "$VERSION" "$TARGET" "$SOURCE_BRANCH" "$BUILD_TARGET" <<'PY'
+import datetime, hashlib, json, os, sys
+path, version, commit, ref, target = sys.argv[1:]
+exe=os.path.join(os.path.dirname(path), "opencode")
+with open(exe,"rb") as f: digest=hashlib.file_digest(f,"sha256").hexdigest()
+m={"version":version,"source_commit":commit,"source_ref":ref or "origin/v2","build_timestamp":datetime.datetime.now(datetime.timezone.utc).isoformat(),"build_target":target,"build_command":"OPENCODE_VERSION=<version> bun run packages/cli/script/build.ts --single --skip-install --outdir=<isolated-candidate>","executable":"opencode","sha256":digest}
+with open(path,"x",encoding="utf-8") as f: json.dump(m,f,indent=2); f.write("\n")
+PY
+if [[ -e $DEST || -L $DEST ]]; then rm -rf -- "$STAGING"; opencode_die "generation appeared during build; refusing overwrite: $DEST"; exit 1; fi
+mv "$STAGING" "$DEST"
+opencode_generation_verify "$DEST" >/dev/null || { opencode_die 'installed candidate failed manifest/hash verification'; exit 1; }
+
+printf 'Activating...\n'
+opencode_swap_pointers "$TARGET_NAME" "$CURRENT_NAME" || { opencode_die 'pointer activation interrupted; transaction journal retained for recovery'; exit 1; }
+NEW_EXE=$(opencode_generation_verify "$OPENCODE_ROOT/releases/$TARGET_NAME") || exit 1
+if ! ACTIVE_VERSION=$("$HOME/.local/bin/opencode" --version 2>&1) || [[ $ACTIVE_VERSION != *"$VERSION"* ]]; then
+  opencode_die "post-activation verification failed: ${ACTIVE_VERSION:-no version output}; restoring previous pointers"
+  if opencode_swap_pointers "$CURRENT_NAME" "$TARGET_NAME"; then
+    opencode_prune_generations || printf 'opencode-update: warning: failed candidate retained after restoration\n' >&2
+  else
+    opencode_die 'automatic pointer restoration failed; transaction journal retained'
+  fi
+  exit 1
+fi
+printf 'Active:    %s\nPrevious:  %s\n' "$TARGET_NAME" "$CURRENT_NAME"
+if ! opencode_prune_generations; then printf 'opencode-update: warning: retention cleanup incomplete; extra releases retained\n' >&2; fi
+SUCCESS=1

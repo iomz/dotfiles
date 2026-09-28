@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+OPENCODE_ROOT=${OPENCODE_UPDATE_ROOT:-"$HOME/.local/share/opencode"}
+LIB="$HOME/.local/lib/opencode-generation.sh"
+[[ -r $LIB ]] || { printf 'opencode-rollback: missing helper: %s\n' "$LIB" >&2; exit 1; }
+# shellcheck source=../lib/opencode-generation.sh
+source "$LIB"
+LOCKED=0
+cleanup() { local status=$?; (( LOCKED )) && opencode_lock_release; exit "$status"; }
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+for tool in python3 shasum; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
+[[ -x $HOME/.local/bin/opencode ]] || { opencode_die "public entrypoint is missing or not executable: $HOME/.local/bin/opencode"; exit 1; }
+opencode_lock_acquire || exit 1
+LOCKED=1
+opencode_recover_transaction
+
+ACTIVE=$(opencode_link_target "$OPENCODE_ROOT/active") || { opencode_die 'active pointer is invalid'; exit 1; }
+PREVIOUS=$(opencode_link_target "$OPENCODE_ROOT/previous") || { opencode_die 'previous pointer is invalid'; exit 1; }
+[[ $(dirname "$ACTIVE") = "$OPENCODE_ROOT/releases" && $(dirname "$PREVIOUS") = "$OPENCODE_ROOT/releases" ]] || { opencode_die 'active/previous points outside releases/'; exit 1; }
+ACTIVE_EXE=$(opencode_generation_verify "$ACTIVE") || exit 1
+PREVIOUS_EXE=$(opencode_generation_verify "$PREVIOUS") || exit 1
+OLD_NAME=$(basename "$ACTIVE")
+NEW_NAME=$(basename "$PREVIOUS")
+NEW_VERSION=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "$PREVIOUS/manifest.json")
+NEW_COMMIT=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("source_commit","unknown"))' "$PREVIOUS/manifest.json")
+printf 'Swapping %s ⇄ %s...\n' "$OLD_NAME" "$NEW_NAME"
+opencode_swap_pointers "$NEW_NAME" "$OLD_NAME" || { opencode_die 'rollback pointer swap interrupted; transaction journal retained for recovery'; exit 1; }
+NEW_ACTIVE_EXE=$(opencode_generation_verify "$OPENCODE_ROOT/releases/$NEW_NAME") || exit 1
+VERSION_OUTPUT=$("$HOME/.local/bin/opencode" --version 2>&1) || { opencode_die "restored public entrypoint failed --version: $VERSION_OUTPUT"; exit 1; }
+[[ $VERSION_OUTPUT = *"$NEW_VERSION"* ]] || { opencode_die "restored version mismatch: expected $NEW_VERSION; got $VERSION_OUTPUT"; exit 1; }
+printf 'Rolled back:\n  Active:    %s (%s, %s)\n  Previous:  %s\n' "$NEW_NAME" "$NEW_VERSION" "${NEW_COMMIT:0:10}" "$OLD_NAME"
