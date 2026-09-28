@@ -18,6 +18,11 @@ node_modules/**
 package-lock.json
 package.json
 
+# OpenCode local CLI plugin generated dependencies
+.config/opencode/node_modules/**
+.config/opencode/package-lock.json
+.config/opencode/cli-plugins/codex-quota-sidebar/node_modules/**
+
 # backup
 *.bak
 **/*.bak

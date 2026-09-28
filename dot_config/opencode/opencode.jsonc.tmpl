@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "update": "disable",
+  "lsp": false,
+  "plugins": [
+    "@wakatime/opencode-wakatime@1.0.0",
+    "{{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24.14.1/lib/node_modules/opencode-codex-usage/opencode2-plugin"
+  ],
+  "permissions": [
+    { "action": "*", "resource": "*", "effect": "allow" }
+  ]
+}

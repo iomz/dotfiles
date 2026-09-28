@@ -6,16 +6,23 @@ const skillPath = path.join(
   ".agents/skills/caveman/SKILL.md",
 )
 
-export const Caveman = async () => ({
-  "experimental.chat.system.transform": async (_input, output) => {
+export default {
+  id: "caveman",
+  async setup(ctx) {
+    let body
     try {
       const skill = fs.readFileSync(skillPath, "utf8")
-      const body = skill.replace(/^---[\s\S]*?---\s*/, "")
-      output.system.push(
-        `CAVEMAN MODE ACTIVE — level: full\n\n${body}`,
-      )
+      body = skill.replace(/^---[\s\S]*?---\s*/, "")
     } catch (error) {
       console.error(`[caveman] Could not load ${skillPath}:`, error)
+      return
     }
+
+    await ctx.session.hook("context", (event) => {
+      event.system.push({
+        type: "text",
+        text: `CAVEMAN MODE ACTIVE — level: full\n\n${body}`,
+      })
+    })
   },
-})
+}
