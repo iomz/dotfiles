@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+STATUSLINE="$HOME/.local/bin/claude-code-status-line.py"
+CAVEMAN="$HOME/.claude/hooks/caveman/src/hooks/caveman-statusline.sh"
+input=$(cat)
+line=$(printf '%s' "$input" | "$STATUSLINE")
+printf '%s' "$line"
+
+# Keep the existing Caveman mode/savings indicator alongside upstream output.
+if [[ -r $CAVEMAN ]]; then
+  caveman=$(bash "$CAVEMAN" || true)
+  [[ -z $caveman ]] || printf '  %s' "$caveman"
+fi
+printf '\n'
