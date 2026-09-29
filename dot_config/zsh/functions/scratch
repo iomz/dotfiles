@@ -12,8 +12,11 @@ if [[ "$1" == "-r" ]]; then
     return $?
 fi
 
-dir="$(mktemp -d "${${TMPDIR:-/tmp}%/}/scratch.XXXXXX")" || return
-file="$dir/scratch.md"
+dir="${${TMPDIR:-/tmp}%/}/scratch"
+mkdir -p "$dir" || return
+file="$(mktemp "${dir}/scratch.XXXXXX")" || return
+mv "$file" "$file.md" || return
+file="$file.md"
 
 if [[ "$1" == "-c" ]]; then
     pbpaste >| "$file" || return

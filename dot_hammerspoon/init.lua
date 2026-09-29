@@ -11,8 +11,11 @@ hs.hotkey.bind({"ctrl", "alt"}, "V", function()
     hs.task.new("/bin/zsh", nil, {
         "-lc",
         [[
-            dir="$(mktemp -d "${TMPDIR%/}/scratch.XXXXXX")" || exit
-            file="$dir/scratch.md"
+            dir="${TMPDIR%/}/scratch"
+            mkdir -p "$dir" || exit
+            file="$(mktemp "$dir/scratch.XXXXXX")" || exit
+            mv "$file" "$file.md" || exit
+            file="$file.md"
             pbpaste > "$file" || exit
             open -R "$file"
         ]]
