@@ -80,6 +80,10 @@ Use four backticks around Markdown containing triple-backtick fences, then incre
 When editing Markdown prose, prefer sentence-per-line formatting: one sentence per source line within a paragraph.
 Preserve existing wrapping unless the edit already touches that paragraph or the user asks to reflow it.
 
+# Japanese Writing Skills
+
+When a Japanese writing or editing task could use either `yomiyasu` or `japanese-tech-writing`, ask the user which skill to use before drafting. If the user names a skill, use that skill without asking. Do not combine both unless the user explicitly requests it.
+
 # Design
 
 Prefer simple designs with clear responsibility boundaries.

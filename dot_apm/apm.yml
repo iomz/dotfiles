@@ -19,3 +19,4 @@ dependencies:
     - iomz/skills/gh-coderabbit-resolve#3538ac9403b1d564bc77a24551d106486a6542bd
     - iomz/skills/keep-skills-up-to-date#3538ac9403b1d564bc77a24551d106486a6542bd
     - iomz/brain-vault/Skills/Common/brain-vault#ffafd45d85fb88bcc22274bb11d873527026114c
+    - nanaism/yomiyasu#8d5abeebe2dd20c2db005deaddcc50be43c59c0a
