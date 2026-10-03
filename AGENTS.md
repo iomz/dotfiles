@@ -16,11 +16,14 @@ It must not contain credentials, local state, history, caches, or machine-specif
 - Keep generated, vendored, and system-managed content out of Git unless there is a clear reason to own it here.
 - For Codex, track repo/global instruction files and personal custom skills only.
   Do not track `~/.codex/config.toml`, hooks, sessions, auth, caches, or `~/.codex/skills/.system`.
-- Global instructions for Codex and Claude Code share one tool-neutral source, `.chezmoitemplates/agents-common.md`.
-  `private_dot_codex/AGENTS.md.tmpl` appends Codex-only rules and `private_dot_claude/CLAUDE.md.tmpl` renders the neutral text as is.
+- Global instructions for Codex and Claude Code share one canonical tool-neutral source, `.chezmoitemplates/AGENTS.md`.
+  `private_dot_codex/AGENTS.md.tmpl` appends Codex-only rules and `private_dot_claude/CLAUDE.md.tmpl` renders the neutral text at Claude's required user-global path.
   Put tool-specific rules in the matching template, not in the shared file.
-- For Claude Code, track only `~/.claude/CLAUDE.md`.
+- For Claude Code, track only `~/.claude/CLAUDE.md`, generated from the canonical shared source.
+  `~/.claude/AGENTS.md` is not a user-global instruction location.
   Do not track `~/.claude/settings.json`, skills, agents, hooks, plugins, sessions, or caches; APM deploys skills, agents, and hooks there.
+- Claude Cloud owns its Git signing configuration and launcher/session/synced-skill state.
+  Never deploy `.gitconfig`, `.claude.json`, or an `exact_` Claude directory in the Cloud variant.
 - Treat `~/.agents/skills` as a shared deployment surface.
   Track only explicitly allowlisted, personally authored, public-safe skills.
   Keep third-party skills, installer lock files, and package-manager output outside chezmoi.

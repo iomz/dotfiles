@@ -5,11 +5,12 @@
 
 # dotfiles
 
-Personal Linux and macOS dotfiles managed by [chezmoi](https://www.chezmoi.io/).
+Personal Linux and macOS dotfiles, plus a minimal Claude Cloud agent environment, managed by [chezmoi](https://www.chezmoi.io/).
 
 ## Contents
 
 - [Quick Start](#quick-start)
+- [Claude Cloud](#claude-cloud)
 - [Responsibility Split](#responsibility-split)
 - [Public Dotfiles Safety](#public-dotfiles-safety)
 - [Common Operations](#common-operations)
@@ -22,6 +23,8 @@ Personal Linux and macOS dotfiles managed by [chezmoi](https://www.chezmoi.io/).
 - [WakaTime](#wakatime)
 
 ## Quick Start
+
+For macOS/Linux workstations:
 
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
@@ -36,6 +39,110 @@ chezmoi init
 chezmoi apply
 ```
 
+## Claude Cloud
+
+`claude-cloud` provisions agent instructions, skills, agents, and hooks without deploying the workstation shell or tooling configuration.
+
+### Bootstrap before Claude starts
+
+Requirements: Linux x86_64, a POSIX shell, Git, curl, Node.js, Python 3.10+ with `venv`/pip, and standard Ubuntu tools including `sha256sum`/tar.
+The hosted Ubuntu 24.04 image supplies these tools and includes `~/.local/bin` on PATH.
+Allow network access to GitHub release assets, public GitHub repositories, and PyPI.
+
+Put this in **Cloud's environment setup script**, before Claude starts:
+
+```sh
+source="$HOME/.local/share/chezmoi"
+if [ ! -d "$source/.git" ]; then
+  mkdir -p "$(dirname "$source")"
+  git clone https://github.com/iomz/dotfiles.git "$source"
+fi
+sh "$source/scripts/bootstrap-claude-cloud.sh"
+```
+
+The script installs chezmoi **2.65.0** from its GitHub release asset, verifies SHA-256 before extraction, and initializes the Cloud variant with `--no-tty --promptDefaults`.
+A matching installed binary is reused.
+
+Cloud can cache the provisioned filesystem.
+Refresh the cached source checkout or invalidate the environment cache when changing configuration or pins; the setup snippet does not update the checkout automatically.
+To use another checkout, run `sh /path/to/dotfiles/scripts/bootstrap-claude-cloud.sh` during setup.
+For a non-default source path, retain `chezmoi --source /path/to/dotfiles` on later commands.
+
+With the pinned chezmoi already installed, use `CHEZMOI_VARIANT=claude-cloud chezmoi init --apply --no-tty --promptDefaults iomz`.
+For an existing checkout, run `CHEZMOI_VARIANT=claude-cloud chezmoi --source "$PWD" init --apply --no-tty --promptDefaults` from its source directory.
+The selector is saved in machine-local chezmoi `[data].variant`; later `chezmoi apply` and `chezmoi init` retain it without the environment variable.
+The default variant is `workstation`; unknown selectors fail initialization.
+Switching back requires `CHEZMOI_VARIANT=workstation chezmoi init`, but switching variants does not remove previously deployed files.
+Use a separate Cloud home rather than converting an existing workstation.
+
+### Deployment scope
+
+Chezmoi deploys only:
+
+- `~/.claude/CLAUDE.md`, generated from `.chezmoitemplates/AGENTS.md` for user-global instructions.
+- `~/.apm/apm.yml`, containing SHA-pinned public dependencies.
+- An after-apply script that installs `apm-cli==0.28.0` in `~/.local/share/claude-cloud/apm` and runs `apm install -g --target agent-skills,claude --https`.
+
+APM deploys `ax`, `find-skills`, `typesafe-ai`, `yomiyasu`, the Caveman skill bundle, three Caveman agents, and command hooks.
+It merges hooks into local Claude settings and owns its generated skill directories, cache, and lockfile.
+Existing Claude settings must be readable JSON objects; invalid or unusable settings stop APM deployment without replacing the file.
+`CLAUDE_CONFIG_DIR`, if set, must resolve to `~/.claude`; redirected APM deployment is rejected.
+Cloud excludes private `iomz/skills` dependencies and the vault-only `brain-vault` skill; no GitHub credentials are required.
+
+No workstation shell/editor/mise configuration, Git configuration, credentials, or native plugin registration is deployed.
+Cloud has no `/plugin` interface; use the deployed skills, agents, and hooks.
+Skill-associated optional tools such as `ax`, `gh`, or `npx` are not installed by this variant; supply them in the Cloud image when needed.
+
+Provision before startup so agents and SessionStart hooks are available from the first prompt.
+Installing a SessionStart hook during an active session does not replay the initial event.
+
+Cloud's `.gitconfig` (including signing configuration), `~/.claude.json`, and unrelated `.claude` launcher/session/synced-skill files remain Cloud-owned.
+Chezmoi manages only the allowlisted instruction file and manifest, plus its own machine-local configuration/state.
+Use repo `.mcp.json` for repo MCP needs; this variant does not manage it.
+
+APM installation runs on first apply and when the Cloud manifest/script changes; failures are retried by the next apply.
+For an explicit reinstall without a manifest change:
+
+```sh
+(
+  set -e
+  script=$(mktemp)
+  trap 'rm -f "$script"' 0
+  chezmoi cat "$HOME/claude-cloud-apm.sh" > "$script"
+  sh "$script"
+)
+```
+
+### Validation
+
+```sh
+just test
+# Or, without just:
+python3 -m unittest discover -s tests -v
+```
+
+Tests cover macOS/Linux rendering, Cloud selection and allowlisting, host-state preservation, checksum-verified noninteractive bootstrap, and idempotency with APM stubbed.
+They do not require network access.
+
+For real Ubuntu 24.04 x86_64/dash, pinned chezmoi/APM, settings merge/preservation, and idempotency checks:
+
+```sh
+just test-integration
+# Or, without just:
+sh tests/integration/run-claude-cloud.sh
+```
+
+This opt-in test requires Docker with Linux amd64 execution/emulation and network access to Ubuntu packages, GitHub releases/repositories, and PyPI.
+It runs in a disposable container with the checkout mounted read-only, HOME `/root`, and cwd outside HOME.
+Use `chezmoi apply --dry-run` to inspect a selected deployment without running installers.
+Hosted-Cloud APM provisioning and first-prompt skill/agent/hook discovery still require validation in the target environment.
+
+### Shared agent instructions
+
+`.chezmoitemplates/AGENTS.md` is the single source for global instructions.
+Claude receives a generated `~/.claude/CLAUDE.md` deployment artifact; Codex receives the same text at `~/.codex/AGENTS.md` with its tool-specific appendix.
+The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is not deployed.
+
 ## Responsibility Split
 
 | Layer    | Owns                                                                                                                                                           | Source of truth                             |
@@ -44,20 +151,6 @@ chezmoi apply
 | mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `dot_config/mise/config.toml`               |
 | zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
 | chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
-
-Each tool should have one owner. Duplicate installation is reserved for explicit bootstrap or package-dependency requirements.
-
-In practice:
-
-- apt/brew owns system-level packages: bootstrap dependencies, OS integration, native build dependencies, GUI-adjacent tools, and packages that should follow the host package manager.
-- mise owns versioned developer environments: language runtimes, runtime-adjacent package managers, editor/runtime foundations, and developer CLIs that need reproducible versions across machines.
-- zinit owns zsh-only integrations: plugins, completion snippets, prompt fallback, widgets, syntax highlighting, autosuggestions, and navigation helpers.
-
-Ownership is based on responsibility, not installability. If multiple layers can install a tool, choose the layer that best matches the tool's role and document exceptions near the configuration that declares them.
-
-Use mise global for tools whose version or availability is part of the reproducible development environment. Use Homebrew for convenience CLIs that can follow the host package manager and do not need cross-machine version control.
-
-Do not keep a tool in mise global only because mise can install it.
 
 Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
 
@@ -99,7 +192,7 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 
 ### System Dependencies
 
-`run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
+For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
 - macOS uses Homebrew.
 - Debian and Ubuntu use apt.
@@ -122,9 +215,6 @@ mise outdated
 Run `mise reshim` after changing tools so new executables become available.
 `run_onchange_after_mise-install.sh.tmpl` also runs installation and reshim when managed mise configuration changes.
 
-Most developer CLIs are intentionally managed by mise rather than Homebrew or zinit.
-This keeps command availability independent from zsh plugin loading order.
-
 ### Bitwarden CLI
 
 Bitwarden CLI is pinned through mise's npm backend. Managed tool name is `npm:@bitwarden/cli`; executable name is `bw`.
@@ -141,18 +231,11 @@ bw --version
 
 Do not run `mise use bw`; `bw` is not a mise registry tool.
 
-Homebrew's `bitwarden-cli` formula depends on Homebrew Node.js. After mise-managed `bw` works, remove duplicate formula and check remaining Node.js dependents:
-
-```zsh
-brew uninstall bitwarden-cli
-brew uses --installed node
-```
-
-Run `brew uninstall node` only when dependency check prints no formulae.
-
 ### Neovim Providers
 
-Neovim and provider runtimes are managed by mise.
+Neovim uses mise shims for Python and Ruby providers.
+Python is configured in `dot_config/mise/config.toml`; a Ruby runtime must be available separately for the Ruby provider.
+Install provider packages in their corresponding runtimes:
 
 ```zsh
 python3 -m pip install --upgrade pip pynvim
@@ -199,7 +282,8 @@ Default zsh order:
 .zshenv -> .zprofile -> .zshrc -> .zlogin -> .zlogout
 ```
 
-`~/.profile` contains local options such as `TINY_CHEZMOI` and is loaded only when zsh runs in sh compatibility mode. `TINY_CHEZMOI=1` skips heavy setup.
+On Linux ARM, `.profile` and `.zshenv` enable `TINY_CHEZMOI` by default.
+Set `TINY_CHEZMOI=1` to skip heavier interactive integrations.
 
 ### rc.d Layout
 
@@ -208,7 +292,7 @@ Files load numerically:
 - `00-env.zsh`: environment values not set in `.zshenv`
 - `01-options.zsh`: shell options and history
 - `02-plugin-manager.zsh`: zinit bootstrap, zsh plugins, and completion snippets
-- `03-tools.zsh`: temporary placeholder for remaining zinit-managed tools
+- `03-tools.zsh`: reserved tool-integration slot, currently empty
 - `04-mise.zsh`: mise activation
 - `05-zeno.zsh`: zeno configuration
 - `06-widgets.zsh`: ZLE widgets
@@ -256,11 +340,11 @@ Configuration lives in `~/.config/nvim`:
 
 ```text
 init.lua
-lua/iomz/
+lua/config/
   commands.lua
   keymaps.lua
   options.lua
-  os/
+  platform/
     macos.lua
     windows.lua
     wsl.lua
@@ -269,7 +353,7 @@ after/plugin/
 plugin/
 ```
 
-`init.lua` handles global startup, theme loading, lazy.nvim bootstrap, base modules, and OS-specific modules. Plugin specs live in `lua/iomz/plugins.lua`.
+`init.lua` handles global startup, theme loading, lazy.nvim bootstrap, base modules, and OS-specific modules. Plugin specs live in `lua/config/plugins.lua`.
 
 Runtime plugin configuration remains under `after/plugin/` and `plugin/` to preserve Neovim load semantics.
 
@@ -280,7 +364,6 @@ Managed Codex files are intentionally narrow.
 Tracked:
 
 - `~/.codex/AGENTS.md`
-- inspected personal skills under `~/.codex/skills/<name>/`
 
 Not tracked:
 
@@ -317,11 +400,12 @@ It also owns Caveman: its skills, agents, and hooks land in `~/.claude`, and APM
 APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
 `iomz/skills` supplies selected personal skills through the same deployment path.
 The vault-specific `brain-vault` skill is owned by `iomz/brain-vault` (`Skills/Common/brain-vault`) and deployed the same way.
-Remove same-named copies from `~/.codex/skills`, since Codex would otherwise see each skill twice.
+Workstation installs require GitHub read access to private `iomz/skills`; Cloud installs use public dependencies only.
+Keep skill names unique across `~/.agents/skills` and `~/.codex/skills` to avoid duplicate discovery.
 Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
 
-The APM manifest lives at `~/.apm/apm.yml`; chezmoi owns this inspected declarative input, and the commit SHA pins in it are the source of truth.
-`~/.apm/apm.lock.yaml` is generated per machine and not tracked, because it records every deployed file and is large; install with `apm install -g`, not `--frozen`.
+The APM manifest lives at `~/.apm/apm.yml`, rendered from `dot_apm/apm.yml.tmpl`; chezmoi owns this inspected declarative input, and the commit SHA pins in it are the source of truth.
+`~/.apm/apm.lock.yaml` is generated per machine and not tracked; install with `apm install -g`, not `--frozen`.
 Do not let chezmoi and APM own the same deployed skill directory.
 
 #### Updating APM-managed skills
@@ -347,17 +431,14 @@ chezmoi apply ~/.apm/apm.yml
 apm install -g
 chezmoi diff ~/.apm/apm.yml
 git diff --check
-git diff -- dot_apm/apm.yml
+git diff -- dot_apm/apm.yml.tmpl
 ```
 
 Verify changed skill frontmatter and any associated CLI before committing.
 Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
 
-Nix-based skill management is appropriate only as part of a broader Nix or Home Manager adoption.
-Adding Nix solely for agent skills would duplicate mise and chezmoi responsibilities.
-
-Caveman mode is installed through Codex hooks, not through `AGENTS.md`.
-`~/.codex/hooks.json` runs caveman activation at session start.
+Caveman activation for Codex requires a local `~/.codex/hooks.json` SessionStart hook.
+Codex hooks are not managed by chezmoi.
 
 Local `~/.codex/config.toml` should include:
 

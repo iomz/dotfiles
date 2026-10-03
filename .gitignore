@@ -3,7 +3,8 @@
 
 # repository tooling
 node_modules/
+tests/__pycache__/
 
 # apm
-# generated per machine; SHA pins in dot_apm/apm.yml are the source of truth
+# generated per machine; SHA pins in dot_apm/apm.yml.tmpl are the source of truth
 dot_apm/private_apm.lock.yaml
