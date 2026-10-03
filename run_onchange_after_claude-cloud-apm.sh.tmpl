@@ -1,0 +1,70 @@
+{{ if eq (get . "variant" | default "workstation") "claude-cloud" -}}
+#!/bin/sh
+# manifest: {{ includeTemplate "dot_apm/apm.yml.tmpl" . | sha256sum }}
+set -eu
+export GIT_TERMINAL_PROMPT=0
+
+# Use Cloud's runtimes, not the workstation's mise environment.
+for tool in python3 git node; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "claude-cloud requires $tool on PATH" >&2
+    exit 1
+  fi
+done
+
+# APM treats settings read/parse errors as an empty config. Fail closed here.
+validate_settings() {
+  python3 - <<'PY'
+import json
+import os
+import stat
+import sys
+
+config_dir = os.path.join(os.environ["HOME"], ".claude")
+path = os.path.join(config_dir, "settings.json")
+
+def reject_constant(value):
+    raise ValueError(f"non-JSON constant {value}")
+
+try:
+    override = os.environ.get("CLAUDE_CONFIG_DIR", "").strip()
+    if override and os.path.realpath(override) != os.path.realpath(config_dir):
+        raise ValueError("CLAUDE_CONFIG_DIR must resolve to ~/.claude for this variant")
+    try:
+        os.lstat(path)
+    except FileNotFoundError:
+        sys.exit(0)
+    # Nonblocking open lets us reject FIFOs/devices rather than hang on them.
+    fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+    with os.fdopen(fd, "r", encoding="utf-8") as settings_file:
+        if not stat.S_ISREG(os.fstat(settings_file.fileno()).st_mode):
+            raise ValueError("settings must be a regular file")
+        settings = json.load(settings_file, parse_constant=reject_constant)
+    if not isinstance(settings, dict):
+        raise ValueError("settings must be a JSON object")
+    if "hooks" in settings and not isinstance(settings["hooks"], dict):
+        raise ValueError("settings.hooks must be a JSON object")
+except Exception as exc:
+    print(f"claude-cloud: refusing APM deployment: cannot safely read {path}: {exc}. "
+          "Existing settings left unchanged.", file=sys.stderr)
+    sys.exit(1)
+PY
+}
+
+validate_settings
+
+apm_version=0.28.0
+apm_env="$HOME/.local/share/claude-cloud/apm"
+if [ ! -x "$apm_env/bin/python" ]; then
+  python3 -m venv "$apm_env"
+fi
+if [ ! -x "$apm_env/bin/apm" ] || [ "$("$apm_env/bin/apm" --version)" != "Agent Package Manager (APM) CLI version $apm_version" ]; then
+  "$apm_env/bin/python" -m pip install --no-input --disable-pip-version-check "apm-cli==$apm_version"
+fi
+
+# Recheck after runtime installation, immediately before APM touches settings.
+validate_settings
+
+# APM owns generated settings, plugin hooks, agents and skills. Never mirror them.
+"$apm_env/bin/apm" install -g --target agent-skills,claude --https
+{{ end -}}

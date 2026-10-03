@@ -10,13 +10,15 @@ dependencies:
     - yusukebe/ax#8abbca2fc400c2ff4866248ba1ec9309b948812f
     - vercel-labs/skills/skills/find-skills#7407f3893ad4dceab546ac002c3ef806e4000c73
     - typesafe-ai/skills/skills/typesafe-ai#65a39f393687675ce170e6094757de20370365b9
+{{ if ne (get . "variant" | default "workstation") "claude-cloud" }}
     - iomz/skills/say-what-it-is#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/japanese-tech-writing#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/cognitive-rhythm-writing#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/retrospective-codify#87a2cc489da64524c93c1dd9e2eadca930331aca
     - iomz/skills/empirical-prompt-tuning#87a2cc489da64524c93c1dd9e2eadca930331aca
-    - JuliusBrussee/caveman#655b7d9c5431f822264b7732e9901c5578ac84cf
     - iomz/skills/gh-coderabbit-resolve#3538ac9403b1d564bc77a24551d106486a6542bd
     - iomz/skills/keep-skills-up-to-date#3538ac9403b1d564bc77a24551d106486a6542bd
     - iomz/brain-vault/Skills/Common/brain-vault#ffafd45d85fb88bcc22274bb11d873527026114c
+{{ end }}
+    - JuliusBrussee/caveman#655b7d9c5431f822264b7732e9901c5578ac84cf
     - nanaism/yomiyasu#8d5abeebe2dd20c2db005deaddcc50be43c59c0a

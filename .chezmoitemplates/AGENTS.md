@@ -2,10 +2,6 @@
 
 Prefer narrow queries before broad scans.
 
-Use `runlog` for commands expected to produce more than 200 lines, unless they may run longer than 10 seconds.
-
-Run `ai-check` before diagnosing environment issues.
-
 # Git
 
 Use Conventional Commits unless repository history requires another strict format.

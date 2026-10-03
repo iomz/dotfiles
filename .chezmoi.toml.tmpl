@@ -1,6 +1,16 @@
+{{- $variant := env "CHEZMOI_VARIANT" | default (get . "variant" | default "workstation") -}}
+{{- if not (has $variant (list "workstation" "claude-cloud")) -}}
+{{- fail "CHEZMOI_VARIANT must be workstation or claude-cloud" -}}
+{{- end -}}
+{{- if eq $variant "claude-cloud" }}
+[data]
+variant = "claude-cloud"
+{{- else -}}
 {{- $gitName := promptStringOnce . "git_name" "Git author name" "Iori Mizutani" -}}
 {{- $gitEmail := promptStringOnce . "git_email" "Git author email" "iomz@sazanka.io" -}}
 
 [data]
+variant = "workstation"
 git_name = {{ $gitName | quote }}
 git_email = {{ $gitEmail | quote }}
+{{- end }}
