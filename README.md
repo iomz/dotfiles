@@ -43,19 +43,23 @@ chezmoi apply
 
 `claude-cloud` provisions agent instructions, skills, agents, and hooks without deploying the workstation shell or tooling configuration.
 
-### Bootstrap before Claude starts
+### Claude Cloud Environment setup
 
 Requirements: Linux x86_64, a POSIX shell, Git, curl, Node.js, Python 3.10+ with `venv`/pip, and standard Ubuntu tools including `sha256sum`/tar.
 The hosted Ubuntu 24.04 image supplies these tools and includes `~/.local/bin` on PATH.
 Allow network access to GitHub release assets, public GitHub repositories, and PyPI.
 
-Put this in **Cloud's environment setup script**, before Claude starts:
+Paste this into Claude Cloud's **Environment setup field**, before Claude starts:
 
 ```sh
+set -eu
 source="$HOME/.local/share/chezmoi"
 if [ ! -d "$source/.git" ]; then
   mkdir -p "$(dirname "$source")"
-  git clone https://github.com/iomz/dotfiles.git "$source"
+  git clone --single-branch --branch main https://github.com/iomz/dotfiles.git "$source"
+else
+  git -C "$source" fetch origin main
+  git -C "$source" checkout --detach FETCH_HEAD
 fi
 sh "$source/scripts/bootstrap-claude-cloud.sh"
 ```
@@ -63,8 +67,8 @@ sh "$source/scripts/bootstrap-claude-cloud.sh"
 The script installs chezmoi **2.65.0** from its GitHub release asset, verifies SHA-256 before extraction, and initializes the Cloud variant with `--no-tty --promptDefaults`.
 A matching installed binary is reused.
 
-Cloud can cache the provisioned filesystem.
-Refresh the cached source checkout or invalidate the environment cache when changing configuration or pins; the setup snippet does not update the checkout automatically.
+Each setup run refreshes this dedicated checkout from `main` and reapplies the Cloud variant; keep it free of local edits.
+Cloud may reuse the provisioned filesystem without rerunning setup; rerun setup or invalidate the environment cache to pick up changes on `main`.
 To use another checkout, run `sh /path/to/dotfiles/scripts/bootstrap-claude-cloud.sh` during setup.
 For a non-default source path, retain `chezmoi --source /path/to/dotfiles` on later commands.
 
