@@ -5,6 +5,7 @@ OPENCODE_ROOT=${OPENCODE_UPDATE_ROOT:-"$HOME/.local/share/opencode"}
 SOURCE=${OPENCODE_UPDATE_SOURCE:-"$HOME/ghq/github.com/anomalyco/opencode-v2-build"}
 UPSTREAM_REF=${OPENCODE_UPDATE_REF:-origin/v2}
 LIB="$HOME/.local/lib/opencode-generation.sh"
+PATCH="$HOME/.local/lib/opencode-patches/transparent-borders.patch"
 [[ -r $LIB ]] || { printf 'opencode-update: missing helper: %s\n' "$LIB" >&2; exit 1; }
 # shellcheck source=../lib/opencode-generation.sh
 source "$LIB"
@@ -35,6 +36,8 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 for tool in git bun python3 lipo; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
+[[ -r $PATCH ]] || { opencode_die "missing local UI patch: $PATCH"; exit 1; }
+PATCH_SHA=$(python3 -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$PATCH")
 [[ $(uname -s) = Darwin ]] || { opencode_die 'native build target is macOS only'; exit 1; }
 [[ -x $HOME/.local/bin/opencode ]] || { opencode_die "public entrypoint is missing or not executable: $HOME/.local/bin/opencode"; exit 1; }
 mkdir -p "$OPENCODE_ROOT/releases" "$OPENCODE_ROOT/candidates"
@@ -58,7 +61,12 @@ PREVIOUS_GEN=$(opencode_link_target "$OPENCODE_ROOT/previous") || { opencode_die
 ACTIVE_EXE=$(opencode_generation_verify "$ACTIVE_GEN") || exit 1
 PREVIOUS_EXE=$(opencode_generation_verify "$PREVIOUS_GEN") || exit 1
 CURRENT_COMMIT=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["source_commit"])' "$ACTIVE_GEN/manifest.json")
+CURRENT_PATCH_SHA=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("local_patch_sha256", ""))' "$ACTIVE_GEN/manifest.json")
 CURRENT_NAME=$(basename "$ACTIVE_GEN")
+# A patch-only rebuild must never move an existing newer build backwards.
+if git -C "$SOURCE" merge-base --is-ancestor "$TARGET" "$CURRENT_COMMIT"; then
+  TARGET=$CURRENT_COMMIT
+fi
 UPSTREAM_VERSION=$(python3 - "$SOURCE" "$TARGET" <<'PY'
 import json, subprocess, sys
 root, commit = sys.argv[1:]
@@ -66,12 +74,12 @@ raw = subprocess.check_output(["git", "-C", root, "show", f"{commit}:packages/cl
 print(json.loads(raw)["version"])
 PY
 )
-TARGET_NAME="v${UPSTREAM_VERSION}-${TARGET:0:10}"
+TARGET_NAME="v${UPSTREAM_VERSION}-${TARGET:0:10}-p${PATCH_SHA:0:12}"
 [[ $UPSTREAM_VERSION =~ ^[0-9A-Za-z][0-9A-Za-z.+_-]*$ ]] || { opencode_die "unsafe upstream version string: $UPSTREAM_VERSION"; exit 1; }
 printf 'Current:   %s\nUpstream:  %s\n' "$CURRENT_NAME" "$TARGET_NAME"
 
-if [[ $CURRENT_COMMIT = "$TARGET" ]] || git -C "$SOURCE" merge-base --is-ancestor "$TARGET" "$CURRENT_COMMIT"; then
-  printf 'OpenCode already contains upstream V2 commit %s; no changes made.\n' "${TARGET:0:10}"
+if [[ $CURRENT_COMMIT = "$TARGET" && $CURRENT_PATCH_SHA = "$PATCH_SHA" ]]; then
+  printf 'OpenCode already contains V2 commit %s and local UI patch; no changes made.\n' "${TARGET:0:10}"
   SUCCESS=1
   exit 0
 fi
@@ -94,6 +102,15 @@ print(json.load(open(sys.argv[1]))["version"])
 PY
 )
 [[ $VERSION = "$UPSTREAM_VERSION" ]] || { opencode_die 'version changed between ref resolution and worktree'; exit 1; }
+# Build from the hashed snapshot, not a patch that might change during the build.
+cp "$PATCH" "$TMP/transparent-borders.patch"
+SNAPSHOT_SHA=$(python3 -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$TMP/transparent-borders.patch")
+[[ $SNAPSHOT_SHA = "$PATCH_SHA" ]] || { opencode_die 'local UI patch changed during setup; retry update'; exit 1; }
+if ! git -C "$WORKTREE" apply --check "$TMP/transparent-borders.patch"; then
+  opencode_die 'local UI patch no longer matches upstream; active build unchanged'
+  exit 1
+fi
+git -C "$WORKTREE" apply "$TMP/transparent-borders.patch"
 BUILD_LOG="$TMP/build.log"
 printf 'Building %s...\n' "$TARGET_NAME"
 if ! (cd "$WORKTREE" && bun install --frozen-lockfile && OPENCODE_VERSION="$VERSION" bun run packages/cli/script/build.ts --single --skip-install --outdir="$TMP/output") >"$BUILD_LOG" 2>&1; then
@@ -117,12 +134,13 @@ STAGING="$OPENCODE_ROOT/releases/.staging-${TARGET_NAME}-$$"
 DEST="$OPENCODE_ROOT/releases/$TARGET_NAME"
 mkdir "$STAGING"
 cp -p "$BUILT_EXE" "$STAGING/opencode"
-python3 - "$STAGING/manifest.json" "$VERSION" "$TARGET" "$SOURCE_BRANCH" "$BUILD_TARGET" <<'PY'
+python3 - "$STAGING/manifest.json" "$VERSION" "$TARGET" "$SOURCE_BRANCH" "$BUILD_TARGET" "$PATCH_SHA" <<'PY'
 import datetime, hashlib, json, os, sys
-path, version, commit, ref, target = sys.argv[1:]
+path, version, commit, ref, target, patch_sha = sys.argv[1:]
 exe=os.path.join(os.path.dirname(path), "opencode")
 with open(exe,"rb") as f: digest=hashlib.file_digest(f,"sha256").hexdigest()
 m={"version":version,"source_commit":commit,"source_ref":ref or "origin/v2","build_timestamp":datetime.datetime.now(datetime.timezone.utc).isoformat(),"build_target":target,"build_command":"OPENCODE_VERSION=<version> bun run packages/cli/script/build.ts --single --skip-install --outdir=<isolated-candidate>","executable":"opencode","sha256":digest}
+m["local_patch_sha256"] = patch_sha
 with open(path,"x",encoding="utf-8") as f: json.dump(m,f,indent=2); f.write("\n")
 PY
 if [[ -e $DEST || -L $DEST ]]; then rm -rf -- "$STAGING"; opencode_die "generation appeared during build; refusing overwrite: $DEST"; exit 1; fi

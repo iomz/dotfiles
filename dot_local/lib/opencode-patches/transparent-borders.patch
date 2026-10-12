@@ -1,0 +1,33 @@
+diff --git a/packages/tui/src/routes/session/sidebar.tsx b/packages/tui/src/routes/session/sidebar.tsx
+--- a/packages/tui/src/routes/session/sidebar.tsx
++++ b/packages/tui/src/routes/session/sidebar.tsx
+@@ -20,6 +20,8 @@
+     <Show when={session()}>
+       <box
+         backgroundColor={theme.background.raised.base}
++        border={["left"]}
++        borderColor={theme.border.base}
+         width={SESSION_SIDEBAR_WIDTH}
+         height="100%"
+         paddingTop={1}
+diff --git a/packages/tui/src/routes/session/index.tsx b/packages/tui/src/routes/session/index.tsx
+--- a/packages/tui/src/routes/session/index.tsx
++++ b/packages/tui/src/routes/session/index.tsx
+@@ -2218,3 +2218,3 @@
+   const [hover, setHover] = createSignal(false)
+-  const color = createMemo(() => local.agent.color(data.session.get(ctx.sessionID)?.agent ?? "build"))
++  const color = createMemo(() => theme.decrease(local.agent.color(data.session.get(ctx.sessionID)?.agent ?? "build")))
+   const delivery = createMemo(() => ctx.pendingDelivery(props.message.id))
+@@ -2275,4 +2275,7 @@
+         >
++          <text fg={delivery() ? theme.text.muted : color()} attributes={TextAttributes.BOLD}>
++            YOU
++          </text>
+           <text fg={theme.text.base}>{props.message.text}</text>
+           <Show when={skills().length}>
+             <box flexDirection="row" paddingTop={1} gap={1} flexWrap="wrap">
+@@ -2736,3 +2736,3 @@
+       customBorderChars={SplitBorder.customBorderChars}
+-      borderColor={theme.background.base}
++      borderColor={theme.border.base}
+       onMouseOver={() => props.onClick && setHover(true)}

@@ -18,9 +18,22 @@ Personal Linux and macOS dotfiles, plus a minimal Claude Cloud agent environment
 - [Zsh](#zsh)
 - [Neovim](#neovim)
 - [Codex](#codex)
+- [OpenCode](#opencode)
 - [Ansible](#ansible)
 - [Fonts](#fonts)
 - [WakaTime](#wakatime)
+
+## OpenCode
+
+The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfaces transparent, with opaque dialogs and cyan border colors.
+`opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` to an isolated source worktree before building.
+The patch adds a sidebar divider, uses the theme's border token for tool blocks, and marks user prompts with a bold `YOU` label and brighter agent-colored border.
+Patch SHA-256 is recorded in each build manifest and generation name; changing the patch rebuilds even when the upstream commit is unchanged.
+If the patch conflicts with upstream, the update stops without changing the active build.
+`opencode-rollback` restores the previous generation, including its patch state.
+Restart the TUI after activating a new build.
+
+Run offline updater checks with `python3 -m unittest discover -s tests -p 'test_opencode_borders.py'`.
 
 ## Quick Start
 
