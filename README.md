@@ -53,6 +53,7 @@ Dashboard panels can be disabled individually through `context`, `usage`, `sessi
 The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
 Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
 After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.
+They bootstrap the Node version pinned in the managed mise config and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
 The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
 Restart the TUI after plugin changes. No binary rebuild is required.
 

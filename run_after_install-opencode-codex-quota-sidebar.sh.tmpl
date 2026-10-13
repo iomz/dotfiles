@@ -11,10 +11,13 @@ if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$lock_hash" ] && \
     exit 0
 fi
 
-if ! command -v npm >/dev/null 2>&1; then
-  echo "npm is required to install codex-quota-sidebar dependencies" >&2
-  exit 1
+if ! command -v mise >/dev/null 2>&1; then
+    echo "mise is required to install codex-quota-sidebar dependencies" >&2
+    exit 1
 fi
 
-npm ci --prefix "$plugin_dir" --ignore-scripts --no-audit --no-fund
+# Bootstrap Node before the full mise installer; ignore inherited asdf shims.
+node_version="{{ (fromToml (include "dot_config/mise/config.toml")).tools.nodejs }}"
+mise install "node@$node_version"
+mise exec "node@$node_version" -- npm ci --prefix "$plugin_dir" --ignore-scripts --no-audit --no-fund
 printf '%s\n' "$lock_hash" > "$stamp"

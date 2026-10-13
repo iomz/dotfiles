@@ -241,6 +241,9 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.assertEqual(script.strip(), "")
 
     def test_plugin_dependencies_recover_after_sweep_and_later_loss(self):
+        config_dir = self.source / "dot_config/mise"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(SOURCE / "dot_config/mise/config.toml", config_dir / "config.toml")
         plugins = {"codex-quota-sidebar": "zod", "dir-tree-bottom": "opencode-dir-tree-tui"}
         for name, dependency in plugins.items():
             script = f"run_after_install-opencode-{name}.sh.tmpl"
@@ -254,7 +257,7 @@ class PreinstallCleanupTest(unittest.TestCase):
             self.put(f".config/opencode/cli-plugins/{name}/node_modules/{dependency}/package.json")
         tools = self.root / "tools"
         tools.mkdir()
-        npm = tools / "npm"
+        npm = tools / "mise-npm"
         npm.write_text('''#!/bin/sh
 set -eu
 test "$1" = ci
@@ -272,6 +275,26 @@ printf '{}\\n' > "$dir/node_modules/$dependency/package.json"
 printf '%s\\n' "$dir" >> "$HOME/npm-calls"
 ''')
         npm.chmod(0o755)
+        # The inherited npm represents a broken asdf shim. Only mise may select npm.
+        ambient = tools / "npm"
+        ambient.write_text('#!/bin/sh\necho "unexpected asdf shim" >&2\nexit 99\n')
+        ambient.chmod(0o755)
+        mise = tools / "mise"
+        mise.write_text('''#!/bin/sh
+set -eu
+test "$2" = node@24.14.1
+case "$1" in
+    install) exit 0 ;;
+    exec)
+        test "$3" = --
+        test "$4" = npm
+        shift 4
+        exec "$(dirname "$0")/mise-npm" "$@"
+        ;;
+    *) exit 98 ;;
+esac
+''')
+        mise.chmod(0o755)
         self.env["PATH"] = str(tools) + os.pathsep + self.env["PATH"]
         self.chezmoi("apply")
         self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 2)
