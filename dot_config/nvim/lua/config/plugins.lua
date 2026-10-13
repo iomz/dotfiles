@@ -226,12 +226,9 @@ return {
     -- nvim-treesitter
     {
         'nvim-treesitter/nvim-treesitter',
-        build = {
-            'cargo install tree-sitter-cli', function()
-            -- require('nvim-treesitter.install').compilers = { 'clang++'} -- for macOS
-            require('nvim-treesitter.install').update { with_sync = true }
-        end
-        },
+        branch = 'main',
+        lazy = false,
+        build = ':TSUpdate',
         dependencies = { 'nvim-treesitter/nvim-treesitter-context' }
     },
     -- nvim tree-sitter autotag
