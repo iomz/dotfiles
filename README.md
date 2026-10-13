@@ -25,15 +25,21 @@ Personal Linux and macOS dotfiles, plus a minimal Claude Cloud agent environment
 
 ## OpenCode
 
-The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfaces transparent, with opaque dialogs and cyan border colors.
+The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfaces transparent, with opaque dialogs, a blue-gray input fill, slate borders, red user accents, blue secondary text, and a mint scrollbar.
 `opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` to an isolated source worktree before building.
-The patch adds a sidebar divider, uses the theme's border token for tool blocks, and marks user prompts with a bold `YOU` label and brighter agent-colored border.
+The patch adds a sidebar divider, uses the theme's border token for tool blocks, marks user prompts with a bold `YOU` label and agent-colored border, and uses the form-field background for the input box.
+It also wires the transcript scrollbar to its own token and renders image/file badges with the main text color on the form-field selection background.
+Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P` moves up in the input box.
+Build keeps its red theme accent; Plan has an explicit cyan agent color. Attachment badges use dark orange for readable main-text contrast, including submitted file/skill tags.
 Patch SHA-256 is recorded in each build manifest and generation name; changing the patch rebuilds even when the upstream commit is unchanged.
 If the patch conflicts with upstream, the update stops without changing the active build.
 `opencode-rollback` restores the previous generation, including its patch state.
 Restart the TUI after activating a new build.
 
 Run offline updater checks with `python3 -m unittest discover -s tests -p 'test_opencode_borders.py'`.
+Use `scripts/opencode-theme-lab.html` for a local dark-terminal color preview with role-specific pickers and attachment contrast checks.
+The lab includes the personal palette, a main-text picker, optional badge-text linking, and inline attachment RGB/hex controls that do not open an overlapping native picker.
+The lab exports color preferences only; it does not modify OpenCode configuration.
 
 ## Quick Start
 

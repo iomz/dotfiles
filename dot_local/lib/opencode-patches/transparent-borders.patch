@@ -13,11 +13,17 @@ diff --git a/packages/tui/src/routes/session/sidebar.tsx b/packages/tui/src/rout
 diff --git a/packages/tui/src/routes/session/index.tsx b/packages/tui/src/routes/session/index.tsx
 --- a/packages/tui/src/routes/session/index.tsx
 +++ b/packages/tui/src/routes/session/index.tsx
-@@ -2218,3 +2218,3 @@
+@@ -1401,4 +1401,4 @@
+                   trackOptions: {
+                     backgroundColor: theme.decrease(theme.background.raised.base),
+-                    foregroundColor: theme.border.base,
++                    foregroundColor: theme.scrollbar.base,
+                   },
+@@ -2215,4 +2215,2 @@
+-  const themes = useThemes()
+   const theme = useTheme()
+-  const mode = themes.mode
    const [hover, setHover] = createSignal(false)
--  const color = createMemo(() => local.agent.color(data.session.get(ctx.sessionID)?.agent ?? "build"))
-+  const color = createMemo(() => theme.decrease(local.agent.color(data.session.get(ctx.sessionID)?.agent ?? "build")))
-   const delivery = createMemo(() => ctx.pendingDelivery(props.message.id))
 @@ -2275,4 +2275,7 @@
          >
 +          <text fg={delivery() ? theme.text.muted : color()} attributes={TextAttributes.BOLD}>
@@ -26,8 +32,47 @@ diff --git a/packages/tui/src/routes/session/index.tsx b/packages/tui/src/routes
            <text fg={theme.text.base}>{props.message.text}</text>
            <Show when={skills().length}>
              <box flexDirection="row" paddingTop={1} gap={1} flexWrap="wrap">
+@@ -2284,3 +2285,3 @@
+-                        bg: theme.hue.accent[mode() === "light" ? 300 : 200],
+-                        fg: theme.background.raised.base,
++                        bg: theme.background.formfield.selected,
++                        fg: theme.text.base,
+                         bold: true,
+@@ -2308,3 +2309,3 @@
+-                          bg: theme.hue.accent[mode() === "light" ? 300 : 200],
+-                          fg: theme.background.raised.base,
++                          bg: theme.background.formfield.selected,
++                          fg: theme.text.base,
+                           bold: true,
 @@ -2736,3 +2736,3 @@
        customBorderChars={SplitBorder.customBorderChars}
 -      borderColor={theme.background.base}
 +      borderColor={theme.border.base}
        onMouseOver={() => props.onClick && setHover(true)}
+diff --git a/packages/tui/src/component/prompt/index.tsx b/packages/tui/src/component/prompt/index.tsx
+--- a/packages/tui/src/component/prompt/index.tsx
++++ b/packages/tui/src/component/prompt/index.tsx
+@@ -1653,3 +1653,3 @@
+-  const promptBg = createMemo(() => theme.decrease(theme.background.raised.base))
+-
++  const promptBg = createMemo(() => theme.background.formfield.base)
++
+   return (
+diff --git a/packages/theme/src/tui/syntax.ts b/packages/theme/src/tui/syntax.ts
+--- a/packages/theme/src/tui/syntax.ts
++++ b/packages/theme/src/tui/syntax.ts
+@@ -13,3 +13,6 @@
+-    rule(["extmark.file"], feedback.warning.base, { bold: true }),
++    rule(["extmark.file"], theme.text.base, {
++      background: theme.background.formfield.selected,
++      bold: true,
++    }),
+     rule(["extmark.agent"], theme.categorical[0][step], { bold: true }),
+     rule(["extmark.skill"], (theme.categorical[1] ?? theme.categorical[0])[step], { bold: true }),
+@@ -17,4 +17,4 @@
+-    rule(["extmark.paste"], theme.text.action.primary.focused, {
+-      background: feedback.warning.base,
++    rule(["extmark.paste"], theme.text.base, {
++      background: theme.background.formfield.selected,
+       bold: true,
+     }),
