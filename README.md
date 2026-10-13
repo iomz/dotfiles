@@ -29,7 +29,8 @@ The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfa
 `opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` to an isolated source worktree before building.
 The patch adds a sidebar divider, uses the theme's border token for tool blocks, marks user prompts with a bold `YOU` label and agent-colored border, and uses the form-field background for the input box.
 It also wires the transcript scrollbar to its own token and renders image/file badges with the main text color on the form-field selection background.
-Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P` moves up in the input box.
+Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P`/`Ctrl+N` move up/down in the input box.
+`Ctrl+B`/`Ctrl+F` move left/right one character; `Ctrl+K` deletes from the cursor to the end of the line.
 Build keeps its red theme accent; Plan has an explicit cyan agent color. Attachment badges use dark orange for readable main-text contrast, including submitted file/skill tags.
 Patch SHA-256 is recorded in each build manifest and generation name; changing the patch rebuilds even when the upstream commit is unchanged.
 If the patch conflicts with upstream, the update stops without changing the active build.

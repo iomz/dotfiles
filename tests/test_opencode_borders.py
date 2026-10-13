@@ -166,6 +166,12 @@ class OpenCodeBordersTest(unittest.TestCase):
         self.assertEqual(config["keybinds"]["command.palette.show"], "<leader>p")
         self.assertEqual(config["keybinds"]["input.move.up"], "up,ctrl+p")
 
+    def test_prompt_navigation_and_kill_line_keybinds(self):
+        config = json.loads((SOURCE / "dot_config/opencode/cli.json.tmpl").read_text())
+        self.assertEqual(config["keybinds"]["input.move.down"], "down,ctrl+n")
+        self.assertEqual(config["keybinds"]["input.move.left"], "left,ctrl+b")
+        self.assertEqual(config["keybinds"]["input.delete.to.line.end"], "ctrl+k")
+
     def setup_updater(self):
         lib = self.home / ".local/lib"
         (lib / "opencode-patches").mkdir(parents=True)
