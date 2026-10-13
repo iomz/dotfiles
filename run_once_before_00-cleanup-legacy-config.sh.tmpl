@@ -1,0 +1,60 @@
+{{ if ne (get . "variant" | default "workstation") "claude-cloud" -}}
+#!/bin/sh
+set -eu
+umask 077
+
+# Use the destination, not the invoking shell's HOME (also supports test homes).
+home={{ .chezmoi.destDir | quote }}
+backup_root="$home/.chezmoi-backups"
+complete="$backup_root/.pre-install-complete"
+backup=
+
+# Do not traverse a redirected config tree or backup directory.
+for parent in "$home/.config" "$backup_root"; do
+    if [ -L "$parent" ] || { [ -e "$parent" ] && [ ! -d "$parent" ]; }; then
+        printf 'Cleanup refused: %s must be a real directory.\n' "$parent" >&2
+        exit 1
+    fi
+done
+
+if [ -L "$complete" ] || { [ -e "$complete" ] && [ ! -f "$complete" ]; }; then
+    printf 'Cleanup refused: %s must be a regular file.\n' "$complete" >&2
+    exit 1
+fi
+# Script content changes must not sweep newly added local configuration again.
+if [ -f "$complete" ]; then
+    exit 0
+fi
+
+mkdir -p "$backup_root"
+chmod 700 "$backup_root"
+
+# Sweep config trees for apps owned by this repo, including unknown files.
+# Standalone histories/credentials, runtime data, agent state and unrelated
+# applications remain in place. Move symlinks, never their targets.
+for relative in \
+    .vim .vimrc .gvimrc .exrc .zsh .config/vim .config/nvim .config/zsh \
+    .zshenv .zprofile .zshrc .zlogin .zlogout \
+    .zshenv.zwc .zprofile.zwc .zshrc.zwc .zlogin.zwc .zlogout.zwc \
+    .gitconfig .config/git .config/direnv \
+    .config/mise .config/rtx .mise.toml .rtx.toml .tool-versions \
+    .config/ghostty .config/zellij .config/zeno .config/starship.toml \
+    .config/vale .config/yamlfmt .config/tig .config/opencode \
+    .hammerspoon .profile .inputrc .mostrc .screenrc .tigrc
+do
+    path="$home/$relative"
+    if [ ! -e "$path" ] && [ ! -L "$path" ]; then
+        continue
+    fi
+    if [ -z "$backup" ]; then
+        backup=$(mktemp -d "$backup_root/pre-install.$(date -u +%Y%m%dT%H%M%SZ).XXXXXX")
+        printf 'Legacy config backup: %s\n' "$backup" >&2
+    fi
+    mkdir -p "$backup/$(dirname "$relative")"
+    mv "$path" "$backup/$relative"
+    printf 'Backed up %s\n' "$path" >&2
+done
+# Mark complete only after all moves succeed. Failed migrations retry safely,
+# retaining previous backups rather than overwriting them.
+printf 'Completed pre-install configuration cleanup.\n' > "$complete"
+{{ end -}}

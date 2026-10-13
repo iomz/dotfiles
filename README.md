@@ -229,6 +229,35 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 
 ## Installation and Package Management
 
+### Pre-installation Cleanup
+
+On the first workstation apply, `run_once_before_00-cleanup-legacy-config.sh.tmpl` moves repo-owned application configuration into a timestamped `~/.chezmoi-backups/pre-install.<UTC timestamp>.<random suffix>` before installing packages or writing managed files.
+The backup directory is private (mode `0700`); nothing is deleted or added to Git.
+This noninteractive migration also runs once on existing workstations when they first receive the script.
+
+The application allowlist covers:
+
+- Config trees under `~/.config`: `vim`, `nvim`, `zsh`, `git`, `direnv`, `mise`, `rtx`, `ghostty`, `zellij`, `zeno`, `vale`, `yamlfmt`, `tig`, and `opencode`; plus `starship.toml`.
+- Home-level config trees: `~/.vim`, `~/.zsh`, and `~/.hammerspoon`.
+- Home-level dotfiles: `.vimrc`, `.gvimrc`, `.exrc`, `.gitconfig`, `.profile`, `.inputrc`, `.mostrc`, `.screenrc`, `.tigrc`, `.mise.toml`, `.rtx.toml`, and `.tool-versions`.
+- Zsh startup files: `.zshenv`, `.zprofile`, `.zshrc`, `.zlogin`, `.zlogout`, plus their `.zwc` files.
+
+Whole config trees move, including unknown files, so stale plugins, hooks, alternate configs, and modules cannot load alongside the fresh setup.
+Standalone history and credential files, runtime installations, data/cache/state directories, unrelated applications, and project-local configs stay untouched.
+Claude, Codex, APM, and shared agent deployment directories are excluded; OpenCode's config tree is swept, but its separate auth/session data is not.
+Any secrets or history embedded in a swept config tree remain in its private local backup; treat backups as sensitive and never publish them.
+Symlinks in the allowlist are moved without modifying their targets; a symlinked `~/.config` or backup root fails deployment without prompting or moving anything.
+Claude Cloud skips this migration.
+
+Preview with `chezmoi apply --dry-run` before applying.
+The script prints its backup path; restore selected local customizations from there after reviewing them.
+In particular, an existing `~/.zprofile` is backed up, not automatically restored, since managed Zsh explicitly sources it.
+Subsequent applies leave new local customizations alone.
+`~/.chezmoi-backups/.pre-install-complete` also prevents repeat cleanup if the script changes or chezmoi's script state is reset.
+Failed moves stop deployment, retain completed backups, and retry on the next apply; completion is recorded only after all moves succeed.
+An intentional new sweep requires removing this completion marker and resetting this script's chezmoi run state.
+Inherited config-path overrides such as `XDG_CONFIG_HOME` or `ZDOTDIR` and system-level configs are outside this home-scoped migration.
+
 ### System Dependencies
 
 For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
