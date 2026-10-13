@@ -51,6 +51,23 @@ do
         printf 'Legacy config backup: %s\n' "$backup" >&2
     fi
     mkdir -p "$backup/$(dirname "$relative")"
+    # OpenCode owns service.json as host state, not application configuration.
+    # Sweep children of a real tree without moving that file or its symlink.
+    if [ "$relative" = .config/opencode ] && [ -d "$path" ] && [ ! -L "$path" ]; then
+        mkdir -p "$backup/$relative"
+        for child in "$path"/* "$path"/.[!.]* "$path"/..?*; do
+            if [ ! -e "$child" ] && [ ! -L "$child" ]; then
+                continue
+            fi
+            name=$(basename "$child")
+            if [ "$name" = service.json ]; then
+                continue
+            fi
+            mv "$child" "$backup/$relative/$name"
+            printf 'Backed up %s\n' "$child" >&2
+        done
+        continue
+    fi
     mv "$path" "$backup/$relative"
     printf 'Backed up %s\n' "$path" >&2
 done

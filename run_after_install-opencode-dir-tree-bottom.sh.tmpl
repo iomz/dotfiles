@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+
+# Check every apply: cleanup can remove dependencies without changing this script.
+lock_hash="{{ include "dot_config/opencode/cli-plugins/dir-tree-bottom/package-lock.json" | sha256sum }}"
+plugin_dir="{{ .chezmoi.destDir }}/.config/opencode/cli-plugins/dir-tree-bottom"
+stamp="$plugin_dir/node_modules/.chezmoi-lock-sha256"
+if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$lock_hash" ] && \
+    [ -f "$plugin_dir/node_modules/opencode-dir-tree-tui/package.json" ]; then
+    exit 0
+fi
+if ! command -v npm >/dev/null 2>&1; then
+  echo "npm is required to install dir-tree-bottom dependencies" >&2
+  exit 1
+fi
+npm ci --prefix "$plugin_dir" --ignore-scripts --no-audit --no-fund
+printf '%s\n' "$lock_hash" > "$stamp"

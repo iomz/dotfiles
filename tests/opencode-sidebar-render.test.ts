@@ -16,9 +16,13 @@ test.skipIf(!source)("sidebar height stays stable across usage, tools, variants 
   const model = { providerID: "test", id: "model" }
   const location = { directory: "/workspace" }
   let reply: (value: unknown) => void = () => {}
+  let quotaLocation: unknown
   const context: any = {
     theme, options: {},
-    client: { rpc: () => ({ usage: () => new Promise(resolve => { reply = resolve }) }) },
+    client: { rpc: () => ({ usage: (_input: unknown, options: any) => {
+      quotaLocation = options?.location
+      return new Promise(resolve => { reply = resolve })
+    } }) },
     data: {
       session: {
         get: () => ({ id: "test", location, agent: "build", model: { ...model, variant: busy() ? "Very long variant ".repeat(5) : undefined }, tokens: busy() ? tokens : undefined }),
@@ -52,9 +56,10 @@ test.skipIf(!source)("sidebar height stays stable across usage, tools, variants 
   const quota = await testRender(() => SidebarQuota({ context }), { width: 31, height: 10 })
   try {
     await quota.renderOnce()
+    expect(quotaLocation).toEqual(location)
     const initial = quota.captureCharFrame().split("\n").map(line => line.trim()).filter(Boolean)
     expect(initial).toHaveLength(6)
-    reply({ used: { primary: 25, secondary: 50 }, reset: { primary: "Long reset description ".repeat(4), secondary: "Long reset description ".repeat(4) }, plan: "plus" })
+    reply({ status: "ok", used: { primary: 25, secondary: 50 }, reset: { primary: "Long reset description ".repeat(4), secondary: "Long reset description ".repeat(4) }, plan: "plus" })
     await Promise.resolve()
     await quota.renderOnce()
     const refreshed = quota.captureCharFrame()
@@ -63,6 +68,25 @@ test.skipIf(!source)("sidebar height stays stable across usage, tools, variants 
     expect(refreshed).toContain("█████████░░░ 75% left")
   } finally {
     quota.renderer.destroy()
+  }
+  const scoped = { directory: "/other-workspace" }
+  const errorContext = {
+    ...context, location: scoped,
+    client: { rpc: () => ({ usage: async (_input: unknown, options: any) => {
+      expect(options.location).toEqual(scoped)
+      return { status: "error", statusCode: "auth" }
+    } }) },
+  }
+  const unavailable = await testRender(() => SidebarQuota({ context: errorContext }), { width: 31, height: 10 })
+  try {
+    await Promise.resolve()
+    await unavailable.renderOnce()
+    const frame = unavailable.captureCharFrame()
+    expect(frame).toContain("Codex (unavailable)")
+    expect(frame).not.toContain("checking")
+    expect(frame.split("\n").map(line => line.trim()).filter(Boolean)).toHaveLength(6)
+  } finally {
+    unavailable.renderer.destroy()
   }
 })
 

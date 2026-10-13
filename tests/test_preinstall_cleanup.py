@@ -95,7 +95,8 @@ class PreinstallCleanupTest(unittest.TestCase):
                   ".profile", ".inputrc", ".mostrc", ".screenrc", ".tigrc"]
         preserved = [".zsh_history", ".viminfo", ".local/share/nvim/sentinel",
                      ".local/share/vim/bundle/sentinel", ".cache/zsh/sentinel",
-                     ".config/other/config", ".codex/auth.json", ".git-credentials",
+                     ".config/other/config", ".config/opencode/service.json",
+                     ".codex/auth.json", ".git-credentials",
                      ".ssh/config", ".config/gh/hosts.yml", ".config/rclone/rclone.conf",
                      ".local/share/opencode/auth.json", ".local/share/opencode/session/probe",
                      ".claude/settings.json", ".agents/skills/probe/SKILL.md",
@@ -151,6 +152,20 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.assertEqual(list(outside.iterdir()), [outside / "sentinel"])
         self.assertFalse((self.home / ".config/nvim").is_symlink())
         self.assertTrue((self.home / ".config/nvim/init.lua").is_file())
+
+    def test_opencode_service_symlink_stays_in_place(self):
+        service = self.root / "service-config"
+        service.write_text("host-owned\n")
+        directory = self.home / ".config/opencode"
+        directory.mkdir(parents=True)
+        (directory / "service.json").symlink_to(service)
+        self.put(".config/opencode/.legacy-config")
+        self.chezmoi("apply")
+        self.assertTrue((directory / "service.json").is_symlink())
+        self.assertEqual(service.read_text(), "host-owned\n")
+        backup, = self.backups()
+        self.assertEqual((backup / ".config/opencode/.legacy-config").read_text(), "legacy\n")
+        self.assertFalse((backup / ".config/opencode/service.json").exists())
 
     def test_redirected_parents_fail_before_moving_and_retry(self):
         for parent in (".config", ".chezmoi-backups"):
@@ -224,6 +239,59 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.config.write_text('[data]\nvariant = "claude-cloud"\n')
         script = self.chezmoi("cat", str(self.home / "00-cleanup-legacy-config.sh")).stdout
         self.assertEqual(script.strip(), "")
+
+    def test_plugin_dependencies_recover_after_sweep_and_later_loss(self):
+        plugins = {"codex-quota-sidebar": "zod", "dir-tree-bottom": "opencode-dir-tree-tui"}
+        for name, dependency in plugins.items():
+            script = f"run_after_install-opencode-{name}.sh.tmpl"
+            shutil.copyfile(SOURCE / script, self.source / script)
+            relative = f"dot_config/opencode/cli-plugins/{name}"
+            directory = self.source / relative
+            directory.mkdir(parents=True)
+            for filename in ("package.json", "package-lock.json"):
+                shutil.copyfile(SOURCE / relative / filename, directory / filename)
+            # Model an existing installation removed by the first sweep.
+            self.put(f".config/opencode/cli-plugins/{name}/node_modules/{dependency}/package.json")
+        tools = self.root / "tools"
+        tools.mkdir()
+        npm = tools / "npm"
+        npm.write_text('''#!/bin/sh
+set -eu
+test "$1" = ci
+test "$2" = --prefix
+dir=$3
+test -f "$dir/package-lock.json"
+case "$dir" in
+    */codex-quota-sidebar) dependency=zod ;;
+    */dir-tree-bottom) dependency=opencode-dir-tree-tui ;;
+    *) exit 98 ;;
+esac
+if [ -f "$HOME/fail-npm" ]; then exit 42; fi
+mkdir -p "$dir/node_modules/$dependency"
+printf '{}\\n' > "$dir/node_modules/$dependency/package.json"
+printf '%s\\n' "$dir" >> "$HOME/npm-calls"
+''')
+        npm.chmod(0o755)
+        self.env["PATH"] = str(tools) + os.pathsep + self.env["PATH"]
+        self.chezmoi("apply")
+        self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 2)
+        self.chezmoi("apply")
+        self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 2)
+        quota = self.home / ".config/opencode/cli-plugins/codex-quota-sidebar"
+        shutil.move(quota / "node_modules", self.root / "lost-node-modules")
+        self.put("fail-npm")
+        result = self.chezmoi("apply", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((quota / "node_modules/.chezmoi-lock-sha256").exists())
+        (self.home / "fail-npm").unlink()
+        self.chezmoi("apply")
+        self.assertTrue((quota / "node_modules/zod/package.json").is_file())
+        self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 3)
+        lock = self.source / "dot_config/opencode/cli-plugins/codex-quota-sidebar/package-lock.json"
+        lock.write_text(lock.read_text() + "\n")
+        self.chezmoi("apply")
+        self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 4)
+        self.assertEqual(len(self.backups()), 1)
 
 
 if __name__ == "__main__":

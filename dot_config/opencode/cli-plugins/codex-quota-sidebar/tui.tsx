@@ -58,11 +58,13 @@ export function SidebarQuota(props: { context: Context }) {
     if (refreshing) return
     refreshing = true
     try {
-      const result = await context.client.rpc(CodexUsageRpc).usage({})
+      const location = context.location ?? context.data.location.default()
+      const result = await context.client.rpc(CodexUsageRpc).usage({}, { location })
       setUsage(result as Usage)
-      setFailed(false)
+      setFailed((result as Usage).status !== "ok")
     } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error)
+      const detail = error && typeof error === "object" && "message" in error
+        ? String(error.message) : String(error)
       console.error(`[personal.codex-quota-sidebar] quota RPC failed: ${detail}`)
       setFailed(true)
     } finally {
@@ -92,7 +94,7 @@ export function SidebarQuota(props: { context: Context }) {
       <text height={1} wrapMode="none" truncate fg={styleColor(context.options.heading, "#5394ee")}>
         <b>Usage</b>
       </text>
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Codex{usage()?.plan ? ` (${usage()?.plan})` : " (checking…)"}</text>
+      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Codex{usage()?.plan ? ` (${usage()?.plan})` : failed() ? " (unavailable)" : " (checking…)"}</text>
       {row("primary", "5h")}
       <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.primary ?? (failed() ? "unavailable" : "checking…")}</text>
       {row("secondary", "7d")}

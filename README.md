@@ -52,6 +52,8 @@ The lab exports color preferences only; it does not modify OpenCode configuratio
 Dashboard panels can be disabled individually through `context`, `usage`, `session`, `tokens`, `activity`, and `workers` in its `cli.json` plugin options. Sidebar colors are configurable there too. The dashboard embeds the quota component; do not also load its standalone plugin entry.
 The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
 Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
+After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.
+The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
 Restart the TUI after plugin changes. No binary rebuild is required.
 
 Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.
@@ -245,13 +247,16 @@ The application allowlist covers:
 
 Whole config trees move, including unknown files, so stale plugins, hooks, alternate configs, and modules cannot load alongside the fresh setup.
 Standalone history and credential files, runtime installations, data/cache/state directories, unrelated applications, and project-local configs stay untouched.
-Claude, Codex, APM, and shared agent deployment directories are excluded; OpenCode's config tree is swept, but its separate auth/session data is not.
+Claude, Codex, APM, and shared agent deployment directories are excluded; OpenCode's config tree is swept except for its host-owned `service.json`, and its separate auth/session data is not.
 Any secrets or history embedded in a swept config tree remain in its private local backup; treat backups as sensitive and never publish them.
 Symlinks in the allowlist are moved without modifying their targets; a symlinked `~/.config` or backup root fails deployment without prompting or moving anything.
 Claude Cloud skips this migration.
 
 Preview with `chezmoi apply --dry-run` before applying.
 The script prints its backup path; restore selected local customizations from there after reviewing them.
+After sweeping a running OpenCode installation, wait for active tasks to finish, run `opencode service restart`, then reopen the TUI.
+Restarting only the TUI can leave the background service with stale per-location plugin state and an unavailable Usage panel.
+The migration does not restart applications or services automatically.
 In particular, an existing `~/.zprofile` is backed up, not automatically restored, since managed Zsh explicitly sources it.
 Subsequent applies leave new local customizations alone.
 `~/.chezmoi-backups/.pre-install-complete` also prevents repeat cleanup if the script changes or chezmoi's script state is reset.
