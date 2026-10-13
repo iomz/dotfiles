@@ -41,6 +41,22 @@ Use `scripts/opencode-theme-lab.html` for a local dark-terminal color preview wi
 The lab includes the personal palette, a main-text picker, optional badge-text linking, and inline attachment RGB/hex controls that do not open an overlapping native picker.
 The lab exports color preferences only; it does not modify OpenCode configuration.
 
+### Sidebar trial bundle
+
+- `opencode-git-plugin@0.3.0`: working-tree files and native diff preview, refreshed every 8 seconds. `Ctrl+X`, then `Shift+G`, focuses the list; arrow keys stage/unstage only in list mode and `c` opens a commit prompt.
+- `opencode-dir-tree-tui@1.0.6`: expandable project tree and Git badges, placed last below the other sidebar panels and collapsed on TUI startup by a local wrapper. Click its heading to expand. `/dirtree-sidebar` controls visibility, mouse actions, and ignored paths. Right-click opens a file/folder in its system default application.
+- Personal Sidebar Dashboard: context meter, selected agent/model, estimated API cost, session token totals, loaded-transcript activity, running subagents, and location-scoped background shells. It reads OpenCode's cached data; no model calls, telemetry, or extra authentication.
+- Usage: Codex plan and 12-cell quota bars immediately below Context window. Blue heading and mint bars, amber below 26% remaining, red below 11% remaining.
+
+Dashboard panels can be disabled individually through `context`, `usage`, `session`, `tokens`, `activity`, and `workers` in its `cli.json` plugin options. Sidebar colors are configurable there too. The dashboard embeds the quota component; do not also load its standalone plugin entry.
+The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
+Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
+Restart the TUI after plugin changes. No binary rebuild is required.
+
+Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.
+Dashboard panels reserve fixed row counts, including startup placeholders; Workers shows counts only, without transient command/title rows or blank detail slots. Quota reset times have dedicated non-wrapping rows so refreshes do not shift neighboring panels.
+Renderer checks use the build checkout's runtime: from its `packages/tui` directory, run `OPENCODE_TUI_SOURCE="$PWD" bun test ~/.local/share/chezmoi/tests/opencode-sidebar-render.test.ts` after applying the plugins.
+
 ## Quick Start
 
 For macOS/Linux workstations:

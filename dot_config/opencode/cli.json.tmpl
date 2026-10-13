@@ -13,7 +13,30 @@
     "input.move.up": "up,ctrl+p"
   },
   "plugins": [
+    "-opencode.sidebar.context",
     "{{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24.14.1/lib/node_modules/opencode-codex-usage/opencode2-tui-plugin",
-    "{{ .chezmoi.homeDir }}/.config/opencode/cli-plugins/codex-quota-sidebar"
+    {
+      "package": "{{ .chezmoi.homeDir }}/.config/opencode/cli-plugins/sidebar-dashboard",
+      "options": {
+        "context": true,
+        "usage": true,
+        "session": true,
+        "tokens": true,
+        "activity": true,
+        "workers": true,
+        "colors": {
+          "heading": "#5394ee",
+          "muted": "#a6b2c0",
+          "positive": "#32cd99",
+          "warning": "#e5c07b",
+          "critical": "#ff4747"
+        }
+      }
+    },
+    {
+      "package": "opencode-git-plugin@0.3.0",
+      "options": { "intervalMs": 8000, "folderTree": "compact" }
+    },
+    "{{ .chezmoi.homeDir }}/.config/opencode/cli-plugins/dir-tree-bottom"
   ]
 }

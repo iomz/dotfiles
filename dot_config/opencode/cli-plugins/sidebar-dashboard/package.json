@@ -1,0 +1,6 @@
+{
+  "name": "personal-sidebar-dashboard",
+  "private": true,
+  "type": "module",
+  "exports": { "./tui": "./tui.tsx" }
+}

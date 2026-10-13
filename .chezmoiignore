@@ -23,6 +23,7 @@ package.json
 .config/opencode/node_modules/**
 .config/opencode/package-lock.json
 .config/opencode/cli-plugins/codex-quota-sidebar/node_modules/**
+.config/opencode/cli-plugins/dir-tree-bottom/node_modules/**
 
 # backup
 *.bak

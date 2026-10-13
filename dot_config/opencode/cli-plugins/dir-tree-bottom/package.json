@@ -1,0 +1,13 @@
+{
+  "name": "personal-dir-tree-bottom",
+  "private": true,
+  "type": "module",
+  "exports": { "./tui": "./tui.js" },
+  "dependencies": {
+    "opencode-dir-tree-tui": "1.0.6",
+    "@opencode/plugin": "2.0.18",
+    "@opentui/core": "0.5.12",
+    "@opentui/solid": "0.5.12",
+    "solid-js": "1.9.12"
+  }
+}
