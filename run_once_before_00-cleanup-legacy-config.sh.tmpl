@@ -32,7 +32,7 @@ chmod 700 "$backup_root"
 # Sweep config trees for apps owned by this repo, including unknown files.
 # Standalone histories/credentials, runtime data, agent state and unrelated
 # applications remain in place. Move symlinks, never their targets.
-for relative in \
+set -- \
     .vim .vimrc .gvimrc .exrc .zsh .config/vim .config/nvim .config/zsh \
     .zshenv .zprofile .zshrc .zlogin .zlogout \
     .zshenv.zwc .zprofile.zwc .zshrc.zwc .zlogin.zwc .zlogout.zwc \
@@ -41,6 +41,37 @@ for relative in \
     .config/ghostty .config/zellij .config/zeno .config/starship.toml \
     .config/vale .config/yamlfmt .config/tig .config/opencode \
     .hammerspoon .profile .inputrc .mostrc .screenrc .tigrc
+
+cleanup_failed() {
+    printf 'Cleanup refused: cannot back up %s.\n' "$1" >&2
+    printf 'Inspect ownership, parent permissions, ACLs, mount points and immutable flags; fix only the affected path, then run chezmoi apply.\n' >&2
+    printf 'Existing backups remain in %s; cleanup is not marked complete.\n' "$backup_root" >&2
+    exit 1
+}
+
+# Catch ordinary permission failures before moving any configuration. Rename
+# also depends on ACLs, mount boundaries and flags; mv remains authoritative.
+for relative
+do
+    path="$home/$relative"
+    if [ ! -e "$path" ] && [ ! -L "$path" ]; then
+        continue
+    fi
+    parent=$(dirname "$path")
+    if [ ! -w "$parent" ] || [ ! -x "$parent" ]; then
+        cleanup_failed "$path"
+    fi
+    if [ -d "$path" ] && [ ! -L "$path" ]; then
+        if [ ! -w "$path" ] || [ ! -x "$path" ]; then
+            cleanup_failed "$path"
+        fi
+        if [ "$relative" = .config/opencode ] && [ ! -r "$path" ]; then
+            cleanup_failed "$path"
+        fi
+    fi
+done
+
+for relative
 do
     path="$home/$relative"
     if [ ! -e "$path" ] && [ ! -L "$path" ]; then
@@ -63,12 +94,12 @@ do
             if [ "$name" = service.json ]; then
                 continue
             fi
-            mv "$child" "$backup/$relative/$name"
+            mv "$child" "$backup/$relative/$name" || cleanup_failed "$child"
             printf 'Backed up %s\n' "$child" >&2
         done
         continue
     fi
-    mv "$path" "$backup/$relative"
+    mv "$path" "$backup/$relative" || cleanup_failed "$path"
     printf 'Backed up %s\n' "$path" >&2
 done
 # Mark complete only after all moves succeed. Failed migrations retry safely,

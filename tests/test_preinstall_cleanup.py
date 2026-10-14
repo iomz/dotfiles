@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import tomllib
 import unittest
 
 
@@ -223,6 +224,8 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.env["PATH"] = str(tools) + os.pathsep + original_path
         result = self.chezmoi("apply", check=False)
         self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Cleanup refused: cannot back up", result.stderr)
+        self.assertIn("cleanup is not marked complete", result.stderr)
         first, = self.backups()
         self.assertEqual((first / ".vimrc").read_text(), "legacy\n")
         self.assertFalse((self.home / ".vimrc").exists())
@@ -234,6 +237,31 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.assertEqual(len(self.backups()), 2)
         self.assertEqual((first / ".vimrc").read_text(), "legacy\n")
         self.assertEqual(self.chezmoi("diff").stdout, "")
+
+    @unittest.skipIf(os.geteuid() == 0, "root bypasses directory permissions")
+    def test_permission_preflight_prevents_partial_sweep(self):
+        self.put(".vimrc")
+        self.put(".config/nvim/init.vim")
+        directory = self.home / ".config/nvim"
+        directory.chmod(0o500)
+        try:
+            result = self.chezmoi("apply", check=False)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Cleanup refused: cannot back up", result.stderr)
+            self.assertEqual(self.backups(), [])
+            self.assertEqual((self.home / ".vimrc").read_text(), "legacy\n")
+            self.assertTrue((directory / "init.vim").exists())
+            self.assertFalse((self.home / ".chezmoi-backups/.pre-install-complete").exists())
+        finally:
+            directory.chmod(0o700)
+        self.chezmoi("apply")
+        self.assertEqual(len(self.backups()), 1)
+
+    def test_starship_prioritizes_prompt_latency(self):
+        config = tomllib.loads(self.chezmoi("cat", str(self.home / ".config/starship.toml")).stdout)
+        self.assertEqual(config["scan_timeout"], 10)
+        self.assertEqual(config["command_timeout"], 100)
+        self.assertFalse(config["follow_symlinks"])
 
     def test_cloud_script_is_empty(self):
         self.config.write_text('[data]\nvariant = "claude-cloud"\n')

@@ -262,8 +262,20 @@ In particular, an existing `~/.zprofile` is backed up, not automatically restore
 Subsequent applies leave new local customizations alone.
 `~/.chezmoi-backups/.pre-install-complete` also prevents repeat cleanup if the script changes or chezmoi's script state is reset.
 Failed moves stop deployment, retain completed backups, and retry on the next apply; completion is recorded only after all moves succeed.
+Permission checks run before moving configuration; failures caused by ACLs, mount points or immutable flags can still occur during a move.
+For `Permission denied`, inspect the affected path and its parent (on Linux: `ls -ld "$HOME" "$HOME/.vim"`, `getfacl "$HOME" "$HOME/.vim"`, `lsattr -d "$HOME/.vim"`, and `findmnt -T "$HOME/.vim"`).
+Correct only the verified ownership or permission problem, then run `chezmoi init` to regenerate an outdated config template and `chezmoi apply` to retry; upgrading chezmoi alone does not fix filesystem permissions.
+Do not run `sudo chezmoi apply` or recursively change ownership of the entire home directory.
+If this host must keep its existing config trees, explicitly opt out of the entire cleanup by creating the regular file `~/.chezmoi-backups/.pre-install-complete` in a real, private backup directory before retrying.
+This skips cleanup, not later managed-file writes; review `chezmoi diff` and keep any backups from the failed attempt.
 An intentional new sweep requires removing this completion marker and resetting this script's chezmoi run state.
 Inherited config-path overrides such as `XDG_CONFIG_HOME` or `ZDOTDIR` and system-level configs are outside this home-scoped migration.
+
+### Prompt Latency
+
+Starship uses a 10 ms directory scan timeout and a 100 ms command timeout, and does not follow symlinks during detection.
+Slow optional modules may be missing; these are per-operation limits, not a hard deadline for the whole prompt.
+Use `starship timings` in a slow directory to identify modules to disable rather than increasing timeouts.
 
 ### System Dependencies
 

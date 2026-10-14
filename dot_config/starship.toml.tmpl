@@ -1,6 +1,11 @@
 add_newline = true
 continuation_prompt = '▶▶ '
 
+# Optional project information must not hold up the prompt.
+scan_timeout = 10
+command_timeout = 100
+follow_symlinks = false
+
 # Use custom format
 format = "$all$character"
 
