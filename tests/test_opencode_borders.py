@@ -173,6 +173,9 @@ class OpenCodeBordersTest(unittest.TestCase):
         self.assertEqual(config["keybinds"]["input.delete.to.line.end"], "ctrl+k")
 
     def setup_updater(self):
+        self.upstream = self.root / "upstream.git"
+        self.run_git("clone", "--bare", str(self.repo), str(self.upstream))
+        self.run_git("remote", "add", "origin", str(self.upstream))
         lib = self.home / ".local/lib"
         (lib / "opencode-patches").mkdir(parents=True)
         shutil.copyfile(SOURCE / "dot_local/lib/opencode-generation.sh", lib / "opencode-generation.sh")
@@ -190,7 +193,6 @@ class OpenCodeBordersTest(unittest.TestCase):
         self.executable(self.home / ".local/bin/opencode", '#!/bin/bash\nexec "$HOME/.local/share/opencode/active/opencode" "$@"\n')
         tools = self.root / "tools"
         self.executable(tools / "git", f'''#!/bin/bash
-if [[ "$3" = fetch ]]; then exit 0; fi
 if [[ "$3" = config && "$4" = --get ]]; then
   echo https://github.com/anomalyco/opencode.git
   exit 0
@@ -206,11 +208,7 @@ for arg in "$@"; do
 done
 echo build >> "$HOME/build-count"
 mkdir -p "$out/cli-darwin-arm64/bin"
-cat > "$out/cli-darwin-arm64/bin/opencode" <<'EOF'
-#!/bin/bash
-[[ "$1" != --version ]] || echo 2.0.26
-exit 0
-EOF
+printf '#!/bin/bash\n[[ "$1" != --version ]] || echo %s\nexit 0\n' "$OPENCODE_VERSION" > "$out/cli-darwin-arm64/bin/opencode"
 chmod +x "$out/cli-darwin-arm64/bin/opencode"
 ''')
         self.env = dict(os.environ, HOME=str(self.home), TMPDIR=str(self.root),
@@ -257,9 +255,122 @@ chmod +x "$out/cli-darwin-arm64/bin/opencode"
         self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
         self.setup_updater()
         self.env["OPENCODE_UPDATE_REF"] = older
-        self.update()
+        result = self.update()
         manifest = json.loads((self.data / "active/manifest.json").read_text())
         self.assertEqual(manifest["source_commit"], self.commit)
+        self.assertEqual(manifest["source_ref"], self.commit)
+        self.assertIn(f"Upstream:   v2.0.26 ({older} @ {older[:10]})", result.stdout)
+        self.assertIn("Active source is newer than selected upstream", result.stdout)
+        self.assertIn("no changes made", self.update().stdout)
+
+    def release_commit(self, version):
+        self.write("packages/cli/package.json", json.dumps({"version": version}) + "\n")
+        self.run_git("add", "packages/cli/package.json")
+        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                     "commit", "-qm", f"release {version}")
+        return self.run_git("rev-parse", "HEAD").stdout.strip()
+
+    def remote_git(self, *args):
+        return subprocess.run([self.git, "--git-dir", str(self.upstream), *args],
+                              check=True, text=True, capture_output=True)
+
+    def test_default_selects_highest_stable_v2_tag_not_stale_branch(self):
+        self.run_git("branch", "v2", self.commit)
+        self.run_git("tag", "v2.0.26")
+        self.release_commit("2.9.9")
+        self.run_git("tag", "v2.9.9")
+        target = self.release_commit("2.10.0")
+        # Annotated tags must be peeled to commits, not recorded as tag objects.
+        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                     "tag", "-a", "v2.10.0", "-m", "release")
+        self.release_commit("2.11.0-beta.1")
+        for tag in ("v2.11.0-beta.1", "v2.99.0-rc.1", "v2.100.0+build", "v3.0.0", "v1.99.0"):
+            self.run_git("tag", tag)
+        self.setup_updater()
+        self.env.pop("OPENCODE_UPDATE_REF")
+        result = self.update()
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_commit"], target)
+        self.assertEqual(manifest["version"], "2.10.0")
+        self.assertEqual(manifest["source_ref"], "refs/tags/v2.10.0")
+        self.assertIn(f"Upstream:   v2.10.0 (refs/tags/v2.10.0 @ {target[:10]})", result.stdout)
+        self.assertIn("Repository: https://github.com/anomalyco/opencode.git", result.stdout)
+        self.assertIn("no changes made", self.update().stdout)
+
+    def test_default_ignores_local_tags_and_prunes_deleted_remote_tags(self):
+        self.run_git("tag", "v2.0.26")
+        self.setup_updater()
+        self.run_git("tag", "v2.99.0")
+        self.run_git("update-ref", "refs/remotes/origin/tags/v2.98.0", self.commit)
+        self.env.pop("OPENCODE_UPDATE_REF")
+        self.update()
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_ref"], "refs/tags/v2.0.26")
+        self.assertNotEqual(self.run_git("rev-parse", "--verify", "refs/remotes/origin/tags/v2.98.0",
+                                         check=False).returncode, 0)
+
+    def test_default_without_stable_tags_fails_without_build(self):
+        self.run_git("tag", "v2.1.0-beta.1")
+        self.setup_updater()
+        self.env.pop("OPENCODE_UPDATE_REF")
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("no stable V2 tags found", result.stderr)
+        self.assertEqual((self.data / "active").resolve().name, "initial")
+        self.assertFalse((self.home / "build-count").exists())
+
+    def test_branch_override_fetches_fresh_remote_tip(self):
+        self.run_git("branch", "v2", self.commit)
+        self.setup_updater()
+        target = self.release_commit("2.1.1")
+        self.run_git("push", "origin", "HEAD:refs/heads/v2")
+        # This deliberately stale local ref must not determine the build target.
+        self.run_git("update-ref", "refs/remotes/origin/v2", self.commit)
+        self.env["OPENCODE_UPDATE_REF"] = "origin/v2"
+        self.update()
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_commit"], target)
+        self.assertEqual(manifest["source_ref"], "origin/v2")
+        for ref in ("refs/remotes/origin/v2", "refs/heads/v2"):
+            with self.subTest(ref=ref):
+                self.env["OPENCODE_UPDATE_REF"] = ref
+                result = self.update()
+                self.assertIn(f"({ref} @ {target[:10]})", result.stdout)
+                self.assertIn("no changes made", result.stdout)
+
+    def test_tag_override_fetches_tag_absent_locally(self):
+        self.setup_updater()
+        target = self.release_commit("2.1.1")
+        self.run_git("push", "origin", "HEAD:refs/tags/v2.1.1")
+        self.env["OPENCODE_UPDATE_REF"] = "refs/tags/v2.1.1"
+        self.update()
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_commit"], target)
+        self.assertEqual(manifest["source_ref"], "refs/tags/v2.1.1")
+
+    def test_override_fetch_failure_keeps_active_build(self):
+        self.setup_updater()
+        self.env["OPENCODE_UPDATE_REF"] = "origin/missing"
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("fetch of upstream ref failed", result.stderr)
+        self.assertEqual((self.data / "active").resolve().name, "initial")
+        self.assertFalse((self.home / "build-count").exists())
+
+    def test_divergent_upstream_keeps_active_build(self):
+        older = self.commit
+        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                     "commit", "--allow-empty", "-qm", "active branch")
+        self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
+        self.run_git("checkout", "--detach", older)
+        target = self.release_commit("2.1.1")
+        self.setup_updater()
+        self.env["OPENCODE_UPDATE_REF"] = target
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("upstream and active commits diverge", result.stderr)
+        self.assertEqual((self.data / "active").resolve().name, "initial")
+        self.assertFalse((self.home / "build-count").exists())
 
 
 if __name__ == "__main__":

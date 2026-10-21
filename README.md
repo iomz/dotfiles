@@ -27,6 +27,10 @@ Personal Linux and macOS dotfiles, plus a minimal Claude Cloud agent environment
 
 The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfaces transparent, with opaque dialogs, a blue-gray input fill, slate borders, red user accents, blue secondary text, and a mint scrollbar.
 `opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` to an isolated source worktree before building.
+By default it fetches tags from `anomalyco/opencode` and selects the highest stable `v2.<minor>.<patch>` tag numerically, excluding prereleases and local-only tags.
+It does not follow the stale `v2` branch or GitHub's latest published Release, which may still be V1.
+Use `OPENCODE_UPDATE_REF=refs/tags/v2.1.1 opencode-update` to select a specific tag, or `OPENCODE_UPDATE_REF=origin/dev opencode-update` to follow a branch; explicit refs are fetched before resolution.
+Output identifies the repository, selected upstream ref/commit, and effective build target separately. An older selected ref never downgrades an existing newer build; divergent history stops the update.
 The patch adds a sidebar divider, uses the theme's border token for tool blocks, marks user prompts with a bold `YOU` label and agent-colored border, and uses the form-field background for the input box.
 It also wires the transcript scrollbar to its own token and renders image/file badges with the main text color on the form-field selection background.
 Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P`/`Ctrl+N` move up/down in the input box.
@@ -50,6 +54,7 @@ The lab exports color preferences only; it does not modify OpenCode configuratio
 - Usage: Codex plan and 12-cell quota bars immediately below Context window. Blue heading and mint bars, amber below 26% remaining, red below 11% remaining.
 
 Dashboard panels can be disabled individually through `context`, `usage`, `session`, `tokens`, `activity`, and `workers` in its `cli.json` plugin options. Sidebar colors are configurable there too. The dashboard embeds the quota component; do not also load its standalone plugin entry.
+The sidebar footer shows the running TUI's OpenCode version from its plugin context, not the installed binary or active-generation manifest. Restart the TUI after an update to run the new client version.
 The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
 Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
 After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.

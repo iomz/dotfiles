@@ -3,6 +3,40 @@ import { expect, test } from "bun:test"
 // Run with OPENCODE_TUI_SOURCE=/path/to/opencode/packages/tui.
 // Uses the same Solid/OpenTUI runtime as the native build, not a JSX stub.
 const source = process.env.OPENCODE_TUI_SOURCE
+test.skipIf(!source)("sidebar footer shows running client version and cleans up both slots", async () => {
+  await import(`${source}/src/plugin/runtime-plugin-support.bun.ts`)
+  const { testRender } = await import(Bun.resolveSync("@opentui/solid", source!))
+  // Applied path uses the same runtime dependencies and entrypoint as the TUI.
+  const { default: plugin, SidebarVersion } = await import(`${process.env.HOME}/.config/opencode/cli-plugins/sidebar-dashboard/tui.tsx`)
+  const slots: any[] = []
+  const removed: string[] = []
+  const context: any = {
+    app: { version: "2.1.1", channel: "latest" }, options: {},
+    ui: { slot: (slot: any) => {
+      slots.push(slot)
+      return () => removed.push(slot.prepend ?? slot.append)
+    } },
+  }
+  const cleanup = await plugin.setup(context)
+  expect(slots.map(slot => slot.prepend ?? slot.append)).toEqual(["sidebar.content", "sidebar.footer"])
+  const app = await testRender(() => slots[1].render(), { width: 31, height: 2 })
+  try {
+    await app.renderOnce()
+    expect(app.captureCharFrame().trim()).toBe("OpenCode v2.1.1")
+  } finally {
+    app.renderer.destroy()
+    await cleanup?.()
+  }
+  expect(removed).toEqual(["sidebar.footer", "sidebar.content"])
+  const prefixed = await testRender(() => SidebarVersion({ context: { ...context, app: { version: "v2.1.2" } } }), { width: 31, height: 2 })
+  try {
+    await prefixed.renderOnce()
+    expect(prefixed.captureCharFrame().trim()).toBe("OpenCode v2.1.2")
+  } finally {
+    prefixed.renderer.destroy()
+  }
+})
+
 test.skipIf(!source)("sidebar height stays stable across usage, tools, variants and workers", async () => {
   await import(`${source}/src/plugin/runtime-plugin-support.bun.ts`)
   const { testRender } = await import(Bun.resolveSync("@opentui/solid", source!))

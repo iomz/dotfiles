@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 OPENCODE_ROOT=${OPENCODE_UPDATE_ROOT:-"$HOME/.local/share/opencode"}
 SOURCE=${OPENCODE_UPDATE_SOURCE:-"$HOME/ghq/github.com/anomalyco/opencode-v2-build"}
-UPSTREAM_REF=${OPENCODE_UPDATE_REF:-origin/v2}
+UPSTREAM_REF=${OPENCODE_UPDATE_REF:-}
 LIB="$HOME/.local/lib/opencode-generation.sh"
 PATCH="$HOME/.local/lib/opencode-patches/transparent-borders.patch"
 [[ -r $LIB ]] || { printf 'opencode-update: missing helper: %s\n' "$LIB" >&2; exit 1; }
@@ -46,14 +46,52 @@ LOCKED=1
 opencode_recover_transaction
 
 [[ -d $SOURCE/.git || -f $SOURCE/.git ]] || { opencode_die "source checkout missing: $SOURCE"; exit 1; }
-git -C "$SOURCE" config --get remote.origin.url | grep -Eq 'github\.com[:/]anomalyco/opencode([.]git)?$' || {
+UPSTREAM_URL=$(git -C "$SOURCE" config --get remote.origin.url) || { opencode_die "source checkout has no origin: $SOURCE"; exit 1; }
+printf '%s\n' "$UPSTREAM_URL" | grep -Eq 'github\.com[:/]anomalyco/opencode([.]git)?$' || {
   opencode_die "unexpected origin for source checkout: $SOURCE"; exit 1;
 }
-git -C "$SOURCE" fetch --quiet origin "+refs/heads/v2:refs/remotes/origin/v2" || {
-  opencode_die 'fetch of upstream V2 branch failed'; exit 1;
-}
-TARGET=$(git -C "$SOURCE" rev-parse --verify "$UPSTREAM_REF^{commit}") || { opencode_die "cannot resolve upstream ref: $UPSTREAM_REF"; exit 1; }
+if [[ -z $UPSTREAM_REF ]]; then
+  # Isolate remote tags from local tags; prune deleted remote tags before selecting.
+  git -C "$SOURCE" fetch --quiet --no-tags --prune origin 'refs/tags/v2.*:refs/remotes/origin/tags/v2.*' || {
+    opencode_die 'fetch of upstream V2 tags failed'; exit 1;
+  }
+  UPSTREAM_REF=$(git -C "$SOURCE" for-each-ref --format='%(refname)' refs/remotes/origin/tags/ | python3 -c '
+import re, sys
+tags = []
+for line in sys.stdin:
+    ref = line.strip()
+    match = re.fullmatch(r"refs/remotes/origin/tags/v(2)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", ref)
+    if match:
+        tags.append((tuple(map(int, match.groups())), ref))
+if not tags:
+    sys.exit("opencode-update: no stable V2 tags found on origin")
+print(max(tags)[1])
+') || exit 1
+  RESOLVED_REF=$UPSTREAM_REF
+  UPSTREAM_REF="refs/tags/${UPSTREAM_REF##*/}"
+else
+  # Remote-tracking shorthand names cannot be fetched directly from origin.
+  FETCH_REF=$UPSTREAM_REF
+  case "$FETCH_REF" in
+    refs/remotes/origin/*) FETCH_REF="refs/heads/${FETCH_REF#refs/remotes/origin/}" ;;
+    origin/*) FETCH_REF="refs/heads/${FETCH_REF#origin/}" ;;
+  esac
+  git -C "$SOURCE" fetch --quiet --no-tags -- origin "$FETCH_REF" || {
+    opencode_die "fetch of upstream ref failed: $UPSTREAM_REF"; exit 1;
+  }
+  RESOLVED_REF=FETCH_HEAD
+fi
+TARGET=$(git -C "$SOURCE" rev-parse --verify "$RESOLVED_REF^{commit}") || { opencode_die "cannot resolve upstream ref: $UPSTREAM_REF"; exit 1; }
 [[ $TARGET =~ ^[0-9a-f]{40}$ ]] || { opencode_die 'resolved upstream commit is not a full Git SHA'; exit 1; }
+UPSTREAM_COMMIT=$TARGET
+SOURCE_REF=$UPSTREAM_REF
+UPSTREAM_VERSION=$(python3 - "$SOURCE" "$UPSTREAM_COMMIT" <<'PY'
+import json, subprocess, sys
+root, commit = sys.argv[1:]
+raw = subprocess.check_output(["git", "-C", root, "show", f"{commit}:packages/cli/package.json"], text=True)
+print(json.loads(raw)["version"])
+PY
+)
 
 ACTIVE_GEN=$(opencode_link_target "$OPENCODE_ROOT/active") || { opencode_die 'active must point to a managed generation; bootstrap required'; exit 1; }
 PREVIOUS_GEN=$(opencode_link_target "$OPENCODE_ROOT/previous") || { opencode_die 'previous must point to a managed generation; bootstrap required'; exit 1; }
@@ -66,17 +104,24 @@ CURRENT_NAME=$(basename "$ACTIVE_GEN")
 # A patch-only rebuild must never move an existing newer build backwards.
 if git -C "$SOURCE" merge-base --is-ancestor "$TARGET" "$CURRENT_COMMIT"; then
   TARGET=$CURRENT_COMMIT
+  if [[ $TARGET != "$UPSTREAM_COMMIT" ]]; then
+    SOURCE_REF=$(python3 -c 'import json,sys;m=json.load(open(sys.argv[1]));print(m.get("source_ref") or m["source_commit"])' "$ACTIVE_GEN/manifest.json")
+  fi
 fi
-UPSTREAM_VERSION=$(python3 - "$SOURCE" "$TARGET" <<'PY'
+TARGET_VERSION=$(python3 - "$SOURCE" "$TARGET" <<'PY'
 import json, subprocess, sys
 root, commit = sys.argv[1:]
 raw = subprocess.check_output(["git", "-C", root, "show", f"{commit}:packages/cli/package.json"], text=True)
 print(json.loads(raw)["version"])
 PY
 )
-TARGET_NAME="v${UPSTREAM_VERSION}-${TARGET:0:10}-p${PATCH_SHA:0:12}"
+TARGET_NAME="v${TARGET_VERSION}-${TARGET:0:10}-p${PATCH_SHA:0:12}"
 [[ $UPSTREAM_VERSION =~ ^[0-9A-Za-z][0-9A-Za-z.+_-]*$ ]] || { opencode_die "unsafe upstream version string: $UPSTREAM_VERSION"; exit 1; }
-printf 'Current:   %s\nUpstream:  %s\n' "$CURRENT_NAME" "$TARGET_NAME"
+[[ $TARGET_VERSION =~ ^[0-9A-Za-z][0-9A-Za-z.+_-]*$ ]] || { opencode_die "unsafe target version string: $TARGET_VERSION"; exit 1; }
+printf 'Repository: %s\nCurrent:    %s\nUpstream:   v%s (%s @ %s)\nTarget:     %s\n' "$UPSTREAM_URL" "$CURRENT_NAME" "$UPSTREAM_VERSION" "$UPSTREAM_REF" "${UPSTREAM_COMMIT:0:10}" "$TARGET_NAME"
+if [[ $TARGET != "$UPSTREAM_COMMIT" ]]; then
+  printf 'Active source is newer than selected upstream; retaining active commit %s.\n' "${TARGET:0:10}"
+fi
 
 if [[ $CURRENT_COMMIT = "$TARGET" && $CURRENT_PATCH_SHA = "$PATCH_SHA" ]]; then
   printf 'OpenCode already contains V2 commit %s and local UI patch; no changes made.\n' "${TARGET:0:10}"
@@ -101,7 +146,7 @@ import json,sys
 print(json.load(open(sys.argv[1]))["version"])
 PY
 )
-[[ $VERSION = "$UPSTREAM_VERSION" ]] || { opencode_die 'version changed between ref resolution and worktree'; exit 1; }
+[[ $VERSION = "$TARGET_VERSION" ]] || { opencode_die 'version changed between ref resolution and worktree'; exit 1; }
 # Build from the hashed snapshot, not a patch that might change during the build.
 cp "$PATCH" "$TMP/transparent-borders.patch"
 SNAPSHOT_SHA=$(python3 -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$TMP/transparent-borders.patch")
@@ -128,18 +173,17 @@ VERSION_OUTPUT=$("$BUILT_EXE" --version 2>&1) || { opencode_die "candidate --ver
 "$BUILT_EXE" debug paths >"$TMP/paths.txt" 2>&1 || { opencode_die 'candidate debug paths failed'; exit 1; }
 "$BUILT_EXE" debug config >"$TMP/config.txt" 2>&1 || { opencode_die "candidate config/plugin startup check failed (see $TMP/config.txt)"; tail -30 "$TMP/config.txt" >&2; exit 1; }
 
-SOURCE_BRANCH=$(git -C "$SOURCE" branch -r --contains "$TARGET" --format='%(refname:short)' | grep -E '(^|/)v2$' | head -1 || true)
 BUILD_TARGET=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/arm64/arm64/;s/x86_64/x64/')
 STAGING="$OPENCODE_ROOT/releases/.staging-${TARGET_NAME}-$$"
 DEST="$OPENCODE_ROOT/releases/$TARGET_NAME"
 mkdir "$STAGING"
 cp -p "$BUILT_EXE" "$STAGING/opencode"
-python3 - "$STAGING/manifest.json" "$VERSION" "$TARGET" "$SOURCE_BRANCH" "$BUILD_TARGET" "$PATCH_SHA" <<'PY'
+python3 - "$STAGING/manifest.json" "$VERSION" "$TARGET" "$SOURCE_REF" "$BUILD_TARGET" "$PATCH_SHA" <<'PY'
 import datetime, hashlib, json, os, sys
 path, version, commit, ref, target, patch_sha = sys.argv[1:]
 exe=os.path.join(os.path.dirname(path), "opencode")
 with open(exe,"rb") as f: digest=hashlib.file_digest(f,"sha256").hexdigest()
-m={"version":version,"source_commit":commit,"source_ref":ref or "origin/v2","build_timestamp":datetime.datetime.now(datetime.timezone.utc).isoformat(),"build_target":target,"build_command":"OPENCODE_VERSION=<version> bun run packages/cli/script/build.ts --single --skip-install --outdir=<isolated-candidate>","executable":"opencode","sha256":digest}
+m={"version":version,"source_commit":commit,"source_ref":ref,"build_timestamp":datetime.datetime.now(datetime.timezone.utc).isoformat(),"build_target":target,"build_command":"OPENCODE_VERSION=<version> bun run packages/cli/script/build.ts --single --skip-install --outdir=<isolated-candidate>","executable":"opencode","sha256":digest}
 m["local_patch_sha256"] = patch_sha
 with open(path,"x",encoding="utf-8") as f: json.dump(m,f,indent=2); f.write("\n")
 PY

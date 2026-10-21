@@ -78,12 +78,27 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
   )
 }
 
+export function SidebarVersion(props: { context: Context }) {
+  const { context } = props
+  const styles = context.options.colors as Record<string, unknown> | undefined
+  const muted = colorOption(styles?.muted, "#a6b2c0")
+  return <text height={1} flexShrink={0} wrapMode="none" truncate fg={muted}>OpenCode v{context.app.version.replace(/^v/, "")}</text>
+}
+
 export default Plugin.define({
   id: "personal.sidebar-dashboard",
   setup(context) {
-    return context.ui.slot({
+    const dashboard = context.ui.slot({
       prepend: "sidebar.content",
       render: ({ sessionID }) => <SidebarDashboard context={context} sessionID={sessionID} />,
     })
+    const version = context.ui.slot({
+      append: "sidebar.footer",
+      render: () => <SidebarVersion context={context} />,
+    })
+    return () => {
+      version()
+      dashboard()
+    }
   },
 })
