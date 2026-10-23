@@ -22,13 +22,9 @@ keybinds clear-defaults=true {
         // Pane
         bind "-" { NewPane "down"; SwitchToMode "locked"; }
         bind "|" { NewPane "right"; SwitchToMode "locked"; }
-        bind "s" { NewPane "down"; SwitchToMode "locked"; }
-        bind "v" { NewPane "right"; SwitchToMode "locked"; }
         bind "x" { CloseFocus; SwitchToMode "locked"; }
 
         // Tab
-        bind "n" { GoToNextTab; SwitchToMode "locked"; }
-        bind "b" { GoToPreviousTab; SwitchToMode "locked"; }
         bind "t" { NewTab; SwitchToMode "locked"; }
         bind "q" { CloseTab; SwitchToMode "locked"; }
 
@@ -43,8 +39,6 @@ keybinds clear-defaults=true {
         bind "2" { GoToTab 2; SwitchToMode "locked"; }
         bind "3" { GoToTab 3; SwitchToMode "locked"; }
         bind "4" { GoToTab 4; SwitchToMode "locked"; }
-        bind "h" { GoToPreviousTab; }
-        bind "l" { GoToNextTab; }
     }
 
     scroll {
