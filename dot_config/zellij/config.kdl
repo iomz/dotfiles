@@ -16,7 +16,7 @@ keybinds clear-defaults=true {
 
         bind "d" { Detach; SwitchToMode "locked"; }
         bind "[" { SwitchToMode "scroll"; }
-        bind "Tab" { SwitchToMode "tab"; GoToNextTab; }
+        bind "Tab" { SwitchToMode "tab"; }
         bind "f" { ToggleFloatingPanes; SwitchToMode "locked"; }
 
         // Pane
@@ -43,8 +43,8 @@ keybinds clear-defaults=true {
         bind "2" { GoToTab 2; SwitchToMode "locked"; }
         bind "3" { GoToTab 3; SwitchToMode "locked"; }
         bind "4" { GoToTab 4; SwitchToMode "locked"; }
-        bind "H" { GoToPreviousTab; SwitchToMode "locked"; }
-        bind "L" { GoToNextTab; SwitchToMode "locked"; }
+        bind "h" { GoToPreviousTab; }
+        bind "l" { GoToNextTab; }
     }
 
     scroll {
@@ -58,7 +58,7 @@ keybinds clear-defaults=true {
         bind "Ctrl b" { HalfPageScrollUp; }
 
         bind "g" { ScrollToTop; }
-        bind "G" { ScrollToBottom; }
+        bind "Shift g" { ScrollToBottom; }
 
         bind "/" { SwitchToMode "entersearch"; }
 
@@ -67,16 +67,26 @@ keybinds clear-defaults=true {
     }
 
     tab {
+        bind "Esc" { SwitchToMode "locked"; }
         bind "Ctrl c" { SwitchToMode "locked"; }
+        bind "Enter" { SwitchToMode "locked"; }
 
         bind "Tab" { GoToNextTab; }
         bind "Shift Tab" { GoToPreviousTab; }
 
+        bind "r" { SwitchToMode "RenameTab"; TabNameInput 0; }
+
         bind "h" { GoToPreviousTab; }
         bind "l" { GoToNextTab; }
+        bind "Shift h" { MoveTab "Left"; }
+        bind "Shift l" { MoveTab "Right"; }
 
+    }
+
+    renametab {
+        bind "Esc" { UndoRenameTab; SwitchToMode "locked"; }
+        bind "Ctrl c" { SwitchToMode "locked"; }
         bind "Enter" { SwitchToMode "locked"; }
-        bind "Esc" { SwitchToMode "locked"; }
     }
 }
 
