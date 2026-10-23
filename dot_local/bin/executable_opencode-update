@@ -4,6 +4,11 @@ set -Eeuo pipefail
 OPENCODE_ROOT=${OPENCODE_UPDATE_ROOT:-"$HOME/.local/share/opencode"}
 SOURCE=${OPENCODE_UPDATE_SOURCE:-"$HOME/ghq/github.com/anomalyco/opencode-v2-build"}
 UPSTREAM_REF=${OPENCODE_UPDATE_REF:-}
+APPROVED_TARGET=${OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA:-}
+if [[ -n $APPROVED_TARGET && ! $APPROVED_TARGET =~ ^[0-9a-f]{40}$ ]]; then
+  printf 'opencode-update: OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA must be a full lowercase 40-character commit SHA\n' >&2
+  exit 1
+fi
 LIB="$HOME/.local/lib/opencode-generation.sh"
 PATCH="$HOME/.local/lib/opencode-patches/transparent-borders.patch"
 [[ -r $LIB ]] || { printf 'opencode-update: missing helper: %s\n' "$LIB" >&2; exit 1; }
@@ -129,13 +134,35 @@ if [[ $CURRENT_COMMIT = "$TARGET" && $CURRENT_PATCH_SHA = "$PATCH_SHA" ]]; then
   exit 0
 fi
 if ! git -C "$SOURCE" merge-base --is-ancestor "$CURRENT_COMMIT" "$TARGET"; then
-  opencode_die 'upstream and active commits diverge; refusing implicit downgrade/rebase'
-  exit 1
+  if [[ $APPROVED_TARGET != "$TARGET" ]]; then
+    opencode_die 'upstream and active commits diverge; refusing implicit downgrade/rebase'
+    printf 'Review source changes, then approve this exact target with OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA=%s\n' "$TARGET" >&2
+    exit 1
+  fi
+  printf 'Explicitly approved divergent source switch: %s -> %s\n' "$CURRENT_COMMIT" "$TARGET"
 fi
 
 [[ ! -e $OPENCODE_ROOT/releases/$TARGET_NAME && ! -L $OPENCODE_ROOT/releases/$TARGET_NAME ]] || {
   opencode_die "target generation already exists; will not overwrite: $TARGET_NAME"; exit 1;
 }
+# Match upstream's caret requirement before creating a worktree or installing dependencies.
+BUN_VERSION=$(bun --version) || { opencode_die 'cannot determine Bun version'; exit 1; }
+python3 - "$SOURCE" "$TARGET" "$BUN_VERSION" <<'PY' || exit 1
+import json, re, subprocess, sys
+root, commit, actual = sys.argv[1:]
+raw = subprocess.check_output(["git", "-C", root, "show", f"{commit}:package.json"], text=True)
+manager = json.loads(raw).get("packageManager", "")
+expected = re.fullmatch(r"bun@(\d+)\.(\d+)\.(\d+)", manager)
+installed = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", actual.strip())
+if not expected or not installed:
+    sys.exit(f"opencode-update: unsupported Bun version declaration: {manager!r} (installed {actual!r})")
+minimum = tuple(map(int, expected.groups()))
+current = tuple(map(int, installed.groups()))
+major, minor, patch = minimum
+upper = (major + 1, 0, 0) if major else ((0, minor + 1, 0) if minor else (0, 0, patch + 1))
+if not minimum <= current < upper:
+    sys.exit(f"opencode-update: target requires Bun ^{manager[4:]}, installed {actual.strip()}; install/select {manager} with mise before retrying")
+PY
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/opencode-update.XXXXXX")
 WORKTREE="$TMP/source"
 git -C "$SOURCE" worktree add --detach "$WORKTREE" "$TARGET" >"$TMP/git-worktree.log" 2>&1 || {

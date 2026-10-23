@@ -31,6 +31,9 @@ By default it fetches tags from `anomalyco/opencode` and selects the highest sta
 It does not follow the stale `v2` branch or GitHub's latest published Release, which may still be V1.
 Use `OPENCODE_UPDATE_REF=refs/tags/v2.1.1 opencode-update` to select a specific tag, or `OPENCODE_UPDATE_REF=origin/dev opencode-update` to follow a branch; explicit refs are fetched before resolution.
 Output identifies the repository, selected upstream ref/commit, and effective build target separately. An older selected ref never downgrades an existing newer build; divergent history stops the update.
+After reviewing divergent source changes, set `OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA=<full-40-character-target-SHA>` alongside `OPENCODE_UPDATE_REF=<reviewed-ref>` to approve that exact target for one invocation.
+Approval permits a divergent source switch, including one to an older divergent release; it does not bypass ancestor downgrade protection, patch checks, build verification, or rollback retention.
+Short SHAs and blanket force flags are not accepted; a changed target requires fresh approval.
 The patch adds a sidebar divider, uses the theme's border token for tool blocks, marks user prompts with a bold `YOU` label and agent-colored border, and uses the form-field background for the input box.
 It also wires the transcript scrollbar to its own token and renders image/file badges with the main text color on the form-field selection background.
 Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P`/`Ctrl+N` move up/down in the input box.
@@ -38,6 +41,7 @@ Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P`/`Ctrl+N` move up/down
 Build keeps its red theme accent; Plan has an explicit cyan agent color. Attachment badges use dark orange for readable main-text contrast, including submitted file/skill tags.
 Patch SHA-256 is recorded in each build manifest and generation name; changing the patch rebuilds even when the upstream commit is unchanged.
 If the patch conflicts with upstream, the update stops without changing the active build.
+Before installing build dependencies, the updater checks installed Bun against the target's `packageManager` caret requirement; install/select a compatible runtime with mise if it stops.
 `opencode-rollback` restores the previous generation, including its patch state.
 Restart the TUI after activating a new build.
 

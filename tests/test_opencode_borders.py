@@ -87,6 +87,7 @@ class OpenCodeBordersTest(unittest.TestCase):
     }),
 ''')
         self.write("packages/cli/package.json", '{"version":"2.0.26"}\n')
+        self.write("package.json", '{"packageManager":"bun@1.4.4"}\n')
         self.run_git("add", ".")
         self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "fixture")
         self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
@@ -202,6 +203,7 @@ exec "{self.git}" "$@"
         self.executable(tools / "uname", '#!/bin/bash\nif [[ "$1" = -s ]]; then echo Darwin; else echo arm64; fi\n')
         self.executable(tools / "lipo", '#!/bin/bash\necho arm64\n')
         self.executable(tools / "bun", '''#!/bin/bash
+if [[ "$1" = --version ]]; then echo "${TEST_BUN_VERSION:-1.4.4}"; exit 0; fi
 if [[ "$1" = install ]]; then exit 0; fi
 for arg in "$@"; do
   if [[ "$arg" = --outdir=* ]]; then out=${arg#--outdir=}; fi
@@ -237,6 +239,18 @@ chmod +x "$out/cli-darwin-arm64/bin/opencode"
         self.assertNotEqual((self.data / "active").resolve(), first)
         self.assertEqual((self.data / "previous").resolve(), first)
         self.assertEqual(len((self.home / "build-count").read_text().splitlines()), 2)
+
+    def test_incompatible_bun_stops_before_build(self):
+        self.setup_updater()
+        for version in ("1.4.2", "2.0.0", "1.4.4-canary"):
+            with self.subTest(version=version):
+                self.env["TEST_BUN_VERSION"] = version
+                result = self.update(check=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Bun", result.stderr)
+                self.assertEqual((self.data / "active").resolve().name, "initial")
+                self.assertFalse((self.home / "build-count").exists())
+                self.assertFalse((self.data / "operation.lock").exists())
 
     def test_conflicting_patch_keeps_active_build(self):
         self.setup_updater()
@@ -371,6 +385,30 @@ chmod +x "$out/cli-darwin-arm64/bin/opencode"
         self.assertIn("upstream and active commits diverge", result.stderr)
         self.assertEqual((self.data / "active").resolve().name, "initial")
         self.assertFalse((self.home / "build-count").exists())
+
+
+    def test_divergent_switch_requires_exact_approval_and_keeps_previous(self):
+        older = self.commit
+        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                     "commit", "--allow-empty", "-qm", "active branch")
+        self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
+        self.run_git("checkout", "--detach", older)
+        target = self.release_commit("2.1.1")
+        self.setup_updater()
+        self.env["OPENCODE_UPDATE_REF"] = target
+        for approval in (target[:10], "true", self.commit):
+            with self.subTest(approval=approval):
+                self.env["OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA"] = approval
+                result = self.update(check=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual((self.data / "active").resolve().name, "initial")
+                self.assertFalse((self.home / "build-count").exists())
+        self.env["OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA"] = target
+        result = self.update()
+        self.assertIn("Explicitly approved divergent source switch", result.stdout)
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_commit"], target)
+        self.assertEqual((self.data / "previous").resolve().name, "initial")
 
 
 if __name__ == "__main__":
