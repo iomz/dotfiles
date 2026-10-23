@@ -57,7 +57,7 @@ The lab exports color preferences only; it does not modify OpenCode configuratio
 - Personal Sidebar Dashboard: context meter, selected agent/model, estimated API cost, session token totals, loaded-transcript activity, running subagents, and location-scoped background shells. It reads OpenCode's cached data; no model calls, telemetry, or extra authentication.
 - Usage: Codex plan and 12-cell quota bars immediately below Context window. Blue heading and mint bars, amber below 26% remaining, red below 11% remaining.
 
-Dashboard panels can be disabled individually through `context`, `usage`, `session`, `tokens`, `activity`, and `workers` in its `cli.json` plugin options. Sidebar colors are configurable there too. The dashboard embeds the quota component; do not also load its standalone plugin entry.
+Dashboard panels can be disabled individually through `context`, `usage`, `session`, `tokens`, `activity`, and `workers` in its `cli.json` plugin options. Sidebar colors are configurable there too. The dashboard embeds the quota component; its CLI plugin entry handles recovery notifications without adding a second panel.
 The sidebar footer shows the running TUI's OpenCode version from its plugin context, not the installed binary or active-generation manifest. Restart the TUI after an update to run the new client version.
 The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
 Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
@@ -69,6 +69,21 @@ Restart the TUI after plugin changes. No binary rebuild is required.
 Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.
 Dashboard panels reserve fixed row counts, including startup placeholders; Workers shows counts only, without transient command/title rows or blank detail slots. Quota reset times have dedicated non-wrapping rows so refreshes do not shift neighboring panels.
 Renderer checks use the build checkout's runtime: from its `packages/tui` directory, run `OPENCODE_TUI_SOURCE="$PWD" bun test ~/.local/share/chezmoi/tests/opencode-sidebar-render.test.ts` after applying the plugins.
+
+### Opt-in Codex quota recovery
+
+- `/codex-resume`: recover the current session once after a confirmed OpenAI quota failure.
+- `/codex-resume --repeat`: keep recovering this session after future quota failures; can be enabled before quota runs out.
+- `/codex-resume --status`: show the current mode and schedule.
+- `/codex-resume --cancel`: cancel pending recovery and disable repeat.
+
+Recovery runs on the server, even with the sidebar or TUI closed. It checks the active OpenAI OAuth account through the read-only ChatGPT usage endpoint, waits for the latest exhausted quota window plus two seconds, then checks every 10 seconds until requests are explicitly allowed. Recovery makes no model calls while waiting. Spark uses its separate quota bucket; missing or unrecognized quota data never authorizes a resume. This internal endpoint can change without notice.
+
+Once available, the plugin queues `Resume from where you paused.` in the same session without switching its model, variant, agent, or permissions. An immediate quota rejection keeps the recovery active; the first successful model step completes a once-only recovery. Manual prompts cancel the pending timer but retain repeat mode. Model/agent changes, moves, deletion, and explicit cancellation disable recovery. Authentication/account changes pause the pending recovery until it is armed again.
+
+The Usage panel adds a recovery status row while armed. Command results appear as toasts. Schedules and stable admission IDs live in OpenCode's plugin storage, not this repository, and survive server restarts. A stable ID prevents duplicate admission if the server stops between queueing a prompt and recording its acceptance. Recovery resumes when the server and that session's location plugin are running again; it cannot wake a sleeping or powered-off machine.
+
+Run scheduler and quota-reader checks with `node --test tests/opencode-codex-resume.test.mjs`. Include the SDK integration check with `OPENCODE_PLUGIN_NODE_MODULES="$HOME/.config/opencode/cli-plugins/codex-quota-sidebar/node_modules" node --test tests/opencode-codex-resume*.test.mjs`.
 
 ## Quick Start
 

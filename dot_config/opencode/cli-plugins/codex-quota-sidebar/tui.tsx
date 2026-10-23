@@ -2,9 +2,10 @@
 import { Plugin } from "@opencode/plugin/tui"
 import type { Context } from "@opencode/plugin/tui/plugin"
 import { Rpc } from "@opencode/plugin"
-import { createSignal, onCleanup } from "solid-js"
+import { createEffect, createSignal, on, onCleanup, Show } from "solid-js"
 import { z } from "zod"
 import { quotaBar, quotaBand, styleColor } from "./style"
+import { ResumeRpc } from "./resume-rpc.js"
 
 export type Usage = {
   status: string
@@ -48,10 +49,29 @@ export function formatQuotaRow(
   return `${label}  ${quotaBar(left)} ${String(left).padStart(2)}% left / ${reset ?? "unknown"}`
 }
 
-export function SidebarQuota(props: { context: Context }) {
+export function SidebarQuota(props: { context: Context; sessionID?: string }) {
   const { context } = props
   const [usage, setUsage] = createSignal<Usage>()
   const [failed, setFailed] = createSignal(false)
+  const [resume, setResume] = createSignal("")
+  createEffect(on(() => props.sessionID, sessionID => {
+    if (!sessionID) return
+    const location = context.data.session.get(sessionID)?.location ?? context.location ?? context.data.location.default()
+    const rpc = context.client.rpc(ResumeRpc)
+    let active = true
+    let changed = false
+    setResume("")
+    const unsubscribe = rpc.events.on("changed", event => {
+      if (event.data.sessionID === sessionID) {
+        changed = true
+        setResume(event.data.message)
+      }
+    })
+    void rpc.status({ sessionID }, { location }).then(message => {
+      if (active && !changed) setResume(message)
+    }).catch(() => {})
+    onCleanup(() => { active = false; unsubscribe() })
+  }))
   let refreshing = false
 
   const refresh = async () => {
@@ -90,7 +110,7 @@ export function SidebarQuota(props: { context: Context }) {
   }
 
   return (
-    <box gap={0} height={6} flexShrink={0} overflow="hidden">
+    <box gap={0} height={resume() && resume() !== "Codex resume: off" ? 7 : 6} flexShrink={0} overflow="hidden">
       <text height={1} wrapMode="none" truncate fg={styleColor(context.options.heading, "#5394ee")}>
         <b>Usage</b>
       </text>
@@ -99,6 +119,9 @@ export function SidebarQuota(props: { context: Context }) {
       <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.primary ?? (failed() ? "unavailable" : "checking…")}</text>
       {row("secondary", "7d")}
       <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.secondary ?? (failed() ? "unavailable" : "checking…")}</text>
+      <Show when={resume() && resume() !== "Codex resume: off"}>
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{resume()}</text>
+      </Show>
     </box>
   )
 }
@@ -106,9 +129,8 @@ export function SidebarQuota(props: { context: Context }) {
 export default Plugin.define({
   id: "personal.codex-quota-sidebar",
   setup(context) {
-    return context.ui.slot({
-      append: "sidebar.content",
-      render: () => <SidebarQuota context={context} />,
+    return context.client.rpc(ResumeRpc).events.on("notice", event => {
+      context.ui.toast.show({ sessionID: event.data.sessionID, title: "Codex resume", message: event.data.message, duration: 8000 })
     })
   },
 })

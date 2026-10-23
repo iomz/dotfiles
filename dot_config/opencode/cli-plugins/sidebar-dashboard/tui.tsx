@@ -40,7 +40,7 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
           </Show>
         </box>
       </Show>
-      <Show when={enabled("usage")}><SidebarQuota context={quotaContext} /></Show>
+      <Show when={enabled("usage")}><SidebarQuota context={quotaContext} sessionID={props.sessionID} /></Show>
       <Show when={enabled("session")}>
         <box height={5} flexShrink={0} overflow="hidden">
           <text fg={heading}><b>Session</b></text>

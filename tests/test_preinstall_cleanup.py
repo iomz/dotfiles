@@ -293,7 +293,11 @@ test "$2" = --prefix
 dir=$3
 test -f "$dir/package-lock.json"
 case "$dir" in
-    */codex-quota-sidebar) dependency=zod ;;
+    */codex-quota-sidebar)
+        dependency=zod
+        mkdir -p "$dir/node_modules/opencode-codex-usage"
+        printf '{}\\n' > "$dir/node_modules/opencode-codex-usage/package.json"
+        ;;
     */dir-tree-bottom) dependency=opencode-dir-tree-tui ;;
     *) exit 98 ;;
 esac
@@ -310,7 +314,7 @@ printf '%s\\n' "$dir" >> "$HOME/npm-calls"
         mise = tools / "mise"
         mise.write_text('''#!/bin/sh
 set -eu
-test "$2" = node@24.14.1
+test "$2" = node@@NODE_VERSION@
 case "$1" in
     install) exit 0 ;;
     exec)
@@ -321,7 +325,7 @@ case "$1" in
         ;;
     *) exit 98 ;;
 esac
-''')
+'''.replace("@NODE_VERSION@", tomllib.loads((SOURCE / "dot_config/mise/config.toml").read_text())["tools"]["node"]))
         mise.chmod(0o755)
         self.env["PATH"] = str(tools) + os.pathsep + self.env["PATH"]
         self.chezmoi("apply")

@@ -53,7 +53,10 @@ test.skipIf(!source)("sidebar height stays stable across usage, tools, variants 
   let quotaLocation: unknown
   const context: any = {
     theme, options: {},
-    client: { rpc: () => ({ usage: (_input: unknown, options: any) => {
+    client: { rpc: () => ({
+      status: async () => "Codex resume: off",
+      events: { on: () => () => {} },
+      usage: (_input: unknown, options: any) => {
       quotaLocation = options?.location
       return new Promise(resolve => { reply = resolve })
     } }) },

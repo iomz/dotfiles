@@ -7,7 +7,8 @@ lock_hash="{{ include "dot_config/opencode/cli-plugins/codex-quota-sidebar/packa
 plugin_dir="{{ .chezmoi.destDir }}/.config/opencode/cli-plugins/codex-quota-sidebar"
 stamp="$plugin_dir/node_modules/.chezmoi-lock-sha256"
 if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$lock_hash" ] && \
-    [ -f "$plugin_dir/node_modules/zod/package.json" ]; then
+    [ -f "$plugin_dir/node_modules/zod/package.json" ] && \
+    [ -f "$plugin_dir/node_modules/opencode-codex-usage/package.json" ]; then
     exit 0
 fi
 
@@ -17,7 +18,7 @@ if ! command -v mise >/dev/null 2>&1; then
 fi
 
 # Bootstrap Node before the full mise installer; ignore inherited asdf shims.
-node_version="{{ (fromToml (include "dot_config/mise/config.toml")).tools.nodejs }}"
+node_version="{{ (fromToml (include "dot_config/mise/config.toml")).tools.node }}"
 mise install "node@$node_version"
 mise exec "node@$node_version" -- npm ci --prefix "$plugin_dir" --ignore-scripts --no-audit --no-fund
 printf '%s\n' "$lock_hash" > "$stamp"
