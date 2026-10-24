@@ -29,7 +29,43 @@ export function parseQuota(body, modelID, now = Date.now()) {
   }
 }
 
-export async function readQuota(ctx, modelID, expectedConnection, fetchImpl = fetch) {
+function percent(value) {
+  return Number.isFinite(value) ? Math.round(Math.max(0, Math.min(100, value))) : null
+}
+
+function durationText(seconds) {
+  const total = Math.max(0, Math.floor(seconds))
+  const days = Math.floor(total / 86400)
+  const hours = Math.floor(total % 86400 / 3600)
+  const minutes = Math.floor(total % 3600 / 60)
+  if (days > 0) return `${days}d${hours}h`
+  if (hours > 0) return `${hours}h${minutes}m`
+  return `${minutes}m`
+}
+
+function resetText(window, now) {
+  if (Number.isFinite(window?.reset_after_seconds)) return durationText(window.reset_after_seconds)
+  if (Number.isFinite(window?.reset_at)) return durationText(window.reset_at - now / 1000)
+  return null
+}
+
+// Sidebar snapshot. Exhausted windows still report usage here, unlike model-probe headers.
+export function parseUsage(body, now = Date.now()) {
+  const bucket = body?.rate_limit
+  if (!bucket || typeof bucket !== "object") throw new QuotaError("Quota response is missing rate limits.")
+  const windows = { primary: bucket.primary_window, secondary: bucket.secondary_window }
+  const pair = read => ({ primary: read(windows.primary), secondary: read(windows.secondary) })
+  const usage = {
+    status: "ok",
+    used: pair(window => percent(window?.used_percent)),
+    reset: pair(window => resetText(window, now)),
+    windowMinutes: pair(window => Number.isFinite(window?.limit_window_seconds) ? Math.round(window.limit_window_seconds / 60) : null),
+  }
+  if (typeof body.plan_type === "string" && body.plan_type) usage.plan = body.plan_type
+  return usage
+}
+
+async function fetchUsage(ctx, expectedConnection, fetchImpl) {
   const connection = await ctx.integration.connection.active("openai")
   if (connection?.type !== "credential" || connection.method !== "oauth") {
     throw new QuotaError("Connect an OpenAI OAuth account before scheduling recovery.", true)
@@ -55,5 +91,18 @@ export async function readQuota(ctx, modelID, expectedConnection, fetchImpl = fe
   }
   let body
   try { body = await response.json() } catch { throw new QuotaError("Invalid quota response.") }
-  return { ...parseQuota(body, modelID), connectionID: connection.id }
+  return { body, connectionID: connection.id }
+}
+
+export async function readQuota(ctx, modelID, expectedConnection, fetchImpl = fetch) {
+  const { body, connectionID } = await fetchUsage(ctx, expectedConnection, fetchImpl)
+  return { ...parseQuota(body, modelID), connectionID }
+}
+
+export async function readUsage(ctx, fetchImpl = fetch, now = Date.now) {
+  try {
+    return parseUsage((await fetchUsage(ctx, undefined, fetchImpl)).body, now())
+  } catch (error) {
+    return { status: "error", error: error instanceof QuotaError ? error.message : "Quota check failed." }
+  }
 }

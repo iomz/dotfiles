@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { ResumeController, POLL_MS, isQuotaError } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/resume.js"
-import { parseQuota, readQuota, QuotaError } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/quota.js"
+import { parseQuota, parseUsage, readQuota, readUsage, QuotaError } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/quota.js"
 
 const model = { providerID: "openai", id: "gpt-5.4", variant: "high" }
 const failure = () => ({ model, agent: "build", failed: true, fingerprint: "original", outcome: "failed" })
@@ -269,4 +269,31 @@ test("quota reader uses active credentials, read-only endpoint, and never expose
   assert.equal((await readQuota(ctx, "gpt", "account", fetchImpl)).allowed, true)
   await assert.rejects(readQuota(ctx, "gpt", "other", fetchImpl), /account changed/)
   await assert.rejects(readQuota(ctx, "gpt", "account", async () => new Response("secret body", { status: 401 })), error => error.permanent && !error.message.includes("secret"))
+})
+
+test("usage snapshot keeps reporting both windows after one is exhausted", async () => {
+  const body = {
+    plan_type: "plus",
+    rate_limit: {
+      allowed: false, limit_reached: true,
+      primary_window: { used_percent: 100, limit_window_seconds: 18_000, reset_after_seconds: 7_980 },
+      secondary_window: { used_percent: 42.4, limit_window_seconds: 604_800, reset_at: 1_000 + 3 * 86_400 + 7_200 },
+    },
+  }
+  assert.deepEqual(parseUsage(body, 1_000_000), {
+    status: "ok", plan: "plus",
+    used: { primary: 100, secondary: 42 },
+    reset: { primary: "2h13m", secondary: "3d2h" },
+    windowMinutes: { primary: 300, secondary: 10_080 },
+  })
+  assert.deepEqual(parseUsage({ rate_limit: {} }).used, { primary: null, secondary: null })
+  assert.throws(() => parseUsage({}), /missing rate limits/)
+  const ctx = { integration: { connection: {
+    active: async () => ({ type: "credential", method: "oauth", id: "account" }),
+    resolve: async () => ({ type: "oauth", access: "secret", metadata: {} }),
+  } } }
+  assert.equal((await readUsage(ctx, async () => new Response(JSON.stringify(body)), () => 1_000_000)).used.primary, 100)
+  const failed = await readUsage(ctx, async () => new Response("secret body", { status: 429 }))
+  assert.equal(failed.status, "error")
+  assert.ok(!JSON.stringify(failed).includes("secret"))
 })

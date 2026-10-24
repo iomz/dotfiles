@@ -1,9 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import { Plugin } from "@opencode/plugin/tui"
 import type { Context } from "@opencode/plugin/tui/plugin"
-import { Rpc } from "@opencode/plugin"
 import { createEffect, createSignal, on, onCleanup, Show } from "solid-js"
-import { z } from "zod"
 import { quotaBar, quotaBand, styleColor } from "./style"
 import { ResumeRpc } from "./resume-rpc.js"
 
@@ -14,17 +12,6 @@ export type Usage = {
   windowMinutes?: { primary: number | null; secondary: number | null }
   plan?: string
 }
-
-const CodexUsageRpc = Rpc.define({
-  id: "opencode-codex-usage",
-  methods: {
-    usage: {
-      input: z.object({ retryCount: z.number().int().min(0).max(2).optional() }).strict(),
-      output: z.unknown(),
-    },
-  },
-  events: {},
-})
 
 function windowLabel(minutes: number | null | undefined, fallback: string) {
   if (!minutes) return fallback
@@ -79,7 +66,8 @@ export function SidebarQuota(props: { context: Context; sessionID?: string }) {
     refreshing = true
     try {
       const location = context.location ?? context.data.location.default()
-      const result = await context.client.rpc(CodexUsageRpc).usage({}, { location })
+      // Read-only usage endpoint keeps reporting both windows after one is exhausted.
+      const result = await context.client.rpc(ResumeRpc).usage({}, { location })
       setUsage(result as Usage)
       setFailed((result as Usage).status !== "ok")
     } catch (error) {

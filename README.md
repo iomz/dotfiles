@@ -64,6 +64,7 @@ Third-party code remains in local package caches or ignored `node_modules`; only
 After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.
 They bootstrap the Node version pinned in the managed mise config and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
 The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
+It reads the same read-only ChatGPT usage endpoint as quota recovery, so both windows stay visible after one is exhausted; it makes no model calls.
 Restart the TUI after plugin changes. No binary rebuild is required.
 
 Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.

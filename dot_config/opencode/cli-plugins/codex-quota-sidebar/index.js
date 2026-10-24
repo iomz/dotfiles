@@ -1,7 +1,7 @@
 import { Plugin } from "@opencode/plugin"
 import { ResumeRpc } from "./resume-rpc.js"
 import { ResumeController, RESUME_TEXT, isQuotaError } from "./resume.js"
-import { readQuota } from "./quota.js"
+import { readQuota, readUsage } from "./quota.js"
 
 export default Plugin.define({
   id: "personal.codex-quota-sidebar",
@@ -67,6 +67,7 @@ export default Plugin.define({
     try {
       registration = await ctx.rpc.register(ResumeRpc, {
         status: async ({ sessionID }) => controller.status(sessionID),
+        usage: async () => readUsage(ctx),
       })
       disposers.push(() => registration.dispose())
       await controller.restore()
