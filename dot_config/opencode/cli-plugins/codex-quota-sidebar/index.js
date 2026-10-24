@@ -25,7 +25,9 @@ export default Plugin.define({
       return {
         model, agent: session.agent,
         outcome: assistant?.time.completed ? session.outcome : undefined,
-        failed: session.outcome === "failed" && isQuotaError(assistant?.error) && assistant?.model.providerID === "openai",
+        // session.outcome can read "succeeded" after a quota failure when a trailing
+        // idle marker follows it; the turn's last assistant error is authoritative.
+        failed: isQuotaError(assistant?.error) && assistant?.model.providerID === "openai",
         fingerprint: JSON.stringify([user?.id, assistant?.id, session.revert ?? null]),
         resumeID: user?.metadata?.codexResume,
       }

@@ -31,8 +31,9 @@ test("server entrypoint registers SDK command, RPC, hooks, and cleans up", {
     const session = { model, agent: "build", location: { directory: "/workspace" }, time: {}, outcome: "succeeded" }
     const messages = [
       { id: "u", type: "user" },
-      { id: "a", type: "assistant", model, time: { completed: 1 }, error: { type: "usage_limit_reached", message: "Usage limit" } },
+      { id: "a", type: "assistant", model, time: { completed: 1 } },
     ]
+    const quotaError = { type: "provider.quota", message: "The usage limit has been reached" }
     const ctx = {
       location: { directory: "/workspace" },
       storage: {
@@ -74,12 +75,14 @@ test("server entrypoint registers SDK command, RPC, hooks, and cleans up", {
     await command.execute({ sessionID: "s", prompt: { text: "--repeat" } })
     assert.match(await rpc.status({ sessionID: "s" }), /repeat/)
     assert.equal(prompts.length, 0)
-    const retry = { sessionID: "s", model, error: messages[1].error, decision: { retry: true, delay: 1000 } }
+    const retry = { sessionID: "s", model, error: quotaError, decision: { retry: true, delay: 1000 } }
     hooks.get("retry")(retry)
     assert.deepEqual(retry.decision, { retry: false })
     await command.execute({ sessionID: "s", prompt: { text: "--cancel" } })
     assert.equal(storage.size, 0)
-    session.outcome = "failed"
+    // A trailing idle marker can leave outcome "succeeded" after the quota failure.
+    messages[1].error = quotaError
+    messages.push({ id: "i", type: "idle", outcome: "failed", error: quotaError }, { id: "j", type: "idle", outcome: "succeeded" })
     globalThis.fetch = async () => new Response(JSON.stringify({ rate_limit: { allowed: true, limit_reached: false } }))
     await command.execute({ sessionID: "s", prompt: { text: "" } })
     assert.equal(prompts.length, 1)
