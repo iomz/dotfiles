@@ -1,0 +1,29 @@
+#!/bin/sh
+# Boot OpenCode locations whose Codex resume check is due.
+# OpenCode evicts idle location services, which stops the quota-sidebar plugin's
+# timer. The plugin writes one "<due epoch seconds>\t<directory>" file per
+# location with a pending check; any RPC for that location boots it again.
+set -u
+
+wake_dir="${XDG_STATE_HOME:-$HOME/.local/state}/opencode/codex-resume-wake"
+[ -d "$wake_dir" ] || exit 0
+now=$(date +%s)
+tab=$(printf '\t')
+
+for file in "$wake_dir"/*.tsv; do
+    [ -f "$file" ] || continue
+    IFS="$tab" read -r due directory < "$file" || continue
+    case $due in
+        '' | *[!0-9]*) rm -f "$file"; continue ;;
+    esac
+    [ "$now" -ge "$due" ] || continue
+    # A week overdue means the plugin or project is gone; the plugin rewrites live files.
+    if [ $((now - due)) -gt 604800 ] || [ ! -d "$directory" ]; then
+        rm -f "$file"
+        continue
+    fi
+    query=$(printf %s "$directory" | od -An -tx1 -v | tr -d ' \n' | sed 's/../%&/g')
+    opencode api post "/api/rpc/personal.codex-resume/status?location%5Bdirectory%5D=$query" \
+        --data '{"input":{"sessionID":"wake"}}' >/dev/null ||
+        echo "$(date '+%Y-%m-%dT%H:%M:%S') wake failed: $directory" >&2
+done

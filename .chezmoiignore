@@ -82,6 +82,12 @@ run_once_install-packages.sh.tmpl
 .apm/apm_modules/
 .apm/apm_modules/**
 
+# macOS launchd agent for OpenCode Codex resume wake-ups
+{{ if ne .chezmoi.os "darwin" }}
+Library/**
+.local/bin/opencode-codex-resume-wake
+{{ end }}
+
 {{ if eq (get . "variant" | default "workstation") "claude-cloud" }}
 # Agent environment, not a workstation. Allow parents explicitly as well.
 **

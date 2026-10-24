@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { mkdtemp, copyFile, symlink, rm } from "node:fs/promises"
+import { mkdtemp, copyFile, readdir, symlink, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
@@ -12,6 +12,8 @@ test("server entrypoint registers SDK command, RPC, hooks, and cleans up", {
 }, async () => {
   const directory = await mkdtemp(join(process.env.TMPDIR ?? tmpdir(), "codex-resume-test-"))
   const originalFetch = globalThis.fetch
+  const originalState = process.env.XDG_STATE_HOME
+  process.env.XDG_STATE_HOME = join(directory, "state")
   let cleanup
   try {
     for (const file of ["index.js", "resume.js", "resume-rpc.js", "quota.js", "package.json"]) {
@@ -91,6 +93,8 @@ test("server entrypoint registers SDK command, RPC, hooks, and cleans up", {
     assert.equal(prompts[0].metadata.codexResume, prompts[0].id)
     assert.equal(session.model, model)
     assert.match(await rpc.status({ sessionID: "s" }), /resuming/)
+    // The pending check wrote a wake file; admission removed it again.
+    assert.deepEqual(await readdir(join(directory, "state/opencode/codex-resume-wake")), [])
     await hooks.get("prompt")({ sessionID: "s", metadata: {} })
     assert.equal(storage.size, 0)
     assert.ok(notices.some(notice => notice.type === "notice"))
@@ -100,6 +104,8 @@ test("server entrypoint registers SDK command, RPC, hooks, and cleans up", {
   } finally {
     await cleanup?.()
     globalThis.fetch = originalFetch
+    if (originalState === undefined) delete process.env.XDG_STATE_HOME
+    else process.env.XDG_STATE_HOME = originalState
     await rm(directory, { recursive: true, force: true })
   }
 })

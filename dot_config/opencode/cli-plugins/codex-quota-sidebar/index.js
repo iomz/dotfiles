@@ -1,7 +1,26 @@
+import { createHash } from "node:crypto"
+import { mkdir, rename, rm, writeFile } from "node:fs/promises"
+import { homedir } from "node:os"
+import { join } from "node:path"
 import { Plugin } from "@opencode/plugin"
 import { ResumeRpc } from "./resume-rpc.js"
 import { ResumeController, RESUME_TEXT, isQuotaError } from "./resume.js"
 import { readQuota, readUsage } from "./quota.js"
+
+// One "<due epoch seconds>\t<directory>" file per location with a pending check.
+// opencode-codex-resume-wake reads these and boots evicted locations when due.
+const wakeDir = () => join(process.env.XDG_STATE_HOME || join(homedir(), ".local/state"), "opencode/codex-resume-wake")
+
+async function writeWake(location, due) {
+  // HTTP location queries carry only a directory, so other workspaces cannot be woken.
+  if (location.workspaceID || /[\t\n]/.test(location.directory)) return
+  const file = join(wakeDir(), `${createHash("sha256").update(location.directory).digest("hex").slice(0, 16)}.tsv`)
+  if (due === null) { await rm(file, { force: true }); return }
+  await mkdir(wakeDir(), { recursive: true })
+  const temporary = `${file}.${process.pid}.tmp`
+  await writeFile(temporary, `${Math.ceil(due / 1000)}\t${location.directory}\n`)
+  await rename(temporary, file)
+}
 
 export default Plugin.define({
   id: "personal.codex-quota-sidebar",
@@ -51,6 +70,10 @@ export default Plugin.define({
           after = page.next
         } while (after)
         return entries
+      },
+      wake: async due => {
+        // A missing wake file only delays recovery until the location boots again.
+        try { await writeWake(ctx.location, due) } catch {}
       },
       changed: async (sessionID, message) => {
         // A disconnected TUI must not affect recovery or its persisted state.

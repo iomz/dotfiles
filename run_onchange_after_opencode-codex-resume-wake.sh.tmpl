@@ -1,0 +1,11 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+set -eu
+
+# Reload when the agent definition changes: {{ include "Library/LaunchAgents/io.github.iomz.opencode-codex-resume-wake.plist.tmpl" | sha256sum }}
+label=io.github.iomz.opencode-codex-resume-wake
+domain="gui/$(id -u)"
+plist="{{ .chezmoi.homeDir }}/Library/LaunchAgents/$label.plist"
+launchctl bootout "$domain/$label" 2>/dev/null || true
+launchctl bootstrap "$domain" "$plist"
+{{ end -}}

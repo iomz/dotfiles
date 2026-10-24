@@ -46,12 +46,21 @@ export class ResumeController {
 
   async restore() {
     for (const [id, state] of await this.io.load()) this.states.set(id, state)
+    await this.io.wake(this.nextWake())
   }
 
   async save(id, state) {
     if (state) { await this.io.save(id, state); this.states.set(id, state) }
     else { await this.io.remove(id); this.states.delete(id) }
+    await this.io.wake(this.nextWake())
     await this.io.changed(id, describeResume(state))
+  }
+
+  // Earliest scheduled quota check. OpenCode evicts idle locations, which stops
+  // the tick timer; an external waker boots the location again by this time.
+  nextWake() {
+    const due = [...this.states.values()].flatMap(state => state.pending ? [state.pending.nextCheck] : [])
+    return due.length ? Math.min(...due) : null
   }
 
   status(id) { return describeResume(this.states.get(id)) }

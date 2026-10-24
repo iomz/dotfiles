@@ -27,6 +27,7 @@ function fixture(durable = new Map()) {
       f.snapshot = { ...failure(), failed: false, outcome: undefined, fingerprint: "resume", resumeID: id }
     },
     changed: async (id, message) => f.notices.push({ id, message }),
+    wake: async due => { f.wake = due },
   }
   f.io = io
   f.durable = durable
@@ -301,4 +302,15 @@ test("usage snapshot keeps reporting both windows after one is exhausted", async
 test("pending resume shows local 24-hour time only", () => {
   const resetAt = new Date(2099, 0, 2, 17, 5, 6).getTime()
   assert.equal(describeResume({ repeat: false, pending: { resetAt } }), "Codex resume (once): 17:05")
+})
+
+test("wake time tracks the earliest pending check and clears when none remain", async () => {
+  const f = fixture()
+  await f.controller.command("s", "")
+  assert.equal(f.wake, f.controller.states.get("s").pending.nextCheck)
+  await f.controller.command("s", "--cancel")
+  assert.equal(f.wake, null)
+  const restored = fixture(new Map([["a", { repeat: true }], ["b", { repeat: false, pending: { nextCheck: 500 } }]]))
+  await restored.controller.restore()
+  assert.equal(restored.wake, 500)
 })
