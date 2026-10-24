@@ -5,13 +5,19 @@ export const RESUME_TEXT = "Resume from where you paused."
 export const isQuotaError = error => /usage_limit_reached|usage limit|quota (?:exceeded|exhausted)|exhausted.*quota/i.test(`${error?.type ?? ""} ${error?.message ?? ""}`)
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 
+// Local 24-hour HH:MM; the sidebar row is too narrow for a full date.
+const clockTime = ms => {
+  const date = new Date(ms)
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+}
+
 export function describeResume(state) {
   if (!state) return "Codex resume: off"
   const mode = state.repeat ? "repeat" : "once"
   if (state.error) return `Codex resume (${mode}): ${state.error}`
   if (state.awaiting) return `Codex resume (${mode}): resuming`
   if (!state.pending) return `Codex resume (${mode}): armed for next quota failure`
-  if (state.pending.resetAt > Date.now()) return `Codex resume (${mode}): ${new Date(state.pending.resetAt).toLocaleString()}`
+  if (state.pending.resetAt > Date.now()) return `Codex resume (${mode}): ${clockTime(state.pending.resetAt)}`
   return `Codex resume (${mode}): waiting for quota`
 }
 

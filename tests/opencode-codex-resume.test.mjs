@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { ResumeController, POLL_MS, isQuotaError } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/resume.js"
+import { ResumeController, POLL_MS, describeResume, isQuotaError } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/resume.js"
 import { parseQuota, parseUsage, readQuota, readUsage, QuotaError } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/quota.js"
 
 const model = { providerID: "openai", id: "gpt-5.4", variant: "high" }
@@ -296,4 +296,9 @@ test("usage snapshot keeps reporting both windows after one is exhausted", async
   const failed = await readUsage(ctx, async () => new Response("secret body", { status: 429 }))
   assert.equal(failed.status, "error")
   assert.ok(!JSON.stringify(failed).includes("secret"))
+})
+
+test("pending resume shows local 24-hour time only", () => {
+  const resetAt = new Date(2099, 0, 2, 17, 5, 6).getTime()
+  assert.equal(describeResume({ repeat: false, pending: { resetAt } }), "Codex resume (once): 17:05")
 })
