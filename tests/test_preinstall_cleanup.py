@@ -293,11 +293,7 @@ test "$2" = --prefix
 dir=$3
 test -f "$dir/package-lock.json"
 case "$dir" in
-    */codex-quota-sidebar)
-        dependency=zod
-        mkdir -p "$dir/node_modules/opencode-codex-usage"
-        printf '{}\\n' > "$dir/node_modules/opencode-codex-usage/package.json"
-        ;;
+    */codex-quota-sidebar) dependency=zod ;;
     */dir-tree-bottom) dependency=opencode-dir-tree-tui ;;
     *) exit 98 ;;
 esac
