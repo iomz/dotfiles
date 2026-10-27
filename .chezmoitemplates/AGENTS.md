@@ -1,141 +1,49 @@
-# Inspection
+# Repository Conventions
 
 Prefer narrow queries before broad scans.
 
-# Git
+When a repository’s documentation and its existing code disagree, follow the conventions used in the existing code, and in your final reply point out each inconsistency you found between the documentation and the code.
+This applies to descriptive conventions, not security requirements, action permissions, or explicit requests to change existing behavior.
+Do not rewrite working code merely to match stale documentation.
 
-Use Conventional Commits unless repository history requires another strict format.
+# Design and Evaluation
 
-Use lowercase type and scope, an imperative subject, and no trailing period.
+Before implementation, evaluate assumptions, risks, alternatives, and maintenance burden.
+Treat proposed designs as drafts; prefer long-term maintainability over cleverness.
+Justify abstractions with their need, viable alternatives, and tradeoffs.
 
-Examples:
+Prefer simple designs, clear responsibility boundaries, explicit interfaces, plain files, standard tools, composition over inheritance, and plugins over feature flags.
+Avoid magic, unnecessary dependencies, speculative abstractions, hidden side effects, and global mutable state.
+Keep the core thin; place domain-specific logic in plugins, adapters, or external systems where practical.
+Do not make external tools implement repository-specific interfaces without a documented architectural reason.
 
-- feat(certbot): add cloudflare renewal migration flag
-- chore(git): stop tracking vault password file
-- docs(certbot): document forced cloudflare renewal
+# Git and GitHub
 
-For non-trivial commits, add a body explaining:
+Use Conventional Commits unless repository history requires another strict format: lowercase type and scope, imperative subject, no trailing period.
+Use Conventional Commit-style PR titles with lowercase type and optional scope.
+Keep commits small and reviewable; for non-trivial changes, explain what changed, why, architectural impact, and any migration requirements in the body.
+Prefer branch prefixes such as `fix/`, `feat/`, or `chore/`, following user or repository conventions.
 
-- what changed
-- why it changed
-- architectural impact
-- migration requirements, when relevant
-
-## Commit Message Encoding
-
-Never embed `\\n`, `\\n\\n`, or shell escape sequences inside a `git commit -m` argument.
-Git stores those characters literally; they do not create commit-message paragraphs.
-
-Use one `-m` argument per paragraph and trailer:
-
-```sh
-git commit -m "type(scope): imperative subject" \
-  -m "First body paragraph." \
-  -m "Second body paragraph." \
-  -m "Co-authored-by: <tool> <noreply@example.com>"
-```
-
-Before pushing or rewriting commits, inspect `git log -1 --format=%B`.
-Stop and correct the message if it contains literal `\\n` or `\\r` sequences.
-
-Keep commits small and reviewable.
-
+Use one `git commit -m` argument per paragraph and trailer; never embed literal `\\n`, `\\r`, or shell escape sequences to create paragraphs.
+Before pushing or rewriting commits, inspect `git log -1 --format=%B` and correct literal `\\n` or `\\r` sequences.
 Do not rewrite history unless explicitly requested.
 
-Prefer user- or repo-specific branch prefixes such as `fix/`, `feat/`, or `chore/`.
-
-Use authenticated `gh` directly for GitHub write operations, including creating, editing, commenting on, labeling, closing, or reopening issues and pull requests, creating releases, and resolving review threads.
-
-Do not push commits or branches unless explicitly authorized.
-Permission to commit does not imply permission to push.
+Use authenticated `gh` directly for GitHub write operations.
+Do not push commits or branches unless explicitly authorized; permission to commit does not imply permission to push.
 Requests to publish, open a pull request, or update a remote pull request authorize pushing required commits.
 
-## Pull Requests
-
-Use Conventional Commit-style PR titles: lowercase type and optional scope.
-
-## AI Attribution
-
-For commits materially authored by an AI tool in repositories owned by this user, append a `Co-authored-by` trailer naming that tool, using the trailer format the tool specifies.
-
+For commits materially authored by an AI tool in repositories owned by this user, append a `Co-authored-by` trailer naming that tool in its specified format.
 For external repositories, follow repository policy and disclose material AI assistance in the pull request body.
-
 Minor research, review, and mechanical assistance require no attribution.
 
 # Markdown Editing
 
-Preserve existing line breaks, paragraph structure, and document shape unless the requested change requires otherwise.
-
-Make the smallest semantic diff possible.
-
+Make the smallest semantic diff; preserve line breaks, paragraph structure, and document shape unless the requested change requires otherwise.
 Do not auto-wrap or reflow prose to a fixed column width.
-
-When providing Markdown source that contains fenced code blocks, wrap full source in an outer backtick fence longer than every nested fence.
-Use four backticks around Markdown containing triple-backtick fences, then increase outer fence length as needed.
-
-When editing Markdown prose, prefer sentence-per-line formatting: one sentence per source line within a paragraph.
-Preserve existing wrapping unless the edit already touches that paragraph or the user asks to reflow it.
-
-# Japanese Writing Skills
-
-When a Japanese writing or editing task could use either `yomiyasu` or `japanese-tech-writing`, ask the user which skill to use before drafting. If the user names a skill, use that skill without asking. Do not combine both unless the user explicitly requests it.
-
-# Design
-
-Prefer simple designs with clear responsibility boundaries.
-
-Treat proposed designs as drafts subject to evaluation.
-
-When proposing an abstraction, document:
-
-- why it is needed
-- viable alternatives
-- tradeoffs
-
-Prefer:
-
-- explicit interfaces
-- plain files
-- standard tools
-- composition over inheritance
-- plugins over feature flags
-
-Avoid:
-
-- magic
-- unnecessary dependencies
-- speculative abstractions
-- hidden side effects
-- global mutable state
-
-Keep the core thin.
-Place domain-specific logic in plugins, adapters, or external systems where practical.
-
-Do not make external tools implement repository-specific interfaces without a documented architectural reason.
+Prefer one sentence per source line when editing prose; preserve existing wrapping outside touched paragraphs unless reflow is requested.
+When providing Markdown source containing fenced code blocks, use an outer backtick fence longer than every nested fence.
 
 # Safety
 
 Before running a destructive operation, explain its impact and request confirmation.
-
-Examples:
-
-- `rm -rf`
-- `git reset --hard`
-- `git clean -fd`
-- `docker system prune`
-- `terraform destroy`
-
 Prefer reversible operations.
-
-# Evaluation
-
-Do not accept proposals without evaluation.
-
-Before implementation, identify:
-
-- assumptions
-- risks
-- alternatives
-- maintenance burden
-
-Prefer long-term maintainability over short-term cleverness.
