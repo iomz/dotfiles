@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+case "${1:-}" in
+  -h|--help)
+    cat <<'HELP'
+Usage: opencode-update
+
+Build and activate the latest stable upstream V2 release with the local UI patch.
+Divergent upstream history is supported; ancestor targets retain the active source.
+Build and verification failures leave the active generation unchanged.
+
+Environment:
+  OPENCODE_UPDATE_REF     Fetch a specific upstream tag, branch, or commit instead.
+  OPENCODE_UPDATE_SOURCE Override the local upstream source checkout.
+  OPENCODE_UPDATE_ROOT   Override the managed generation directory.
+HELP
+    exit 0
+    ;;
+  '') ;;
+  *) printf 'opencode-update: unexpected argument: %s (see --help)\n' "$1" >&2; exit 1 ;;
+esac
+(( $# == 0 )) || { printf 'opencode-update: unexpected arguments (see --help)\n' >&2; exit 1; }
+
 OPENCODE_ROOT=${OPENCODE_UPDATE_ROOT:-"$HOME/.local/share/opencode"}
 SOURCE=${OPENCODE_UPDATE_SOURCE:-"$HOME/ghq/github.com/anomalyco/opencode-v2-build"}
 UPSTREAM_REF=${OPENCODE_UPDATE_REF:-}
-APPROVED_TARGET=${OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA:-}
-if [[ -n $APPROVED_TARGET && ! $APPROVED_TARGET =~ ^[0-9a-f]{40}$ ]]; then
-  printf 'opencode-update: OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA must be a full lowercase 40-character commit SHA\n' >&2
-  exit 1
-fi
 LIB="$HOME/.local/lib/opencode-generation.sh"
 PATCH="$HOME/.local/lib/opencode-patches/transparent-borders.patch"
 [[ -r $LIB ]] || { printf 'opencode-update: missing helper: %s\n' "$LIB" >&2; exit 1; }
@@ -134,12 +150,9 @@ if [[ $CURRENT_COMMIT = "$TARGET" && $CURRENT_PATCH_SHA = "$PATCH_SHA" ]]; then
   exit 0
 fi
 if ! git -C "$SOURCE" merge-base --is-ancestor "$CURRENT_COMMIT" "$TARGET"; then
-  if [[ $APPROVED_TARGET != "$TARGET" ]]; then
-    opencode_die 'upstream and active commits diverge; refusing implicit downgrade/rebase'
-    printf 'Review source changes, then approve this exact target with OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA=%s\n' "$TARGET" >&2
-    exit 1
-  fi
-  printf 'Explicitly approved divergent source switch: %s -> %s\n' "$CURRENT_COMMIT" "$TARGET"
+  # Release branches and rewritten upstream history need not descend from active.
+  # Build the fetched target in isolation; activation still requires all checks.
+  printf 'Upstream history diverges; building fetched target: %s -> %s (rollback retained).\n' "$CURRENT_COMMIT" "$TARGET"
 fi
 
 [[ ! -e $OPENCODE_ROOT/releases/$TARGET_NAME && ! -L $OPENCODE_ROOT/releases/$TARGET_NAME ]] || {

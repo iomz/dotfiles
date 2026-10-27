@@ -371,44 +371,49 @@ chmod +x "$out/cli-darwin-arm64/bin/opencode"
         self.assertEqual((self.data / "active").resolve().name, "initial")
         self.assertFalse((self.home / "build-count").exists())
 
-    def test_divergent_upstream_keeps_active_build(self):
+    def test_divergent_stable_release_updates_without_approval(self):
         older = self.commit
         self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
                      "commit", "--allow-empty", "-qm", "active branch")
         self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
         self.run_git("checkout", "--detach", older)
         target = self.release_commit("2.1.1")
+        self.run_git("tag", "v2.1.1")
         self.setup_updater()
-        self.env["OPENCODE_UPDATE_REF"] = target
-        result = self.update(check=False)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("upstream and active commits diverge", result.stderr)
-        self.assertEqual((self.data / "active").resolve().name, "initial")
-        self.assertFalse((self.home / "build-count").exists())
-
-
-    def test_divergent_switch_requires_exact_approval_and_keeps_previous(self):
-        older = self.commit
-        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
-                     "commit", "--allow-empty", "-qm", "active branch")
-        self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
-        self.run_git("checkout", "--detach", older)
-        target = self.release_commit("2.1.1")
-        self.setup_updater()
-        self.env["OPENCODE_UPDATE_REF"] = target
-        for approval in (target[:10], "true", self.commit):
-            with self.subTest(approval=approval):
-                self.env["OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA"] = approval
-                result = self.update(check=False)
-                self.assertNotEqual(result.returncode, 0)
-                self.assertEqual((self.data / "active").resolve().name, "initial")
-                self.assertFalse((self.home / "build-count").exists())
-        self.env["OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA"] = target
+        self.env.pop("OPENCODE_UPDATE_REF")
         result = self.update()
-        self.assertIn("Explicitly approved divergent source switch", result.stdout)
+        self.assertIn("Upstream history diverges; building fetched target", result.stdout)
         manifest = json.loads((self.data / "active/manifest.json").read_text())
         self.assertEqual(manifest["source_commit"], target)
         self.assertEqual((self.data / "previous").resolve().name, "initial")
+        self.assertIn("no changes made", self.update().stdout)
+
+
+    def test_divergent_explicit_ref_ignores_obsolete_approval(self):
+        older = self.commit
+        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                     "commit", "--allow-empty", "-qm", "active branch")
+        self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
+        self.run_git("checkout", "--detach", older)
+        target = self.release_commit("2.1.1")
+        self.setup_updater()
+        self.env["OPENCODE_UPDATE_REF"] = target
+        self.env["OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA"] = "obsolete-value"
+        result = self.update()
+        self.assertIn("Upstream history diverges; building fetched target", result.stdout)
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_commit"], target)
+        self.assertEqual((self.data / "previous").resolve().name, "initial")
+
+    def test_help_needs_no_helpers_and_makes_no_changes(self):
+        for flag in ("-h", "--help"):
+            with self.subTest(flag=flag):
+                result = subprocess.run(
+                    ["bash", str(SOURCE / "dot_local/bin/executable_opencode-update"), flag],
+                    env=dict(os.environ, HOME=str(self.home)), text=True, capture_output=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("Usage: opencode-update", result.stdout)
+                self.assertFalse(self.home.exists())
 
 
 if __name__ == "__main__":

@@ -30,10 +30,10 @@ The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfa
 By default it fetches tags from `anomalyco/opencode` and selects the highest stable `v2.<minor>.<patch>` tag numerically, excluding prereleases and local-only tags.
 It does not follow the stale `v2` branch or GitHub's latest published Release, which may still be V1.
 Use `OPENCODE_UPDATE_REF=refs/tags/v2.1.1 opencode-update` to select a specific tag, or `OPENCODE_UPDATE_REF=origin/dev opencode-update` to follow a branch; explicit refs are fetched before resolution.
-Output identifies the repository, selected upstream ref/commit, and effective build target separately. An older selected ref never downgrades an existing newer build; divergent history stops the update.
-After reviewing divergent source changes, set `OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA=<full-40-character-target-SHA>` alongside `OPENCODE_UPDATE_REF=<reviewed-ref>` to approve that exact target for one invocation.
-Approval permits a divergent source switch, including one to an older divergent release; it does not bypass ancestor downgrade protection, patch checks, build verification, or rollback retention.
-Short SHAs and blanket force flags are not accepted; a changed target requires fresh approval.
+Output identifies the repository, selected upstream ref/commit, and effective build target separately. A selected ancestor retains the active source rather than downgrading it.
+Divergent upstream history does not block updates: the fetched target builds in isolation, with patch checks, build verification, and rollback retention unchanged. An explicit divergent ref can select an older release.
+No per-commit approval is required; the former `OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA` variable is ignored.
+Use `opencode-update -h` or `--help` for help without fetching, building, or changing generations.
 The patch adds a sidebar divider, uses the theme's border token for tool blocks, marks user prompts with a bold `YOU` label and agent-colored border, and uses the form-field background for the input box.
 It also wires the transcript scrollbar to its own token and renders image/file badges with the main text color on the form-field selection background.
 Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P`/`Ctrl+N` move up/down in the input box.
