@@ -10,8 +10,6 @@ LICENSE
 # repository tooling
 scripts/**
 tests/**
-reports/**
-research_notes/**
 .gitignore
 .githooks/**
 .secretlintignore
