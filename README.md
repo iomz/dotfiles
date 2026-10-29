@@ -25,6 +25,32 @@ Personal Linux and macOS dotfiles, plus a minimal Claude Cloud agent environment
 
 ## OpenCode
 
+### Explicit installation and updates
+
+Applying chezmoi deploys OpenCode configuration and helper scripts, not the OpenCode binary. It never invokes the installer or updater automatically on Linux or macOS.
+Install only on a chosen host, such as nasatya, by running:
+
+```sh
+# Requires Git, Python 3.11+, and Bun compatible with the selected upstream release.
+# Use mise exec when Bun is not on PATH; v2.2.0 requires Bun ^1.4.4.
+mise install bun@1.4.4
+mise exec bun@1.4.4 -- ~/.local/bin/opencode-update --install
+```
+
+`--install` explicitly clones the upstream source checkout if missing, builds with the local patch, verifies the candidate, creates a missing `~/.local/bin/opencode` launcher, and initializes managed generations. It never overwrites an existing public launcher or converts invalid generation pointers.
+The first installation points `active` and `previous` at the same generation; rollback becomes useful after the first subsequent update. Interrupted bootstrap pointer changes are journaled and recovered on the next invocation.
+On an uninstalled host, plain `opencode-update` refuses to bootstrap; `--install` is required. No hostname allowlist is needed: installation is command-driven, not triggered by chezmoi apply.
+
+```sh
+opencode-update             # Update an existing installation.
+opencode-rollback           # Restore its previous generation.
+```
+
+Supported native targets are macOS and glibc Linux, on ARM64 or x86_64. macOS verifies candidate architecture with `lipo`; Linux uses `file` to check its ELF architecture. Musl Linux is not supported.
+Credentials and session data remain host-local; do not copy them from another machine as part of installation.
+
+### Theme and build policy
+
 The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfaces transparent, with opaque dialogs, a blue-gray input fill, slate borders, red user accents, blue secondary text, and a mint scrollbar.
 `opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` to an isolated source worktree before building.
 By default it fetches tags from `anomalyco/opencode` and selects the highest stable `v2.<minor>.<patch>` tag numerically, excluding prereleases and local-only tags.

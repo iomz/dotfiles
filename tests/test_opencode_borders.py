@@ -200,8 +200,10 @@ if [[ "$3" = config && "$4" = --get ]]; then
 fi
 exec "{self.git}" "$@"
 ''')
-        self.executable(tools / "uname", '#!/bin/bash\nif [[ "$1" = -s ]]; then echo Darwin; else echo arm64; fi\n')
+        self.executable(tools / "uname", '#!/bin/bash\nif [[ "$1" = -s ]]; then echo "${TEST_OS:-Darwin}"; else echo "${TEST_MACHINE:-arm64}"; fi\n')
         self.executable(tools / "lipo", '#!/bin/bash\necho arm64\n')
+        self.executable(tools / "getconf", '#!/bin/bash\n[[ "${TEST_LIBC:-glibc}" = glibc ]] || exit 1\necho "glibc 2.43"\n')
+        self.executable(tools / "file", '#!/bin/bash\necho "${TEST_FILE_OUTPUT:-ELF 64-bit LSB executable, x86-64}"\n')
         self.executable(tools / "bun", '''#!/bin/bash
 if [[ "$1" = --version ]]; then echo "${TEST_BUN_VERSION:-1.4.4}"; exit 0; fi
 if [[ "$1" = install ]]; then exit 0; fi
@@ -209,21 +211,162 @@ for arg in "$@"; do
   if [[ "$arg" = --outdir=* ]]; then out=${arg#--outdir=}; fi
 done
 echo build >> "$HOME/build-count"
-mkdir -p "$out/cli-darwin-arm64/bin"
-printf '#!/bin/bash\n[[ "$1" != --version ]] || echo %s\nexit 0\n' "$OPENCODE_VERSION" > "$out/cli-darwin-arm64/bin/opencode"
-chmod +x "$out/cli-darwin-arm64/bin/opencode"
+target=${TEST_BUILD_TARGET:-darwin-arm64}
+mkdir -p "$out/cli-$target/bin"
+printf '#!/bin/bash\n[[ "$1" != --version ]] || echo %s\nexit 0\n' "$OPENCODE_VERSION" > "$out/cli-$target/bin/opencode"
+chmod +x "$out/cli-$target/bin/opencode"
 ''')
         self.env = dict(os.environ, HOME=str(self.home), TMPDIR=str(self.root),
                         PATH=str(tools) + os.pathsep + os.environ["PATH"],
                         OPENCODE_UPDATE_SOURCE=str(self.repo), OPENCODE_UPDATE_ROOT=str(self.data),
                         OPENCODE_UPDATE_REF=self.commit)
 
-    def update(self, check=True):
-        result = subprocess.run(["bash", str(SOURCE / "dot_local/bin/executable_opencode-update")],
+    def update(self, *args, check=True):
+        result = subprocess.run(["bash", str(SOURCE / "dot_local/bin/executable_opencode-update"), *args],
                                 env=self.env, text=True, capture_output=True)
         if check:
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
+
+    def prepare_bootstrap(self):
+        self.setup_updater()
+        (self.data / "active").unlink()
+        (self.data / "previous").unlink()
+        (self.home / ".local/bin/opencode").unlink()
+        shutil.copyfile(SOURCE / "dot_local/share/opencode/executable_opencode", self.data / "opencode")
+        (self.data / "opencode").chmod(0o755)
+
+    def linux_fixture(self):
+        self.env.update(TEST_OS="Linux", TEST_MACHINE="x86_64", TEST_BUILD_TARGET="linux-x64")
+
+    def test_fresh_host_requires_explicit_install(self):
+        self.prepare_bootstrap()
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("run opencode-update --install explicitly", result.stderr)
+        self.assertFalse((self.home / "build-count").exists())
+        self.assertFalse((self.home / ".local/bin/opencode").exists())
+        self.assertFalse((self.data / "active").exists())
+        self.assertFalse((self.data / "operation.lock").exists())
+
+    def test_linux_explicit_install_then_update_and_rollback(self):
+        self.prepare_bootstrap()
+        self.linux_fixture()
+        self.update("--install")
+        first = (self.data / "active").resolve()
+        self.assertEqual((self.data / "previous").resolve(), first)
+        self.assertTrue((self.home / ".local/bin/opencode").is_symlink())
+        manifest = json.loads((first / "manifest.json").read_text())
+        self.assertEqual(manifest["build_target"], "linux-x64")
+        self.assertIn("no changes made", self.update().stdout)
+        self.assertIn("no changes made", self.update("--install").stdout)
+        self.patch.write_text(self.patch.read_text() + "\n")
+        self.update()
+        second = (self.data / "active").resolve()
+        self.assertNotEqual(first, second)
+        self.assertEqual((self.data / "previous").resolve(), first)
+        result = subprocess.run(["bash", str(SOURCE / "dot_local/bin/executable_opencode-rollback")],
+                                env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual((self.data / "active").resolve(), first)
+        self.assertEqual((self.data / "previous").resolve(), second)
+
+    def test_linux_wrong_architecture_keeps_active(self):
+        self.setup_updater()
+        self.linux_fixture()
+        self.env["TEST_FILE_OUTPUT"] = "ELF 64-bit LSB executable, aarch64"
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("candidate lacks Linux x86-64 architecture", result.stderr)
+        self.assertEqual((self.data / "active").resolve().name, "initial")
+
+    def test_linux_musl_is_rejected_before_build(self):
+        self.setup_updater()
+        self.linux_fixture()
+        self.env["TEST_LIBC"] = "musl"
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Linux builds require glibc", result.stderr)
+        self.assertFalse((self.home / "build-count").exists())
+
+    def test_bootstrap_patch_failure_does_not_create_install(self):
+        self.prepare_bootstrap()
+        self.patch.write_text(self.patch.read_text().replace("onMouseOver", "renamedUpstreamHandler"))
+        result = self.update("--install", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("local UI patch no longer matches upstream", result.stderr)
+        self.assertFalse((self.data / "active").exists())
+        self.assertFalse((self.data / "previous").exists())
+        self.assertFalse((self.home / ".local/bin/opencode").exists())
+
+    def test_partial_bootstrap_recovers_verified_generation(self):
+        self.setup_updater()
+        (self.data / "active").unlink()
+        (self.data / "previous").unlink()
+        (self.data / "previous").symlink_to(self.data / "releases/initial")
+        (self.data / "pointer-transaction").write_text(json.dumps({"kind": "install", "new_active": "initial"}))
+        # Recovery completes the first install, then the normal patch rebuild runs.
+        self.update()
+        self.assertEqual((self.data / "previous").resolve().name, "initial")
+        self.assertFalse((self.data / "pointer-transaction").exists())
+
+    def test_install_does_not_replace_invalid_pointers(self):
+        self.setup_updater()
+        (self.data / "active").unlink()
+        (self.data / "active").write_text("user data")
+        result = self.update("--install", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("active must point to a managed generation", result.stderr)
+        self.assertEqual((self.data / "active").read_text(), "user data")
+        self.assertFalse((self.home / "build-count").exists())
+
+    def test_install_clones_missing_source_only_on_explicit_request(self):
+        self.prepare_bootstrap()
+        clone = self.root / "new-source"
+        wrapper = self.root / "tools/git"
+        wrapper.write_text(wrapper.read_text().replace(
+            f'exec "{self.git}" "$@"',
+            f'''if [[ "$1" = clone ]]; then
+  exec "{self.git}" clone --no-checkout "{self.upstream}" "${{@: -1}}"
+fi
+exec "{self.git}" "$@"'''))
+        self.env["OPENCODE_UPDATE_SOURCE"] = str(clone)
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(clone.exists())
+        self.update("--install")
+        self.assertTrue((clone / ".git").is_dir())
+        self.assertTrue((self.data / "active/opencode").is_file())
+
+    def test_install_repairs_missing_launcher_without_rebuilding(self):
+        self.prepare_bootstrap()
+        self.update("--install")
+        public = self.home / ".local/bin/opencode"
+        public.unlink()
+        self.assertIn("no changes made", self.update("--install").stdout)
+        self.assertTrue(public.is_symlink())
+        self.assertEqual((self.home / "build-count").read_text().splitlines(), ["build"])
+
+    def test_failed_public_verification_restores_previous_install(self):
+        self.setup_updater()
+        self.executable(self.home / ".local/bin/opencode", '#!/bin/bash\necho wrong-version\n')
+        result = self.update(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("restoring previous pointers", result.stderr)
+        self.assertEqual((self.data / "active").resolve().name, "initial")
+        self.assertFalse((self.data / "pointer-transaction").exists())
+
+    def test_failed_bootstrap_public_verification_preserves_other_launcher(self):
+        self.prepare_bootstrap()
+        public = self.home / ".local/bin/opencode"
+        original = '#!/bin/bash\necho wrong-version\n'
+        self.executable(public, original)
+        result = self.update("--install", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("bootstrap pointers removed", result.stderr)
+        self.assertEqual(public.read_text(), original)
+        self.assertFalse((self.data / "active").exists())
+        self.assertFalse((self.data / "previous").exists())
 
     def test_patch_rebuild_noop_and_patch_revision(self):
         self.setup_updater()

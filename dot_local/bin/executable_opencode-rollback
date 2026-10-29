@@ -11,7 +11,7 @@ cleanup() { local status=$?; (( LOCKED )) && opencode_lock_release; exit "$statu
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-for tool in python3 shasum; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
+for tool in python3; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
 [[ -x $HOME/.local/bin/opencode ]] || { opencode_die "public entrypoint is missing or not executable: $HOME/.local/bin/opencode"; exit 1; }
 opencode_lock_acquire || exit 1
 LOCKED=1

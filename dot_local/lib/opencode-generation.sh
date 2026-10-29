@@ -94,6 +94,33 @@ opencode_lock_release() {
 opencode_recover_transaction() {
   local journal="$OPENCODE_ROOT/pointer-transaction"
   [[ -e $journal ]] || return 0
+  local kind
+  kind=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("kind", "update"))' "$journal") || return
+  if [[ $kind = install ]]; then
+    local target
+    target=$(python3 - "$journal" <<'PY'
+import json, sys
+target = json.load(open(sys.argv[1]))["new_active"]
+if not isinstance(target, str) or "/" in target or target in ("", ".", ".."):
+    raise SystemExit("invalid bootstrap transaction journal")
+print(target)
+PY
+    ) || return
+    opencode_generation_verify "$OPENCODE_ROOT/releases/$target" >/dev/null || return
+    local link
+    for link in "$OPENCODE_ROOT/previous" "$OPENCODE_ROOT/active"; do
+      if [[ -e $link || -L $link ]]; then
+        [[ $(opencode_link_target "$link") = "$OPENCODE_ROOT/releases/$target" ]] || {
+          opencode_die "cannot recover bootstrap: unexpected pointer $link"; return 1;
+        }
+      fi
+    done
+    opencode_atomic_symlink "$OPENCODE_ROOT/releases/$target" "$OPENCODE_ROOT/previous" || return
+    opencode_atomic_symlink "$OPENCODE_ROOT/releases/$target" "$OPENCODE_ROOT/active" || return
+    rm -f "$journal"
+    return
+  fi
+  [[ $kind = update ]] || { opencode_die "unknown pointer transaction kind: $kind"; return 1; }
   python3 - "$journal" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as f: j=json.load(f)
@@ -113,6 +140,23 @@ PY
   esac
   rm -f "$journal"
   opencode_prune_generations || printf 'opencode: warning: recovery completed, but extra generations could not be pruned\n' >&2
+}
+
+opencode_bootstrap_pointers() {
+  local target=$1
+  [[ ! -e $OPENCODE_ROOT/active && ! -L $OPENCODE_ROOT/active && ! -e $OPENCODE_ROOT/previous && ! -L $OPENCODE_ROOT/previous ]] || {
+    opencode_die 'bootstrap requires absent active/previous pointers'; return 1;
+  }
+  python3 - "$OPENCODE_ROOT/pointer-transaction" "$target" <<'PY' || return
+import json, os, sys, uuid
+path, target = sys.argv[1:]
+tmp = f"{path}.tmp.{os.getpid()}.{uuid.uuid4().hex}"
+with open(tmp, "x", encoding="utf-8") as f:
+    json.dump({"kind": "install", "new_active": target}, f)
+    f.write("\n"); f.flush(); os.fsync(f.fileno())
+os.replace(tmp, path)
+PY
+  opencode_recover_transaction
 }
 
 opencode_swap_pointers() {

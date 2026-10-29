@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+INSTALL=0
 case "${1:-}" in
   -h|--help)
     cat <<'HELP'
-Usage: opencode-update
+Usage: opencode-update [--install]
 
 Build and activate the latest stable upstream V2 release with the local UI patch.
 Divergent upstream history is supported; ancestor targets retain the active source.
 Build and verification failures leave the active generation unchanged.
+Supports macOS and glibc Linux on ARM64/x86_64.
+
+  --install  Explicitly bootstrap this host (clone source if missing).
+             First install sets active and previous to the same generation.
+             Without this flag, an existing managed install is required.
 
 Environment:
   OPENCODE_UPDATE_REF     Fetch a specific upstream tag, branch, or commit instead.
@@ -17,6 +23,7 @@ Environment:
 HELP
     exit 0
     ;;
+  --install) INSTALL=1; shift ;;
   '') ;;
   *) printf 'opencode-update: unexpected argument: %s (see --help)\n' "$1" >&2; exit 1 ;;
 esac
@@ -56,16 +63,68 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-for tool in git bun python3 lipo; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
+for tool in git bun python3; do command -v "$tool" >/dev/null || { opencode_die "required command missing: $tool"; exit 1; }; done
+OS=$(uname -s)
+MACHINE=$(uname -m)
+case "$OS:$MACHINE" in
+  Darwin:arm64) BUILD_TARGET=darwin-arm64; NATIVE_ARCH=arm64 ;;
+  Darwin:x86_64) BUILD_TARGET=darwin-x64; NATIVE_ARCH=x86_64 ;;
+  Linux:x86_64) BUILD_TARGET=linux-x64; NATIVE_ARCH=x86-64 ;;
+  Linux:aarch64|Linux:arm64) BUILD_TARGET=linux-arm64; NATIVE_ARCH=aarch64 ;;
+  *) opencode_die "unsupported native build target: $OS $MACHINE"; exit 1 ;;
+esac
+if [[ $OS = Darwin ]]; then
+  command -v lipo >/dev/null || { opencode_die 'required command missing: lipo'; exit 1; }
+else
+  command -v file >/dev/null || { opencode_die 'required command missing: file'; exit 1; }
+  getconf GNU_LIBC_VERSION >/dev/null 2>&1 || { opencode_die 'Linux builds require glibc; musl is not supported'; exit 1; }
+fi
 [[ -r $PATCH ]] || { opencode_die "missing local UI patch: $PATCH"; exit 1; }
 PATCH_SHA=$(python3 -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$PATCH")
-[[ $(uname -s) = Darwin ]] || { opencode_die 'native build target is macOS only'; exit 1; }
-[[ -x $HOME/.local/bin/opencode ]] || { opencode_die "public entrypoint is missing or not executable: $HOME/.local/bin/opencode"; exit 1; }
 mkdir -p "$OPENCODE_ROOT/releases" "$OPENCODE_ROOT/candidates"
 opencode_lock_acquire || exit 1
 LOCKED=1
 opencode_recover_transaction
 
+BOOTSTRAP=0
+CURRENT_COMMIT=
+CURRENT_PATCH_SHA=
+CURRENT_NAME='(not installed)'
+if [[ ! -e $OPENCODE_ROOT/active && ! -L $OPENCODE_ROOT/active && ! -e $OPENCODE_ROOT/previous && ! -L $OPENCODE_ROOT/previous ]]; then
+  (( INSTALL )) || { opencode_die 'no managed install; run opencode-update --install explicitly on this host'; exit 1; }
+  BOOTSTRAP=1
+else
+  ACTIVE_GEN=$(opencode_link_target "$OPENCODE_ROOT/active") || { opencode_die 'active must point to a managed generation'; exit 1; }
+  PREVIOUS_GEN=$(opencode_link_target "$OPENCODE_ROOT/previous") || { opencode_die 'previous must point to a managed generation'; exit 1; }
+  [[ $(dirname "$ACTIVE_GEN") = "$OPENCODE_ROOT/releases" && $(dirname "$PREVIOUS_GEN") = "$OPENCODE_ROOT/releases" ]] || { opencode_die 'active/previous points outside releases/'; exit 1; }
+  ACTIVE_EXE=$(opencode_generation_verify "$ACTIVE_GEN") || exit 1
+  PREVIOUS_EXE=$(opencode_generation_verify "$PREVIOUS_GEN") || exit 1
+  CURRENT_COMMIT=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["source_commit"])' "$ACTIVE_GEN/manifest.json")
+  CURRENT_PATCH_SHA=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("local_patch_sha256", ""))' "$ACTIVE_GEN/manifest.json")
+  CURRENT_NAME=$(basename "$ACTIVE_GEN")
+fi
+PUBLIC_EXE="$HOME/.local/bin/opencode"
+CREATE_ENTRYPOINT=0
+if [[ ! -e $PUBLIC_EXE && ! -L $PUBLIC_EXE ]] && (( INSTALL )); then
+  # Only create a missing launcher; never replace another installation.
+  [[ -x $HOME/.local/share/opencode/opencode ]] || { opencode_die 'managed launcher missing; apply the OpenCode helper files with chezmoi first'; exit 1; }
+  CREATE_ENTRYPOINT=1
+else
+  [[ -x $PUBLIC_EXE ]] || { opencode_die "public entrypoint is missing or not executable: $PUBLIC_EXE"; exit 1; }
+fi
+install_entrypoint() {
+  if (( CREATE_ENTRYPOINT )); then
+    mkdir -p "$(dirname "$PUBLIC_EXE")"
+    ln -s "$HOME/.local/share/opencode/opencode" "$PUBLIC_EXE"
+  fi
+}
+
+if [[ ! -e $SOURCE && ! -L $SOURCE ]] && (( INSTALL )); then
+  mkdir -p "$(dirname "$SOURCE")"
+  git clone --filter=blob:none --no-checkout --no-tags https://github.com/anomalyco/opencode.git "$SOURCE" || {
+    opencode_die "source clone failed: $SOURCE"; exit 1;
+  }
+fi
 [[ -d $SOURCE/.git || -f $SOURCE/.git ]] || { opencode_die "source checkout missing: $SOURCE"; exit 1; }
 UPSTREAM_URL=$(git -C "$SOURCE" config --get remote.origin.url) || { opencode_die "source checkout has no origin: $SOURCE"; exit 1; }
 printf '%s\n' "$UPSTREAM_URL" | grep -Eq 'github\.com[:/]anomalyco/opencode([.]git)?$' || {
@@ -114,16 +173,8 @@ print(json.loads(raw)["version"])
 PY
 )
 
-ACTIVE_GEN=$(opencode_link_target "$OPENCODE_ROOT/active") || { opencode_die 'active must point to a managed generation; bootstrap required'; exit 1; }
-PREVIOUS_GEN=$(opencode_link_target "$OPENCODE_ROOT/previous") || { opencode_die 'previous must point to a managed generation; bootstrap required'; exit 1; }
-[[ $(dirname "$ACTIVE_GEN") = "$OPENCODE_ROOT/releases" && $(dirname "$PREVIOUS_GEN") = "$OPENCODE_ROOT/releases" ]] || { opencode_die 'active/previous points outside releases/'; exit 1; }
-ACTIVE_EXE=$(opencode_generation_verify "$ACTIVE_GEN") || exit 1
-PREVIOUS_EXE=$(opencode_generation_verify "$PREVIOUS_GEN") || exit 1
-CURRENT_COMMIT=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["source_commit"])' "$ACTIVE_GEN/manifest.json")
-CURRENT_PATCH_SHA=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("local_patch_sha256", ""))' "$ACTIVE_GEN/manifest.json")
-CURRENT_NAME=$(basename "$ACTIVE_GEN")
 # A patch-only rebuild must never move an existing newer build backwards.
-if git -C "$SOURCE" merge-base --is-ancestor "$TARGET" "$CURRENT_COMMIT"; then
+if (( ! BOOTSTRAP )) && git -C "$SOURCE" merge-base --is-ancestor "$TARGET" "$CURRENT_COMMIT"; then
   TARGET=$CURRENT_COMMIT
   if [[ $TARGET != "$UPSTREAM_COMMIT" ]]; then
     SOURCE_REF=$(python3 -c 'import json,sys;m=json.load(open(sys.argv[1]));print(m.get("source_ref") or m["source_commit"])' "$ACTIVE_GEN/manifest.json")
@@ -145,11 +196,12 @@ if [[ $TARGET != "$UPSTREAM_COMMIT" ]]; then
 fi
 
 if [[ $CURRENT_COMMIT = "$TARGET" && $CURRENT_PATCH_SHA = "$PATCH_SHA" ]]; then
+  install_entrypoint
   printf 'OpenCode already contains V2 commit %s and local UI patch; no changes made.\n' "${TARGET:0:10}"
   SUCCESS=1
   exit 0
 fi
-if ! git -C "$SOURCE" merge-base --is-ancestor "$CURRENT_COMMIT" "$TARGET"; then
+if (( ! BOOTSTRAP )) && ! git -C "$SOURCE" merge-base --is-ancestor "$CURRENT_COMMIT" "$TARGET"; then
   # Release branches and rewritten upstream history need not descend from active.
   # Build the fetched target in isolation; activation still requires all checks.
   printf 'Upstream history diverges; building fetched target: %s -> %s (rollback retained).\n' "$CURRENT_COMMIT" "$TARGET"
@@ -201,19 +253,23 @@ printf 'Building %s...\n' "$TARGET_NAME"
 if ! (cd "$WORKTREE" && bun install --frozen-lockfile && OPENCODE_VERSION="$VERSION" bun run packages/cli/script/build.ts --single --skip-install --outdir="$TMP/output") >"$BUILD_LOG" 2>&1; then
   opencode_die "V2 build failed (see $BUILD_LOG)"; tail -40 "$BUILD_LOG" >&2; exit 1
 fi
-BUILT_EXE="$TMP/output/cli-darwin-arm64/bin/opencode"
+BUILT_EXE="$TMP/output/cli-$BUILD_TARGET/bin/opencode"
 [[ -x $BUILT_EXE ]] || { opencode_die "build did not produce expected executable: $BUILT_EXE"; exit 1; }
 
 printf 'Testing...\n'
-ARCHS=$(lipo -archs "$BUILT_EXE" 2>/dev/null || true)
-[[ $ARCHS = *arm64* ]] || { opencode_die "candidate lacks arm64 architecture: $ARCHS"; exit 1; }
+if [[ $OS = Darwin ]]; then
+  ARCHS=$(lipo -archs "$BUILT_EXE" 2>/dev/null || true)
+  [[ " $ARCHS " = *" $NATIVE_ARCH "* ]] || { opencode_die "candidate lacks $NATIVE_ARCH architecture: $ARCHS"; exit 1; }
+else
+  ARCHS=$(file -b "$BUILT_EXE")
+  [[ $ARCHS = "ELF 64-bit LSB"* && $ARCHS = *"$NATIVE_ARCH"* ]] || { opencode_die "candidate lacks Linux $NATIVE_ARCH architecture: $ARCHS"; exit 1; }
+fi
 VERSION_OUTPUT=$("$BUILT_EXE" --version 2>&1) || { opencode_die "candidate --version failed: $VERSION_OUTPUT"; exit 1; }
 [[ $VERSION_OUTPUT = *"$VERSION"* ]] || { opencode_die "candidate version mismatch: $VERSION_OUTPUT"; exit 1; }
 "$BUILT_EXE" --help >"$TMP/help.txt" 2>&1 || { opencode_die 'candidate --help failed'; exit 1; }
 "$BUILT_EXE" debug paths >"$TMP/paths.txt" 2>&1 || { opencode_die 'candidate debug paths failed'; exit 1; }
 "$BUILT_EXE" debug config >"$TMP/config.txt" 2>&1 || { opencode_die "candidate config/plugin startup check failed (see $TMP/config.txt)"; tail -30 "$TMP/config.txt" >&2; exit 1; }
 
-BUILD_TARGET=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/arm64/arm64/;s/x86_64/x64/')
 STAGING="$OPENCODE_ROOT/releases/.staging-${TARGET_NAME}-$$"
 DEST="$OPENCODE_ROOT/releases/$TARGET_NAME"
 mkdir "$STAGING"
@@ -232,10 +288,24 @@ mv "$STAGING" "$DEST"
 opencode_generation_verify "$DEST" >/dev/null || { opencode_die 'installed candidate failed manifest/hash verification'; exit 1; }
 
 printf 'Activating...\n'
-opencode_swap_pointers "$TARGET_NAME" "$CURRENT_NAME" || { opencode_die 'pointer activation interrupted; transaction journal retained for recovery'; exit 1; }
+install_entrypoint
+if (( BOOTSTRAP )); then
+  opencode_bootstrap_pointers "$TARGET_NAME" || { opencode_die 'bootstrap interrupted; transaction journal retained for recovery'; exit 1; }
+else
+  opencode_swap_pointers "$TARGET_NAME" "$CURRENT_NAME" || { opencode_die 'pointer activation interrupted; transaction journal retained for recovery'; exit 1; }
+fi
 NEW_EXE=$(opencode_generation_verify "$OPENCODE_ROOT/releases/$TARGET_NAME") || exit 1
 if ! ACTIVE_VERSION=$("$HOME/.local/bin/opencode" --version 2>&1) || [[ $ACTIVE_VERSION != *"$VERSION"* ]]; then
-  opencode_die "post-activation verification failed: ${ACTIVE_VERSION:-no version output}; restoring previous pointers"
+  if (( BOOTSTRAP )); then
+    # No prior generation exists. Undo only pointers created by this bootstrap.
+    for link in "$OPENCODE_ROOT/active" "$OPENCODE_ROOT/previous"; do
+      [[ $(opencode_link_target "$link") != "$DEST" ]] || rm -- "$link"
+    done
+    (( ! CREATE_ENTRYPOINT )) || rm -- "$PUBLIC_EXE"
+    opencode_die "first-install verification failed: ${ACTIVE_VERSION:-no version output}; bootstrap pointers removed"
+    exit 1
+  fi
+  printf 'opencode: ERROR: post-activation verification failed: %s; restoring previous pointers\n' "${ACTIVE_VERSION:-no version output}" >&2
   if opencode_swap_pointers "$CURRENT_NAME" "$TARGET_NAME"; then
     opencode_prune_generations || printf 'opencode-update: warning: failed candidate retained after restoration\n' >&2
   else
@@ -243,6 +313,7 @@ if ! ACTIVE_VERSION=$("$HOME/.local/bin/opencode" --version 2>&1) || [[ $ACTIVE_
   fi
   exit 1
 fi
+if (( BOOTSTRAP )); then CURRENT_NAME=$TARGET_NAME; fi
 printf 'Active:    %s\nPrevious:  %s\n' "$TARGET_NAME" "$CURRENT_NAME"
 if ! opencode_prune_generations; then printf 'opencode-update: warning: retention cleanup incomplete; extra releases retained\n' >&2; fi
 SUCCESS=1
