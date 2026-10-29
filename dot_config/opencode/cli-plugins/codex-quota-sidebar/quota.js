@@ -1,4 +1,6 @@
 // Read-only endpoint: no model probes, reset-credit redemption, or credential files.
+export const CHATGPT_USAGE_URL = "https://chatgpt.com/settings/usage"
+
 export class QuotaError extends Error {
   constructor(message, permanent = false, code) {
     super(message)
@@ -80,8 +82,8 @@ async function fetchUsage(ctx, expectedConnection, fetchImpl) {
   // usage endpoint. A fresh token still receives 401 there; reauth cannot fix it.
   if (credential.methodID === "chatgpt-token-sharing") {
     throw new QuotaError(
-      "Codex usage requires legacy Codex OAuth. Run /connect > OpenAI > Codex device code (legacy).",
-      true, "legacy_oauth_required",
+      `Quota unavailable for this sign-in method. Model access is unaffected. Manage usage: ${CHATGPT_USAGE_URL}`,
+      true, "token_sharing_quota_unavailable",
     )
   }
   const headers = { Authorization: `Bearer ${credential.access}` }
@@ -113,7 +115,8 @@ export async function readUsage(ctx, fetchImpl = fetch, now = Date.now) {
     return parseUsage((await fetchUsage(ctx, undefined, fetchImpl)).body, now())
   } catch (error) {
     return {
-      status: "error", error: error instanceof QuotaError ? error.message : "Quota check failed.",
+      status: error instanceof QuotaError && error.code === "token_sharing_quota_unavailable" ? "unsupported" : "error",
+      error: error instanceof QuotaError ? error.message : "Quota check failed.",
       ...(error instanceof QuotaError && error.code ? { code: error.code } : {}),
     }
   }

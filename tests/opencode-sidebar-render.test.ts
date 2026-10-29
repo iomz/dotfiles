@@ -126,15 +126,21 @@ test.skipIf(!source)("sidebar height stays stable across usage, tools, variants 
     unavailable.renderer.destroy()
   }
   const tokenSharing = await testRender(() => SidebarQuota({ context: {
-    ...context, client: { rpc: () => ({ usage: async () => ({ status: "error", code: "legacy_oauth_required" }) }) },
+    ...context, client: { rpc: () => ({ usage: async () => ({ status: "unsupported", code: "token_sharing_quota_unavailable" }) }) },
   } }), { width: 31, height: 10 })
   try {
     await Promise.resolve()
     await tokenSharing.renderOnce()
     const frame = tokenSharing.captureCharFrame()
-    expect(frame).toContain("Codex (legacy login needed)")
-    expect(frame).toContain("Use /connect > OpenAI")
-    expect(frame).toContain("Codex device code (legacy)")
+    expect(frame).toContain("Using ChatGPT plan")
+    expect(frame).toContain("Quota unavailable")
+    expect(frame).toContain("for this sign-in method")
+    expect(frame).toContain("Manage usage")
+    expect(frame).toContain("Model access unaffected")
+    expect(frame).not.toContain("legacy")
+    expect(frame).not.toContain("/connect")
+    expect(frame).not.toContain("% left")
+    expect(frame).not.toContain("Reset:")
     expect(frame.split("\n").map(line => line.trim()).filter(Boolean)).toHaveLength(6)
   } finally {
     tokenSharing.renderer.destroy()

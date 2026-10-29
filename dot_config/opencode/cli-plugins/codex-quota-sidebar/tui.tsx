@@ -4,6 +4,7 @@ import type { Context } from "@opencode/plugin/tui/plugin"
 import { createEffect, createSignal, on, onCleanup, Show } from "solid-js"
 import { quotaBar, quotaBand, styleColor } from "./style"
 import { ResumeRpc } from "./resume-rpc.js"
+import { CHATGPT_USAGE_URL } from "./quota.js"
 
 export type Usage = {
   status: string
@@ -42,7 +43,7 @@ export function SidebarQuota(props: { context: Context; sessionID?: string }) {
   const [usage, setUsage] = createSignal<Usage>()
   const [failed, setFailed] = createSignal(false)
   const [resume, setResume] = createSignal("")
-  const legacyLoginNeeded = () => usage()?.code === "legacy_oauth_required"
+  const sharingQuotaUnavailable = () => usage()?.code === "token_sharing_quota_unavailable"
   createEffect(on(() => props.sessionID, sessionID => {
     if (!sessionID) return
     const location = context.data.session.get(sessionID)?.location ?? context.location ?? context.data.location.default()
@@ -76,6 +77,7 @@ export function SidebarQuota(props: { context: Context; sessionID?: string }) {
       const detail = error && typeof error === "object" && "message" in error
         ? String(error.message) : String(error)
       console.error(`[personal.codex-quota-sidebar] quota RPC failed: ${detail}`)
+      setUsage(undefined)
       setFailed(true)
     } finally {
       refreshing = false
@@ -104,11 +106,19 @@ export function SidebarQuota(props: { context: Context; sessionID?: string }) {
       <text height={1} wrapMode="none" truncate fg={styleColor(context.options.heading, "#5394ee")}>
         <b>Usage</b>
       </text>
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Codex{legacyLoginNeeded() ? " (legacy login needed)" : usage()?.plan ? ` (${usage()?.plan})` : failed() ? " (unavailable)" : " (checking…)"}</text>
-      {row("primary", "5h")}
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{legacyLoginNeeded() ? "Use /connect > OpenAI" : `Reset: ${usage()?.reset?.primary ?? (failed() ? "unavailable" : "checking…")}`}</text>
-      {row("secondary", "7d")}
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{legacyLoginNeeded() ? "Codex device code (legacy)" : `Reset: ${usage()?.reset?.secondary ?? (failed() ? "unavailable" : "checking…")}`}</text>
+      <Show when={sharingQuotaUnavailable()} fallback={<>
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Codex{usage()?.plan ? ` (${usage()?.plan})` : failed() ? " (unavailable)" : " (checking…)"}</text>
+        {row("primary", "5h")}
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.primary ?? (failed() ? "unavailable" : "checking…")}</text>
+        {row("secondary", "7d")}
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.secondary ?? (failed() ? "unavailable" : "checking…")}</text>
+      </>}>
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Using ChatGPT plan</text>
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Quota unavailable</text>
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>for this sign-in method</text>
+        <text height={1} wrapMode="none" truncate fg={styleColor(context.options.heading, "#5394ee")}><a href={CHATGPT_USAGE_URL}>Manage usage</a></text>
+        <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Model access unaffected</text>
+      </Show>
       <Show when={resume() && resume() !== "Codex resume: off"}>
         <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{resume()}</text>
       </Show>

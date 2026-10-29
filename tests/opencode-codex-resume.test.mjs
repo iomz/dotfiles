@@ -299,19 +299,21 @@ test("usage snapshot keeps reporting both windows after one is exhausted", async
   assert.ok(!JSON.stringify(failed).includes("secret"))
 })
 
-test("token-sharing login reports legacy OAuth requirement without sending its token", async () => {
+test("token-sharing quota is unsupported, not an invalid login; no legacy endpoint request", async () => {
   const ctx = { integration: { connection: {
     active: async () => ({ type: "credential", method: "oauth", id: "account" }),
     resolve: async () => ({ type: "oauth", methodID: "chatgpt-token-sharing", access: "secret" }),
   } } }
   const fetchImpl = async () => { assert.fail("must not send token-sharing credentials to legacy usage endpoint") }
   const result = await readUsage(ctx, fetchImpl)
-  assert.equal(result.status, "error")
-  assert.equal(result.code, "legacy_oauth_required")
-  assert.match(result.error, /\/connect > OpenAI > Codex device code \(legacy\)/)
+  assert.equal(result.status, "unsupported")
+  assert.equal(result.code, "token_sharing_quota_unavailable")
+  assert.match(result.error, /Quota unavailable for this sign-in method/)
+  assert.match(result.error, /https:\/\/chatgpt.com\/settings\/usage/)
+  assert.ok(!result.error.includes("/connect"))
   assert.ok(!JSON.stringify(result).includes("secret"))
   await assert.rejects(readQuota(ctx, "gpt", "account", fetchImpl), error =>
-    error.permanent && error.code === "legacy_oauth_required")
+    error.permanent && error.code === "token_sharing_quota_unavailable")
 })
 
 test("pending resume shows local 24-hour time only", () => {
