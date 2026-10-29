@@ -299,6 +299,21 @@ test("usage snapshot keeps reporting both windows after one is exhausted", async
   assert.ok(!JSON.stringify(failed).includes("secret"))
 })
 
+test("token-sharing login reports legacy OAuth requirement without sending its token", async () => {
+  const ctx = { integration: { connection: {
+    active: async () => ({ type: "credential", method: "oauth", id: "account" }),
+    resolve: async () => ({ type: "oauth", methodID: "chatgpt-token-sharing", access: "secret" }),
+  } } }
+  const fetchImpl = async () => { assert.fail("must not send token-sharing credentials to legacy usage endpoint") }
+  const result = await readUsage(ctx, fetchImpl)
+  assert.equal(result.status, "error")
+  assert.equal(result.code, "legacy_oauth_required")
+  assert.match(result.error, /\/connect > OpenAI > Codex device code \(legacy\)/)
+  assert.ok(!JSON.stringify(result).includes("secret"))
+  await assert.rejects(readQuota(ctx, "gpt", "account", fetchImpl), error =>
+    error.permanent && error.code === "legacy_oauth_required")
+})
+
 test("pending resume shows local 24-hour time only", () => {
   const resetAt = new Date(2099, 0, 2, 17, 5, 6).getTime()
   assert.equal(describeResume({ repeat: false, pending: { resetAt } }), "Codex resume (once): 17:05")

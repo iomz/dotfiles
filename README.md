@@ -91,9 +91,12 @@ After-apply installers restore local quota/tree plugin dependencies when missing
 They bootstrap the Node version pinned in the managed mise config and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
 The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
 It reads the same read-only ChatGPT usage endpoint as quota recovery, so both windows stay visible after one is exhausted; it makes no model calls.
+Usage percentages and quota recovery require a legacy Codex OAuth connection. The newer **Sign in with ChatGPT** token-sharing credential is valid for model calls but cannot authorize the legacy usage endpoint; the sidebar shows **legacy login needed** instead of making repeated unauthorized requests. To enable usage, run `/connect`, choose OpenAI, and select **Codex device code (legacy)** or **Codex browser (legacy)**. Login remains an explicit host-local action.
+The Caveman server plugin enables full mode by loading APM's `~/.agents/skills/caveman/SKILL.md`. On a newly provisioned host, restore the pinned shared skills with `apm install -g --target agent-skills`, then `/reload`; installing the OpenCode binary alone does not deploy skills. A missing Caveman skill is reported as a plugin error, not silently treated as active.
 Restart the TUI after plugin changes. No binary rebuild is required.
 
 Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.
+Run Caveman and quota logic checks with `node --test tests/opencode-caveman.test.mjs tests/opencode-codex-resume.test.mjs`.
 Dashboard panels reserve fixed row counts, including startup placeholders; Workers shows counts only, without transient command/title rows or blank detail slots. Quota reset times have dedicated non-wrapping rows so refreshes do not shift neighboring panels.
 Renderer checks use the build checkout's runtime: from its `packages/tui` directory, run `OPENCODE_TUI_SOURCE="$PWD" bun test ~/.local/share/chezmoi/tests/opencode-sidebar-render.test.ts` after applying the plugins.
 

@@ -125,6 +125,20 @@ test.skipIf(!source)("sidebar height stays stable across usage, tools, variants 
   } finally {
     unavailable.renderer.destroy()
   }
+  const tokenSharing = await testRender(() => SidebarQuota({ context: {
+    ...context, client: { rpc: () => ({ usage: async () => ({ status: "error", code: "legacy_oauth_required" }) }) },
+  } }), { width: 31, height: 10 })
+  try {
+    await Promise.resolve()
+    await tokenSharing.renderOnce()
+    const frame = tokenSharing.captureCharFrame()
+    expect(frame).toContain("Codex (legacy login needed)")
+    expect(frame).toContain("Use /connect > OpenAI")
+    expect(frame).toContain("Codex device code (legacy)")
+    expect(frame.split("\n").map(line => line.trim()).filter(Boolean)).toHaveLength(6)
+  } finally {
+    tokenSharing.renderer.destroy()
+  }
 })
 
 test.skipIf(!source)("pinned tree setup and real collapsed renderer survive loading and toggling", async () => {

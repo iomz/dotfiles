@@ -7,6 +7,7 @@ import { ResumeRpc } from "./resume-rpc.js"
 
 export type Usage = {
   status: string
+  code?: string
   used?: { primary: number | null; secondary: number | null }
   reset?: { primary: string | null; secondary: string | null }
   windowMinutes?: { primary: number | null; secondary: number | null }
@@ -41,6 +42,7 @@ export function SidebarQuota(props: { context: Context; sessionID?: string }) {
   const [usage, setUsage] = createSignal<Usage>()
   const [failed, setFailed] = createSignal(false)
   const [resume, setResume] = createSignal("")
+  const legacyLoginNeeded = () => usage()?.code === "legacy_oauth_required"
   createEffect(on(() => props.sessionID, sessionID => {
     if (!sessionID) return
     const location = context.data.session.get(sessionID)?.location ?? context.location ?? context.data.location.default()
@@ -102,11 +104,11 @@ export function SidebarQuota(props: { context: Context; sessionID?: string }) {
       <text height={1} wrapMode="none" truncate fg={styleColor(context.options.heading, "#5394ee")}>
         <b>Usage</b>
       </text>
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Codex{usage()?.plan ? ` (${usage()?.plan})` : failed() ? " (unavailable)" : " (checking…)"}</text>
+      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Codex{legacyLoginNeeded() ? " (legacy login needed)" : usage()?.plan ? ` (${usage()?.plan})` : failed() ? " (unavailable)" : " (checking…)"}</text>
       {row("primary", "5h")}
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.primary ?? (failed() ? "unavailable" : "checking…")}</text>
+      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{legacyLoginNeeded() ? "Use /connect > OpenAI" : `Reset: ${usage()?.reset?.primary ?? (failed() ? "unavailable" : "checking…")}`}</text>
       {row("secondary", "7d")}
-      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>Reset: {usage()?.reset?.secondary ?? (failed() ? "unavailable" : "checking…")}</text>
+      <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{legacyLoginNeeded() ? "Codex device code (legacy)" : `Reset: ${usage()?.reset?.secondary ?? (failed() ? "unavailable" : "checking…")}`}</text>
       <Show when={resume() && resume() !== "Codex resume: off"}>
         <text height={1} wrapMode="none" truncate fg={context.theme.text.muted}>{resume()}</text>
       </Show>

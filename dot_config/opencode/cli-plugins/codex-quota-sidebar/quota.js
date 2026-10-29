@@ -1,8 +1,9 @@
 // Read-only endpoint: no model probes, reset-credit redemption, or credential files.
 export class QuotaError extends Error {
-  constructor(message, permanent = false) {
+  constructor(message, permanent = false, code) {
     super(message)
     this.permanent = permanent
+    this.code = code
   }
 }
 
@@ -75,6 +76,14 @@ async function fetchUsage(ctx, expectedConnection, fetchImpl) {
   }
   const credential = await ctx.integration.connection.resolve(connection)
   if (credential?.type !== "oauth") throw new QuotaError("OpenAI OAuth credential unavailable.", true)
+  // Token-sharing credentials target api.openai.com, not the legacy ChatGPT
+  // usage endpoint. A fresh token still receives 401 there; reauth cannot fix it.
+  if (credential.methodID === "chatgpt-token-sharing") {
+    throw new QuotaError(
+      "Codex usage requires legacy Codex OAuth. Run /connect > OpenAI > Codex device code (legacy).",
+      true, "legacy_oauth_required",
+    )
+  }
   const headers = { Authorization: `Bearer ${credential.access}` }
   const accountID = credential.metadata?.accountID ?? credential.metadata?.accountId
   if (typeof accountID === "string") headers["ChatGPT-Account-Id"] = accountID
@@ -103,6 +112,9 @@ export async function readUsage(ctx, fetchImpl = fetch, now = Date.now) {
   try {
     return parseUsage((await fetchUsage(ctx, undefined, fetchImpl)).body, now())
   } catch (error) {
-    return { status: "error", error: error instanceof QuotaError ? error.message : "Quota check failed." }
+    return {
+      status: "error", error: error instanceof QuotaError ? error.message : "Quota check failed.",
+      ...(error instanceof QuotaError && error.code ? { code: error.code } : {}),
+    }
   }
 }

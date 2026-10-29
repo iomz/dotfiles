@@ -14,15 +14,15 @@ export default {
       const skill = fs.readFileSync(skillPath, "utf8")
       body = skill.replace(/^---[\s\S]*?---\s*/, "")
     } catch (error) {
-      console.error(`[caveman] Could not load ${skillPath}:`, error)
-      return
+      throw new Error(`Caveman skill unavailable at ${skillPath}. Restore pinned skills with apm install -g --target agent-skills, then /reload.`, { cause: error })
     }
 
-    await ctx.session.hook("context", (event) => {
+    const hook = await ctx.session.hook("context", (event) => {
       event.system.push({
         type: "text",
         text: `CAVEMAN MODE ACTIVE — level: full\n\n${body}`,
       })
     })
+    return () => hook.dispose()
   },
 }
