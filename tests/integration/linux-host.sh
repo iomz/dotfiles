@@ -78,6 +78,13 @@ if [ "$dev" = yes ]; then
 fi
 check "zsh on a terminal loads the interactive rc.d" tty_zsh '(( ${+widgets[insert-line-break]} ))'
 check "zsh on a terminal prints nothing to stderr" sh -c "! grep . $home/zsh.err"
+# zsh only uses file.zwc when it holds that same file, so a combined digest is dead weight.
+check "zsh login compiles each startup file on its own" as_user zsh -fc '
+    for i in {1..20}; do [[ -s ~/.config/zsh/.zshrc.zwc ]] && break; sleep 0.5; done
+    [[ -s ~/.config/zsh/.zshrc.zwc && -s ~/.config/zsh/rc.d/00-env.zsh.zwc ]] || exit 1
+    for z in ~/.zshenv.zwc ~/.config/zsh/{,rc.d/}*.zwc(DN); do
+        [[ "$(zcompile -t $z | sed -n 2p)" == ${z%.zwc} ]] || { print -- "$z"; exit 1; }
+    done'
 if [ "$dev" != yes ]; then
     check "non-dev zsh downloads no plugins" as_user sh -c '! test -e ~/.local/share/zinit'
 fi
