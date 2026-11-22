@@ -154,33 +154,9 @@ darwin.brew = "jq"
 [tools.mise]
 darwin.brew = "mise"
 
-[tools.openssl]
-darwin.brew = "openssl"
-linux.apt = "libssl-dev"
-
-[tools.pkg-config]
-darwin.brew = "pkg-config"
-linux.apt = "pkg-config"
-
-[tools.readline]
-darwin.brew = "readline"
-linux.apt = "libreadline-dev"
-
-[tools.sqlite3]
-darwin.brew = "sqlite3"
-linux.apt = "libsqlite3-dev"
-
-[tools.tcl-tk]
-darwin.brew = "tcl-tk"
-linux.apt = "tk-dev"
-
 [tools.xz]
 darwin.brew = "xz"
 linux.apt = "xz-utils"
-
-[tools.zlib]
-darwin.brew = "zlib"
-linux.apt = "zlib1g-dev"
 
 # --- Homebrew: daily CLIs -----------------------------------------------
 
@@ -233,7 +209,9 @@ darwin.brew = "goreleaser"
 # --- apt: Linux only -----------------------------------------------------
 
 [tools.build-essential]
+# C toolchain: nvim-treesitter compiles parsers and mise builds lua from source.
 linux.apt = "build-essential"
+groups = ["dev"]
 
 [tools.curl]
 linux.apt = "curl"
@@ -243,28 +221,6 @@ linux.apt = "dirmngr"
 
 [tools.extrepo]
 linux.apt = "extrepo"
-
-[tools.libbz2-dev]
-linux.apt = "libbz2-dev"
-
-[tools.libffi-dev]
-linux.apt = "libffi-dev"
-
-[tools.liblzma-dev]
-linux.apt = "liblzma-dev"
-
-[tools.libncursesw5-dev]
-linux.apt = "libncursesw5-dev"
-
-[tools.libxml2-dev]
-linux.apt = "libxml2-dev"
-
-[tools.libxmlsec1-dev]
-linux.apt = "libxmlsec1-dev"
-
-[tools.linux-headers]
-linux.apt = "linux-headers-$(uname -r)"
-linux.arch = ["amd64"]
 
 [tools.unzip]
 linux.apt = "unzip"
