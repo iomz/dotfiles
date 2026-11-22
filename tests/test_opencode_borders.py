@@ -80,11 +80,18 @@ class OpenCodeBordersTest(unittest.TestCase):
         self.write(SYNTAX, "\n" * 12 + '''    rule(["extmark.file"], feedback.warning.base, { bold: true }),
     rule(["extmark.agent"], theme.categorical[0][step], { bold: true }),
     rule(["extmark.skill"], (theme.categorical[1] ?? theme.categorical[0])[step], { bold: true }),
-    // V1 migration preserves its selected/inverse foreground in this action state.
-    rule(["extmark.paste"], theme.text.action.primary.focused, {
-      background: feedback.warning.base,
-      bold: true,
-    }),
+    rule(
+      ["extmark.paste"],
+      // The page color: dark in dark mode, light in light mode. A transparent page (the system theme) falls back to the selected-row text.
+      theme.background.base.a === 1 ? theme.background.base : theme.text.action.primary.focused,
+      {
+        background: feedback.warning.base,
+        bold: true,
+      },
+    ),
+    rule(["comment", "comment.documentation"], syntax.comment, { italic: true }),
+    rule(["string", "symbol", "character.special", "character"], syntax.string),
+    rule(["number", "boolean", "constant", "float"], syntax.number),
 ''')
         self.write("packages/cli/package.json", '{"version":"2.0.26"}\n')
         self.write("package.json", '{"packageManager":"bun@1.4.4"}\n')
@@ -452,6 +459,18 @@ exec "{self.git}" "$@"'''))
         self.assertEqual(manifest["source_ref"], "refs/tags/v2.10.0")
         self.assertIn(f"Upstream:   v2.10.0 (refs/tags/v2.10.0 @ {target[:10]})", result.stdout)
         self.assertIn("Repository: https://github.com/anomalyco/opencode.git", result.stdout)
+        self.assertIn("no changes made", self.update().stdout)
+
+    def test_v230_multiline_paste_rule_updates_and_retains_rollback(self):
+        target = self.release_commit("2.3.0")
+        self.run_git("tag", "v2.3.0")
+        self.setup_updater()
+        self.env.pop("OPENCODE_UPDATE_REF")
+        self.update()
+        manifest = json.loads((self.data / "active/manifest.json").read_text())
+        self.assertEqual(manifest["source_commit"], target)
+        self.assertEqual(manifest["version"], "2.3.0")
+        self.assertEqual((self.data / "previous").resolve().name, "initial")
         self.assertIn("no changes made", self.update().stdout)
 
     def test_default_ignores_local_tags_and_prunes_deleted_remote_tags(self):
