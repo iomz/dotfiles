@@ -41,9 +41,6 @@ package.json
 .config/zsh/.zcompdump
 .config/zsh/completions/**
 
-# scripts
-run_once_install-packages.sh.tmpl
-
 # local
 .zprofile
 
