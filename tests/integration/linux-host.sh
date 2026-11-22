@@ -14,7 +14,7 @@ apt-get install -y -qq sudo curl ca-certificates git >/dev/null
 
 useradd -m -s /bin/bash "$user"
 printf '%s ALL=(ALL) NOPASSWD:ALL\n' "$user" > /etc/sudoers.d/$user
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin >/dev/null
+sh -c "$(curl --proto '=https' --tlsv1.2 -fsLS https://get.chezmoi.io)" -- -b /usr/local/bin >/dev/null
 
 mkdir -p "$home/.local/share"
 cp -R /dotfiles "$home/.local/share/chezmoi"
@@ -44,7 +44,8 @@ check() {
 check "zsh starts without errors" as_user zsh -ic 'exit 0'
 check "zsh startup prints nothing to stderr" \
     as_user sh -c 'test -z "$(zsh -ic "exit 0" 2>&1 >/dev/null)"'
-check "mise has no missing tools" as_user sh -c 'test -z "$(mise ls --missing)"'
+# Capture first so a failing command cannot pass as empty output.
+check "mise has no missing tools" as_user sh -c 'missing=$(mise ls --missing) && test -z "$missing"'
 # First start clones plugins and compiles parsers; let that finish first.
 as_user zsh -ic 'nvim --headless "+Lazy! sync" "+sleep 60" +qa' >/dev/null 2>&1 || true
 check "neovim starts without errors" as_user zsh -ic \
@@ -57,7 +58,7 @@ echo 'Enabled: no' >> "$mise_source"
 check "package script re-enables a disabled mise source" as_user sh -c \
     'chezmoi cat ~/install-packages.sh | sh >/dev/null 2>&1 && ! grep -qi "^Enabled: no" /etc/apt/sources.list.d/extrepo_mise.sources'
 check "chezmoi reports nothing left to apply" as_user sh -c \
-    'test -z "$(chezmoi status | grep -v "^ R install-opencode-")"'
+    'status=$(chezmoi status) && test -z "$(printf "%s\n" "$status" | grep -v "^ R install-opencode-")"'
 
 echo "== installed apt packages: $(dpkg-query -f '.\n' -W | wc -l)"
 exit $status
