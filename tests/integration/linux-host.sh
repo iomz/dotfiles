@@ -57,6 +57,10 @@ sed -i '/^Enabled:/d' "$mise_source"
 echo 'Enabled: no' >> "$mise_source"
 check "package script re-enables a disabled mise source" as_user sh -c \
     'chezmoi cat ~/install-packages.sh | sh >/dev/null 2>&1 && ! grep -qi "^Enabled: no" /etc/apt/sources.list.d/extrepo_mise.sources'
+# Both zsh directories are glob-loaded, so leftovers must not survive an apply.
+as_user sh -c 'touch ~/.config/zsh/rc.d/99-leftover.zsh ~/.config/zsh/functions/leftover'
+check "apply removes unmanaged zsh files" as_user sh -c \
+    'chezmoi apply --force --no-tty --exclude scripts && ! test -e ~/.config/zsh/rc.d/99-leftover.zsh && ! test -e ~/.config/zsh/functions/leftover'
 check "chezmoi reports nothing left to apply" as_user sh -c \
     'status=$(chezmoi status) && test -z "$(printf "%s\n" "$status" | grep -v "^ R install-opencode-")"'
 

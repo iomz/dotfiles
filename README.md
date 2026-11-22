@@ -247,7 +247,7 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `.chezmoidata/tools.toml`                   |
 | mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                   |
-| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
+| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh` |
 | chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
 
 Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
@@ -281,8 +281,8 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 | ------------------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------- |
 | Add OS dependency                    | `.chezmoidata/tools.toml`                           | Review target OS branch; run package manager manually on existing hosts      |
 | Add or update runtime/CLI            | `.chezmoidata/tools.toml`                           | `chezmoi apply` (runs `mise install` and `mise reshim`), then `mise current` |
-| Add zsh plugin or completion snippet | `dot_config/zsh/rc.d/02-plugin-manager.zsh`         | Start interactive zsh and verify plugin/widget/completion availability       |
-| Change zsh integration               | Relevant numbered file under `dot_config/zsh/rc.d/` | `zsh -n <file>`, then start interactive zsh                                  |
+| Add zsh plugin or completion snippet | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh`   | Start interactive zsh and verify plugin/widget/completion availability       |
+| Change zsh integration               | Relevant numbered file under `dot_config/zsh/exact_rc.d/` | `zsh -n <file>`, then start interactive zsh                                  |
 | Change managed dotfile               | Corresponding chezmoi source path                   | `chezmoi diff`, then `chezmoi apply`                                         |
 | Add managed file                     | Target file through `chezmoi add`                   | Inspect source and `chezmoi diff` before commit                              |
 
@@ -427,6 +427,9 @@ On Linux ARM, `.profile` and `.zshenv` enable `TINY_CHEZMOI` by default.
 Set `TINY_CHEZMOI=1` to skip heavier interactive integrations.
 
 ### rc.d Layout
+
+`rc.d` and `functions` are exact directories: `chezmoi apply` deletes unmanaged files in them.
+Put host-local customization in `~/.zprofile`, which zsh sources last.
 
 Files load numerically:
 

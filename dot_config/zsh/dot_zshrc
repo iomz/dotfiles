@@ -50,4 +50,6 @@ fi
 ############### -------------
 
 # source local if non-empty files exist (should not be managed by chezmoi)
-[[ -s ~/.zprofile ]] && source ~/.zprofile
+if [[ -s ~/.zprofile ]]; then
+    source ~/.zprofile
+fi
