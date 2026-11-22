@@ -52,7 +52,8 @@ set -eu
 {{-   end }}
 {{- end }}
 {{- if $formulae }}
-brew install \
+# Install missing formulae only; upgrades stay an explicit `brew upgrade`.
+HOMEBREW_NO_INSTALL_UPGRADE=1 brew install \
   {{ join " \\\n  " $formulae }}
 {{- end }}
 {{ end -}}

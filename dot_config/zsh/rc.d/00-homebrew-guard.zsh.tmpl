@@ -1,6 +1,6 @@
 {{- $names := .homebrew_guard.extra -}}
 {{- range $name, $tool := .tools -}}
-{{-   if hasKey $tool "mise" -}}
+{{-   if and (hasKey $tool "mise") (ne (toString (get $tool "homebrew_guard")) "false") -}}
 {{-     $id := get $tool "mise_id" | default $name -}}
 {{-     if not (contains ":" $id) }}{{ $names = append $names $id }}{{ end -}}
 {{-   end -}}
