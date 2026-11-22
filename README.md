@@ -338,6 +338,8 @@ For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and sys
 
 - macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
 - Debian and Ubuntu use apt; packages come from `.chezmoidata/tools.toml`.
+- Without root or usable sudo, Linux falls back to Homebrew, or skips the packages and prints how to retry.
+  sudo can only ask for a password when `chezmoi apply` runs in a terminal.
 - Linux installs mise through apt where possible, and only on hosts with mise entries.
 
 ### Mise Runtimes and CLIs
