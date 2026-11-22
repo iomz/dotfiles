@@ -99,7 +99,7 @@ chmod 644 /tmp/edit.vim /tmp/edit.zsh
 as_user script -qec "zsh -ic 'source /tmp/edit.zsh'" /dev/null >/dev/null 2>&1 || true
 check "sudoedit edits with SUDO_EDITOR" grep -qx after "$edit_probe"
 for vim in vim vim.tiny; do
-    check "$vim starts without errors" as_user sh -c \
+    check "$vim starts without errors" as_user env TERM=xterm-256color sh -c \
         "out=\$(timeout 30 script -qec '$vim +qa' /dev/null) && ! printf '%s' \"\$out\" | grep -E 'E[0-9]+:|Press ENTER'"
 done
 # Both zsh directories are glob-loaded, so leftovers must not survive an apply.
