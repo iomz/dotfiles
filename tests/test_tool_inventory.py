@@ -11,7 +11,8 @@ import unittest
 
 
 SOURCE = Path(__file__).resolve().parents[1]
-INVENTORY = SOURCE / ".chezmoidata/tools.toml"
+# scripts/tools.py validates edits by pointing this at the edited file.
+INVENTORY = Path(os.environ.get("TOOLS_INVENTORY", SOURCE / ".chezmoidata/tools.toml"))
 SELECTOR = SOURCE / ".chezmoitemplates/tool-selected"
 
 ENTRY_KEYS = {"mise", "mise_id", "hold", "homebrew_guard", "hosts", "groups", "arch",

@@ -345,6 +345,7 @@ For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and sys
 Global versions live in `~/.config/mise/config.toml`, rendered from `.chezmoidata/tools.toml`.
 Edit the inventory, not the rendered file: changes made by `mise use` or `mise upgrade --bump` are overwritten by the next `chezmoi apply`.
 Entries can be limited to some hosts with `hosts`, `groups` or `arch`; the inventory header describes the format.
+Use `just tool-add`, `just tool-bump`, `just tool-move` and `just tool-check` for routine changes; each edit is validated and reverted if invalid.
 
 Install and verify configured tools:
 

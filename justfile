@@ -15,3 +15,26 @@ test-integration:
 # Point this checkout at its versioned Git hooks.
 install-hooks:
     git config core.hooksPath .githooks
+
+# Usage: just tool-add yq mise [version] [--groups dev|--hosts oxalis]
+#        just tool-add mtr brew|apt|linux-brew [package]
+# Add a tool entry, or an OS package to an existing entry.
+[positional-arguments]
+tool-add *args:
+    python3 -I scripts/tools.py add "$@"
+
+# Update pinned mise versions; --include-latest also pins "latest" entries.
+[positional-arguments]
+tool-bump *args:
+    python3 -I scripts/tools.py bump "$@"
+    git --no-pager diff --stat -- .chezmoidata/tools.toml
+
+# Move a tool between mise and Homebrew on macOS, verifying before removal.
+[positional-arguments]
+tool-move *args:
+    python3 -I scripts/tools.py move "$@"
+
+# Validate the inventory and preview what chezmoi would change.
+tool-check:
+    python3 -m unittest tests.test_tool_inventory
+    chezmoi diff --no-pager
