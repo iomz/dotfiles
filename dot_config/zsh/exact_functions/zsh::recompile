@@ -16,18 +16,12 @@ _zsh_compile_if_writable() {
     zcompile $target
 }
 
-_zsh_compile_if_writable ~/.zshenv
-_zsh_compile_if_writable ~/.zprofile
-
-# Combine zshrc components into one file
-lst=()
-lst+=($zdir/rc.d/*)
-lst+=($zdir/.zshrc $zdir/.zlogin $zdir/functions/*)
-lst=(${^lst}(N-.))
-# Compile the combined zwc only when the config directory is writable.
-if [[ -n $lst && -w $zdir ]]; then
-    zcompile ${lst[@]}
-fi
+# zsh reads file.zwc in place of a startup or sourced file only when it is
+# that file's own compiled form and newer, so compile each file separately.
+local f
+for f in ~/.zshenv ~/.zprofile $zdir/.zshrc $zdir/.zlogin $zdir/rc.d/<->-*zsh(N-.); do
+    _zsh_compile_if_writable $f
+done
 
 # Compile the completion dump
 zcd=$zdir/.zcompdump
