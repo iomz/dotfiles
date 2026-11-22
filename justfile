@@ -18,12 +18,12 @@ install-hooks:
 
 # Usage: just tool-add yq mise [version] [--groups dev|--hosts oxalis]
 #        just tool-add mtr brew|apt|linux-brew [package]
-# Add a tool entry, or an OS package to an existing entry.
+# Add a tool entry, or an OS package to an existing entry, then chezmoi apply.
 [positional-arguments]
 tool-add *args:
     python3 -I scripts/tools.py add "$@"
 
-# Update pinned mise versions; --include-latest also pins "latest" entries.
+# Update pinned mise versions, then chezmoi apply; --include-latest pins "latest".
 [positional-arguments]
 tool-bump *args:
     python3 -I scripts/tools.py bump "$@"

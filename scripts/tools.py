@@ -157,6 +157,7 @@ def command_add(args, inventory):
                                     + [f"{field} = {toml_string(package)}"])
             inventory.save()
             print(f"added {field} = {package} to {args.name}")
+            apply_all(args, inventory)
             return
         body = [f"{field} = {toml_string(package)}"]
     if args.hosts:
@@ -166,6 +167,7 @@ def command_add(args, inventory):
     inventory.append_entry(args.name, body)
     inventory.save()
     print(f"added {args.name}: " + "; ".join(body))
+    apply_all(args, inventory)
 
 
 def command_bump(args, inventory):
@@ -192,9 +194,10 @@ def command_bump(args, inventory):
         inventory.replace_entry(name, [line.rstrip("\n") for line in set_mise_version(lines, latest)])
         print(f"bump    {name} {version} -> {latest}")
         changed += 1
+    print(f"{changed} entr{'y' if changed == 1 else 'ies'} updated")
     if changed:
         inventory.save()
-    print(f"{changed} entr{'y' if changed == 1 else 'ies'} updated")
+        apply_all(args, inventory)
 
 
 def run(command, **kwargs):
@@ -207,6 +210,14 @@ def confirm(question):
         print(f"{question} [y/N] skipped (no terminal)")
         return False
     return input(f"{question} [y/N] ").strip().lower() in ("y", "yes")
+
+
+def apply_all(args, inventory):
+    """Apply the whole source so installs follow the edit; git stays manual."""
+    if args.no_apply or inventory.path.resolve() != INVENTORY.resolve():
+        print("not applied; run chezmoi apply")
+        return
+    run(["chezmoi", "apply"])
 
 
 def apply_rendered():
@@ -282,10 +293,12 @@ def main(argv=None):
     add.add_argument("--mise-id", help="mise tool id when it differs from the name")
     scope = add.add_mutually_exclusive_group()
     scope.add_argument("--hosts", help="comma-separated host names")
+    add.add_argument("--no-apply", action="store_true", help="edit only; skip chezmoi apply")
     scope.add_argument("--groups", help="comma-separated group names")
 
     bump = sub.add_parser("bump", help="update pinned mise versions to mise latest")
     bump.add_argument("name", nargs="?")
+    bump.add_argument("--no-apply", action="store_true", help="edit only; skip chezmoi apply")
     bump.add_argument("--include-latest", action="store_true",
                       help='also pin entries currently set to "latest"')
 

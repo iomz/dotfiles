@@ -82,6 +82,11 @@ class ToolsScriptTest(unittest.TestCase):
         self.assertLess(text.index("[tools.yq]"), text.index("[homebrew_guard]"))
         self.assertTrue(text.startswith(self.original[:text.index("[tools.yq]") - 1]))
 
+    def test_scratch_inventory_is_never_applied(self):
+        # Only edits to the real inventory run chezmoi apply.
+        self.assertIn("not applied", self.tools("add", "yq", "mise", "1.0.0").stdout)
+        self.assertIn("not applied", self.tools("bump", "--no-apply").stdout)
+
     def test_add_explicit_version_and_mise_id(self):
         self.tools("add", "prettier", "mise", "3.0.0", "--mise-id", "npm:prettier")
         self.assertEqual(self.data()["prettier"], {"mise_id": "npm:prettier", "mise": "3.0.0"})
