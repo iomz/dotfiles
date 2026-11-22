@@ -2,37 +2,62 @@
 #!/bin/sh
 set -eu
 
-# apt packages selected for this host from .chezmoidata/tools.toml.
-{{- $packages := list }}
+# Linux packages selected for this host from .chezmoidata/tools.toml, one
+# "<apt name> <brew name>" pair per tool ("-" where none is declared).
+{{- $pairs := list }}
 {{- range $name, $tool := .tools }}
-{{-   if and (hasKey $tool "linux") (hasKey $tool.linux "apt") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" "linux")) "true") }}
-{{-     $packages = append $packages $tool.linux.apt }}
+{{-   if and (hasKey $tool "linux") (or (hasKey $tool.linux "apt") (hasKey $tool.linux "brew")) (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" "linux")) "true") }}
+{{-     $pairs = append $pairs (printf "%s %s" (get $tool.linux "apt" | default "-") (get $tool.linux "brew" | default "-")) }}
 {{-   end }}
 {{- end }}
-wanted="
-  {{ join "\n  " $packages }}
+pairs="
+{{ join "\n" $pairs }}
 "
 
-# Touch apt (and sudo) only for packages that are not installed yet.
-installed=$(dpkg-query -W -f '${db:Status-Abbrev} ${Package}\n' 2>/dev/null | awk '$1 == "ii" { print $2 }')
-missing=
-for package in $wanted; do
-  printf '%s\n' "$installed" | grep -qx "$package" || missing="$missing $package"
-done
-if [ -n "$missing" ]; then
+# apt is preferred where available; Homebrew covers tools without an apt
+# package and hosts without apt. Only missing packages are installed.
+has_apt=$(command -v apt-get >/dev/null 2>&1 && echo yes || true)
+has_brew=$(command -v brew >/dev/null 2>&1 && echo yes || true)
+apt_installed=$( [ -n "$has_apt" ] && dpkg-query -W -f '${db:Status-Abbrev} ${Package}\n' 2>/dev/null | awk '$1 == "ii" { print $2 }' || true)
+brew_installed=$( [ -n "$has_brew" ] && brew list -1 --formula 2>/dev/null || true)
+apt_missing=
+brew_missing=
+skipped=
+while read -r apt_name brew_name; do
+  [ -n "$apt_name" ] || continue
+  if [ "$apt_name" != - ] && [ -n "$has_apt" ]; then
+    printf '%s\n' "$apt_installed" | grep -qx "$apt_name" || apt_missing="$apt_missing $apt_name"
+  elif [ "$brew_name" != - ] && [ -n "$has_brew" ]; then
+    printf '%s\n' "$brew_installed" | grep -qx "$brew_name" || brew_missing="$brew_missing $brew_name"
+  else
+    if [ "$apt_name" != - ]; then skipped="$skipped $apt_name"; else skipped="$skipped $brew_name"; fi
+  fi
+done <<EOF_PAIRS
+$pairs
+EOF_PAIRS
+if [ -n "$apt_missing" ]; then
   sudo apt update
   # shellcheck disable=SC2086 # word splitting is intended
-  sudo apt install -y $missing
+  sudo apt install -y $apt_missing
+fi
+if [ -n "$brew_missing" ]; then
+  # shellcheck disable=SC2086 # word splitting is intended
+  HOMEBREW_NO_INSTALL_UPGRADE=1 brew install $brew_missing
+fi
+if [ -n "$skipped" ]; then
+  printf 'install-packages: skipped (no usable package manager):%s\n' "$skipped" >&2
 fi
 
 # Release upgrades disable third-party sources; re-enable mise's when needed.
-mise_source=/etc/apt/sources.list.d/extrepo_mise.sources
-if [ ! -f "$mise_source" ] || grep -qi '^Enabled: *no' "$mise_source"; then
-  sudo extrepo enable mise
-fi
-if ! command -v mise >/dev/null 2>&1; then
-  sudo apt update
-  sudo apt install -y mise
+if [ -n "$has_apt" ]; then
+  mise_source=/etc/apt/sources.list.d/extrepo_mise.sources
+  if [ ! -f "$mise_source" ] || grep -qi '^Enabled: *no' "$mise_source"; then
+    sudo extrepo enable mise
+  fi
+  if ! command -v mise >/dev/null 2>&1; then
+    sudo apt update
+    sudo apt install -y mise
+  fi
 fi
 
 {{ else if eq .chezmoi.os "darwin" -}}
