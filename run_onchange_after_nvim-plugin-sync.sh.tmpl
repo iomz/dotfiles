@@ -1,0 +1,17 @@
+{{ if ne (get . "variant" | default "workstation") "claude-cloud" -}}
+{{- $config := "" -}}
+{{- range glob (joinPath .chezmoi.sourceDir "dot_config/nvim/**") -}}
+{{-   if not (stat .).isDir }}{{ $config = print $config . "\n" (include .) }}{{ end -}}
+{{- end -}}
+#!/bin/sh
+# Sync Neovim plugins whenever the managed config changes, so a host never runs
+# new config against plugins checked out for an older one.
+# chezmoi trigger: {{ $config | sha256sum }}
+set -eu
+
+nvim=$(command -v nvim 2>/dev/null || mise which nvim 2>/dev/null || true)
+if [ -z "$nvim" ]; then
+    exit 0
+fi
+"$nvim" --headless "+Lazy! sync" +qa
+{{ end -}}
