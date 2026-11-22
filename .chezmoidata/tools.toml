@@ -1,0 +1,207 @@
+# Per-host tool inventory.
+#
+# One entry per tool; the table key is the tool's identity.
+# An entry declares either `mise` (cross-platform) or OS tables such as
+# `darwin.brew`, never both.
+# `hosts` or `groups` restrict an entry; without either it applies everywhere.
+# Hosts and groups are declared under [hosts].
+#
+# Rendered into ~/.config/mise/config.toml and the package install script.
+# Edit this file, not the rendered output.
+
+[hosts.helianthus]
+groups = ["dev"]
+
+[hosts.oxalis]
+groups = ["dev"]
+
+# --- mise ---------------------------------------------------------------
+
+[tools.ansible]
+mise_id = "pipx:ansible"
+mise = { version = "14.2.0", uvx = false, pipx_args = "--include-deps" }
+
+[tools.apm-cli]
+mise_id = "pipx:apm-cli"
+mise = "0.28.0"
+
+[tools.bat]
+mise = "latest"
+
+[tools.bitwarden-cli]
+mise_id = "npm:@bitwarden/cli"
+mise = "2026.5.0"
+
+[tools.bun]
+mise = "1.4.4"
+
+[tools.deno]
+mise = "2.9.8"
+
+[tools.direnv]
+mise = "latest"
+
+[tools.eza]
+mise = "latest"
+
+[tools.fd]
+mise = "latest"
+
+[tools.fzf]
+mise = "latest"
+
+[tools.gh]
+mise = "2.95.0"
+
+[tools.ghq]
+mise = "latest"
+
+[tools.glab]
+mise = "1.122.0"
+
+[tools.go]
+mise = "1.26.10"
+
+[tools.golangci-lint]
+mise = "2.11.2"
+
+[tools.just]
+mise = "1.52.0"
+
+[tools.lua]
+mise = "5.4.8"
+
+[tools.neovim]
+mise = "0.12.3"
+
+[tools.node]
+mise = "24.22.1"
+
+[tools.pipx]
+mise = "1.14.1"
+
+[tools.pnpm]
+mise = "10.32.0"
+
+[tools.python]
+mise = "3.14.6"
+
+[tools.rclone]
+mise = "1.75.0"
+
+[tools.restic]
+mise = "0.19.1"
+
+[tools.ripgrep]
+mise = "latest"
+
+[tools.starship]
+mise = "latest"
+
+[tools.tree-sitter]
+mise = "0.26.9"
+
+[tools.uv]
+mise = "latest"
+
+[tools.zellij]
+mise = "latest"
+
+# --- Homebrew: core bootstrap -------------------------------------------
+
+[tools.ca-certificates]
+darwin.brew = "ca-certificates"
+
+[tools.cmake]
+darwin.brew = "cmake"
+
+[tools.coreutils]
+darwin.brew = "coreutils"
+
+[tools.gawk]
+darwin.brew = "gawk"
+
+[tools.git]
+darwin.brew = "git"
+
+[tools.gnu-getopt]
+darwin.brew = "gnu-getopt"
+
+[tools.gnu-sed]
+darwin.brew = "gnu-sed"
+
+[tools.gpg]
+darwin.brew = "gpg"
+
+[tools.jq]
+darwin.brew = "jq"
+
+[tools.mise]
+darwin.brew = "mise"
+
+[tools.openssl]
+darwin.brew = "openssl"
+
+[tools.pkg-config]
+darwin.brew = "pkg-config"
+
+[tools.readline]
+darwin.brew = "readline"
+
+[tools.sqlite3]
+darwin.brew = "sqlite3"
+
+[tools.tcl-tk]
+darwin.brew = "tcl-tk"
+
+[tools.xz]
+darwin.brew = "xz"
+
+[tools.zlib]
+darwin.brew = "zlib"
+
+# --- Homebrew: daily CLIs -----------------------------------------------
+
+[tools.bat-extras]
+darwin.brew = "bat-extras"
+
+[tools.cheat]
+darwin.brew = "cheat"
+
+[tools.delta]
+darwin.brew = "delta"
+
+[tools.duf]
+darwin.brew = "duf"
+
+[tools.dust]
+darwin.brew = "dust"
+
+[tools.glow]
+darwin.brew = "glow"
+
+[tools.hyperfine]
+darwin.brew = "hyperfine"
+
+[tools.trash]
+darwin.brew = "trash"
+
+[tools.watch]
+darwin.brew = "watch"
+
+[tools.wget]
+darwin.brew = "wget"
+
+# --- Homebrew: specialized ----------------------------------------------
+
+[tools.act]
+darwin.brew = "act"
+
+[tools.antigravity-cli]
+darwin.brew = "antigravity-cli"
+
+[tools.chafa]
+darwin.brew = "chafa"
+
+[tools.goreleaser]
+darwin.brew = "goreleaser"

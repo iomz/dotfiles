@@ -1,0 +1,21 @@
+{{- /* Renders "true" when tool entry .tool applies to the host in .data. */ -}}
+{{- $tool := .tool -}}
+{{- $data := .data -}}
+{{- $host := get $data "host" | default "" -}}
+{{- $selected := true -}}
+{{- if hasKey $tool "hosts" -}}
+{{-   $selected = has $host $tool.hosts -}}
+{{- else if hasKey $tool "groups" -}}
+{{-   $hostGroups := list -}}
+{{-   if hasKey $data.hosts $host -}}
+{{-     $hostGroups = get (index $data.hosts $host) "groups" | default list -}}
+{{-   end -}}
+{{-   $selected = false -}}
+{{-   range $tool.groups -}}
+{{-     if has . $hostGroups }}{{ $selected = true }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+{{- if and $selected (hasKey $tool "arch") -}}
+{{-   $selected = has $data.chezmoi.arch $tool.arch -}}
+{{- end -}}
+{{- if $selected }}true{{ end -}}
