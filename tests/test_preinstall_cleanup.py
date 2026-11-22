@@ -18,7 +18,7 @@ MANAGED = {
     ".config/nvim/init.lua": "dot_config/nvim/init.lua",
     ".config/zsh/.zshrc": "dot_config/zsh/dot_zshrc",
     ".config/direnv/direnv.toml": "dot_config/direnv/direnv.toml",
-    ".config/mise/config.toml": "dot_config/mise/config.toml",
+    ".config/mise/config.toml": "dot_config/mise/config.toml.tmpl",
     ".config/ghostty/config.ghostty": "dot_config/ghostty/config.ghostty",
     ".config/zellij/config.kdl": "dot_config/zellij/config.kdl",
     ".config/zeno/config.yml": "dot_config/zeno/config.yml",
@@ -32,6 +32,9 @@ MANAGED = {
     ".screenrc": "dot_screenrc",
     ".tigrc": "dot_tigrc",
 }
+# Inventory data and partials rendered by managed templates.
+SUPPORT = (".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected",
+           ".chezmoitemplates/mise-config.toml")
 
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
@@ -44,7 +47,7 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.home.mkdir()
         self.source = self.root / "source"
         self.source.mkdir()
-        for name in (SCRIPT, *MANAGED.values()):
+        for name in (SCRIPT, *MANAGED.values(), *SUPPORT):
             target = self.source / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(SOURCE / name, target)
@@ -269,9 +272,6 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.assertEqual(script.strip(), "")
 
     def test_plugin_dependencies_recover_after_sweep_and_later_loss(self):
-        config_dir = self.source / "dot_config/mise"
-        config_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(SOURCE / "dot_config/mise/config.toml", config_dir / "config.toml")
         plugins = {"codex-quota-sidebar": "zod", "dir-tree-bottom": "opencode-dir-tree-tui"}
         for name, dependency in plugins.items():
             script = f"run_after_install-opencode-{name}.sh.tmpl"
@@ -321,7 +321,7 @@ case "$1" in
         ;;
     *) exit 98 ;;
 esac
-'''.replace("@NODE_VERSION@", tomllib.loads((SOURCE / "dot_config/mise/config.toml").read_text())["tools"]["node"]))
+'''.replace("@NODE_VERSION@", tomllib.loads((SOURCE / ".chezmoidata/tools.toml").read_text())["tools"]["node"]["mise"]))
         mise.chmod(0o755)
         self.env["PATH"] = str(tools) + os.pathsep + self.env["PATH"]
         self.chezmoi("apply")

@@ -1,0 +1,16 @@
+{{- /* Rendered from .chezmoidata/tools.toml; edit the inventory, not this output. */ -}}
+[tools]
+{{- range $name, $tool := .tools }}
+{{-   if and (hasKey $tool "mise") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $)) "true") }}
+{{-     $id := get $tool "mise_id" | default $name }}
+{{-     if kindIs "map" $tool.mise }}
+{{-       $pairs := list }}
+{{-       range $key, $value := $tool.mise }}
+{{-         $pairs = append $pairs (printf "%s = %s" $key (toJson $value)) }}
+{{-       end }}
+{{ toJson $id }} = { {{ join ", " $pairs }} }
+{{-     else }}
+{{ toJson $id }} = {{ toJson $tool.mise }}
+{{-     end }}
+{{-   end }}
+{{- end }}

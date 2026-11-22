@@ -44,43 +44,15 @@ fi
 #!/bin/sh
 set -eu
 
-# Core packages required to bootstrap or maintain this dotfiles environment.
+# Homebrew formulae selected for this host from .chezmoidata/tools.toml.
+{{- $formulae := list }}
+{{- range $name, $tool := .tools }}
+{{-   if and (hasKey $tool "darwin") (hasKey $tool.darwin "brew") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $)) "true") }}
+{{-     $formulae = append $formulae $tool.darwin.brew }}
+{{-   end }}
+{{- end }}
+{{- if $formulae }}
 brew install \
-  ca-certificates \
-  cmake \
-  coreutils \
-  git \
-  gnu-sed \
-  gnu-getopt \
-  gpg \
-  gawk \
-  jq \
-  mise \
-  openssl \
-  pkg-config \
-  readline \
-  sqlite3 \
-  tcl-tk \
-  xz \
-  zlib
-
-# Daily convenience CLIs managed by Homebrew.
-brew install \
-  bat-extras \
-  cheat \
-  delta \
-  duf \
-  dust \
-  glow \
-  hyperfine \
-  trash \
-  watch \
-  wget
-
-# Specialized tools that are useful on this host but not part of the core bootstrap.
-brew install \
-  act \
-  antigravity-cli \
-  chafa \
-  goreleaser
+  {{ join " \\\n  " $formulae }}
+{{- end }}
 {{ end -}}
