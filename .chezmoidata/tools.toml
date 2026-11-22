@@ -205,3 +205,11 @@ darwin.brew = "chafa"
 
 [tools.goreleaser]
 darwin.brew = "goreleaser"
+
+# --- Homebrew guard -----------------------------------------------------
+# Interactive zsh forbids Homebrew formulae named like mise-owned tools.
+# These extra names have no mise entry of their own; they are carried over
+# from the previous hand-written list.
+
+[homebrew_guard]
+extra = ["poetry", "python3", "ruby"]

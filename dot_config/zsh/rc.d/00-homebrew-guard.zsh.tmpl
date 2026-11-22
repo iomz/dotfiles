@@ -1,0 +1,12 @@
+{{- $names := .homebrew_guard.extra -}}
+{{- range $name, $tool := .tools -}}
+{{-   if hasKey $tool "mise" -}}
+{{-     $id := get $tool "mise_id" | default $name -}}
+{{-     if not (contains ":" $id) }}{{ $names = append $names $id }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+# Keep Homebrew from installing formulae for tools that mise owns.
+# Generated from .chezmoidata/tools.toml.
+if (( ${+commands[brew]} )); then
+    export HOMEBREW_FORBIDDEN_FORMULAE={{ $names | sortAlpha | uniq | join " " | quote }}
+fi
