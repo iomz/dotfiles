@@ -279,4 +279,4 @@ linux.apt = "zsh"
 # from the previous hand-written list.
 
 [homebrew_guard]
-extra = ["poetry", "python3", "ruby"]
+extra = ["python3", "ruby"]
