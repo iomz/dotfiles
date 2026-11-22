@@ -34,6 +34,10 @@ tool-bump *args:
 tool-move *args:
     python3 -I scripts/tools.py move "$@"
 
+# Re-sort the inventory into its derived sections after hand edits.
+tool-fmt:
+    python3 -I scripts/tools.py normalize
+
 # Validate the inventory and preview what chezmoi would change.
 tool-check:
     python3 -m unittest tests.test_tool_inventory

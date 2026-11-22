@@ -1,5 +1,6 @@
 """Exercise scripts/tools.py against a fixed temporary inventory."""
 
+import importlib.util
 import os
 from pathlib import Path
 import subprocess
@@ -11,12 +12,21 @@ import unittest
 
 SOURCE = Path(__file__).resolve().parents[1]
 SCRIPT = SOURCE / "scripts/tools.py"
+
+
+def load_tools_module():
+    spec = importlib.util.spec_from_file_location("tools_script", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 # Fixed fixture, independent of the real inventory's versions.
 FIXTURE = """\
 # Fixture inventory.
 
 [hosts.oxalis]
 groups = ["dev"]
+
+# --- mise ---------------------------------------------------------------
 
 [tools.ansible]
 mise_id = "pipx:ansible"
@@ -28,12 +38,19 @@ mise = "latest"
 [tools.gh]
 mise = "2.95.0"
 
+# --- macOS and Linux packages -------------------------------------------
+
 [tools.git]
 darwin.brew = "git"
 linux.apt = "git"
 
+# --- macOS packages -----------------------------------------------------
+
 [tools.wget]
+# Kept for scripts.
 darwin.brew = "wget"
+
+# --- Linux packages -----------------------------------------------------
 
 [tools.curl]
 linux.apt = "curl"
@@ -90,6 +107,38 @@ class ToolsScriptTest(unittest.TestCase):
     def test_add_explicit_version_and_mise_id(self):
         self.tools("add", "prettier", "mise", "3.0.0", "--mise-id", "npm:prettier")
         self.assertEqual(self.data()["prettier"], {"mise_id": "npm:prettier", "mise": "3.0.0"})
+
+    def sections(self):
+        """Map each section title to the entry names under it, in file order."""
+        result, title = {}, None
+        for line in self.inventory.read_text().splitlines():
+            if line.startswith("# --- "):
+                title = line[len("# --- "):].rstrip(" -")
+                result[title] = []
+            elif line.startswith("[tools."):
+                result[title].append(line[len("[tools."):-1])
+        return result
+
+    def test_normalize_is_stable_on_normalized_input(self):
+        self.assertEqual(load_tools_module().normalize(FIXTURE), FIXTURE)
+
+    def test_new_entries_land_sorted_in_their_section(self):
+        self.tools("add", "aaa", "mise", "1.0.0")
+        self.tools("add", "fd", "apt")
+        self.tools("add", "zstd", "brew")
+        sections = self.sections()
+        self.assertEqual(sections["mise"], ["aaa", "ansible", "bat", "gh"])
+        self.assertEqual(sections["Linux packages"], ["curl", "fd"])
+        self.assertEqual(sections["macOS packages"], ["wget", "zstd"])
+
+    def test_adding_the_other_os_moves_the_entry_and_orders_keys(self):
+        self.tools("add", "curl", "brew")
+        sections = self.sections()
+        self.assertEqual(sections["macOS and Linux packages"], ["curl", "git"])
+        self.assertNotIn("Linux packages", sections)  # emptied sections disappear
+        text = self.inventory.read_text()
+        self.assertIn('[tools.curl]\ndarwin.brew = "curl"\nlinux.apt = "curl"\n', text)
+        self.assertIn('[tools.wget]\n# Kept for scripts.\ndarwin.brew = "wget"\n', text)
 
     def test_add_os_package_to_existing_entry(self):
         self.tools("add", "curl", "brew")

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Edit the per-host tool inventory (.chezmoidata/tools.toml).
 
-Edits are scoped to one entry's lines, so comments and layout elsewhere stay
-untouched. Every write is re-validated with the inventory schema test and
-rolled back if it fails.
+Edits are scoped to one entry's lines. Every save then normalizes the layout
+(entries in sections derived from their managers, sorted by name, keys in a
+fixed order) and is re-validated with the inventory schema test, rolling back
+if it fails.
 """
 
 import argparse
@@ -21,6 +22,13 @@ OS_FIELDS = {"brew": "darwin.brew", "apt": "linux.apt", "linux-brew": "linux.bre
 # New entries go before this section so the guard settings stay last.
 TAIL_MARKER = "# --- Homebrew guard"
 MISE_ONLY_KEYS = ("mise_id", "mise", "hold", "homebrew_guard")
+# Sections derived from an entry's managers, in file order.
+SECTIONS = (("mise", "mise"), ("both", "macOS and Linux packages"),
+            ("darwin", "macOS packages"), ("linux", "Linux packages"))
+MARKER_WIDTH = 74
+# Key order inside an entry; a prefix ending in "." covers an OS table.
+KEY_ORDER = ("mise_id", "mise", "hold", "homebrew_guard", "bin", "darwin.", "linux.",
+             "hosts", "groups", "arch")
 
 
 class ToolError(Exception):
@@ -71,7 +79,7 @@ class Inventory:
 
     def save(self, validate=True):
         """Write atomically; restore the previous file if validation fails."""
-        tomllib.loads(self.text)
+        self.text = normalize(self.text)
         previous = self.path.read_text()
         temp = self.path.with_name(self.path.name + ".tmp")
         temp.write_text(self.text)
@@ -84,6 +92,79 @@ class Inventory:
             if result.returncode != 0:
                 self.path.write_text(previous)
                 raise ToolError("inventory validation failed; change reverted\n" + result.stderr)
+
+
+def section_marker(title):
+    marker = f"# --- {title} "
+    return marker + "-" * (MARKER_WIDTH - len(marker))
+
+
+def entry_kind(tool):
+    if "mise" in tool:
+        return "mise"
+    darwin, linux = "darwin" in tool, "linux" in tool
+    return "both" if darwin and linux else "darwin" if darwin else "linux"
+
+
+def key_rank(line):
+    key = line.split("=", 1)[0].strip()
+    for index, prefix in enumerate(KEY_ORDER):
+        if key == prefix or (prefix.endswith(".") and key.startswith(prefix)):
+            # Within an OS table the manager comes before its arch filter.
+            return (index, key.endswith(".arch"), key)
+    return (len(KEY_ORDER), False, key)
+
+
+def sort_entry_lines(lines):
+    """Order key lines; a comment stays attached to the key line after it."""
+    units, comments = [], []
+    for line in lines:
+        if line.lstrip().startswith("#"):
+            comments.append(line)
+        else:
+            units.append((key_rank(line), comments + [line]))
+            comments = []
+    ordered = [line for _, unit in sorted(units, key=lambda u: u[0]) for line in unit]
+    return ordered + comments
+
+
+def normalize(text):
+    """Return the inventory with entries in derived sections, sorted by name."""
+    data = tomllib.loads(text)
+    lines = text.splitlines(keepends=True)
+    head_end = next((i for i, line in enumerate(lines)
+                     if line.startswith(("[tools.", "# ---"))), len(lines))
+    tail_start = next((i for i, line in enumerate(lines) if line.startswith(TAIL_MARKER)),
+                      len(lines))
+    blocks, current, leading = {}, None, []
+    for line in lines[head_end:tail_start]:
+        if line.startswith("# ---"):
+            leading = []
+        elif line.startswith("[tools."):
+            current = line.strip()[len("[tools."):-1]
+            blocks[current] = {"lead": leading, "body": []}
+            leading = []
+        elif not line.strip():
+            current = None
+        elif current is None:
+            leading.append(line)
+        else:
+            blocks[current]["body"].append(line)
+    out = "".join(lines[:head_end]).rstrip("\n") + "\n"
+    for kind, title in SECTIONS:
+        names = sorted(n for n in blocks if entry_kind(data["tools"][n]) == kind)
+        if not names:
+            continue
+        out += "\n" + section_marker(title) + "\n"
+        for name in names:
+            block = blocks[name]
+            out += "\n" + "".join(block["lead"]) + f"[tools.{name}]\n"
+            out += "".join(sort_entry_lines(block["body"]))
+    if tail_start < len(lines):
+        out += "\n" + "".join(lines[tail_start:])
+    if tomllib.loads(out) != data:
+        raise ToolError("normalizing would change inventory data; file left unchanged")
+    return out
 
 
 def toml_string(value):
@@ -168,6 +249,12 @@ def command_add(args, inventory):
     inventory.save()
     print(f"added {args.name}: " + "; ".join(body))
     apply_all(args, inventory)
+
+
+def command_normalize(args, inventory):
+    before = inventory.text
+    inventory.save()
+    print("layout unchanged" if inventory.text == before else "layout normalized")
 
 
 def command_bump(args, inventory):
@@ -302,6 +389,8 @@ def main(argv=None):
     bump.add_argument("--include-latest", action="store_true",
                       help='also pin entries currently set to "latest"')
 
+    sub.add_parser("normalize", help="re-sort the inventory after hand edits")
+
     move = sub.add_parser("move", help="move a tool between mise and Homebrew (macOS)")
     move.add_argument("name")
     move.add_argument("target", choices=["mise", "brew"])
@@ -312,7 +401,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         inventory = Inventory(args.inventory)
-        {"add": command_add, "bump": command_bump, "move": command_move}[args.command](args, inventory)
+        {"add": command_add, "bump": command_bump, "move": command_move,
+         "normalize": command_normalize}[args.command](args, inventory)
     except (ToolError, subprocess.CalledProcessError) as error:
         print(f"tools: {error}", file=sys.stderr)
         return 1
