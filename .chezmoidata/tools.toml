@@ -145,7 +145,7 @@ darwin.brew = "gnu-getopt"
 darwin.brew = "gnu-sed"
 
 [tools.gpg]
-darwin.brew = "gpg"
+darwin.brew = "gnupg"
 linux.apt = "gnupg"
 
 [tools.jq]
@@ -167,7 +167,7 @@ darwin.brew = "bat-extras"
 darwin.brew = "cheat"
 
 [tools.delta]
-darwin.brew = "delta"
+darwin.brew = "git-delta"
 
 [tools.duf]
 darwin.brew = "duf"
