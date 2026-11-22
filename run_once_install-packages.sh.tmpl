@@ -2,6 +2,7 @@
 #!/bin/sh
 set -eu
 
+{{ includeTemplate "brew-path" . }}
 # Linux packages selected for this host from .chezmoidata/tools.toml, one
 # "<apt name> <brew name>" pair per tool ("-" where none is declared).
 {{- $pairs := list }}
@@ -98,6 +99,7 @@ fi
 #!/bin/sh
 set -eu
 
+{{ includeTemplate "brew-path" . }}
 # Homebrew formulae and casks selected for this host from .chezmoidata/tools.toml.
 {{- $formulae := list }}
 {{- range $name, $tool := .tools }}

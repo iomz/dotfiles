@@ -1,0 +1,28 @@
+{{- $brew := "" -}}
+{{- range (get . "brew_paths" | default list) }}{{ if stat . }}{{ $brew = . }}{{ end }}{{ end -}}
+{{- if and (eq .chezmoi.os "darwin") (not $brew) -}}
+#!/bin/sh
+# Install Homebrew on a Mac without it: macOS packages and mise come from it.
+# This renders empty once brew exists, so a skipped install is retried on the
+# next apply.
+set -eu
+
+if ! id -Gn | tr ' ' '\n' | grep -qx admin; then
+  echo 'install-homebrew: skipped: Homebrew needs an administrator account' >&2
+  exit 0
+fi
+# The installer asks for the sudo password and a confirmation.
+if [ ! -t 0 ]; then
+  echo 'install-homebrew: skipped: run chezmoi apply in a terminal to install Homebrew' >&2
+  exit 0
+fi
+installer=$(mktemp)
+trap 'rm -f "$installer"' EXIT
+# Download completely before running, so a broken transfer runs nothing.
+if curl --proto '=https' --tlsv1.2 -fsSL -o "$installer" \
+  https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh &&
+  bash "$installer"; then
+  exit 0
+fi
+echo 'install-homebrew: failed; the next chezmoi apply retries' >&2
+{{ end -}}

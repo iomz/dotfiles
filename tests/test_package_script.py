@@ -35,18 +35,13 @@ class PackageScriptCase(unittest.TestCase):
         self.root = Path(temp.name)
         source = self.root / "source"
         (source / ".chezmoitemplates").mkdir(parents=True)
-        for name in ("tool-selected", "selects-mise"):
+        for name in ("tool-selected", "selects-mise", "brew-path"):
             shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
                             source / ".chezmoitemplates" / name)
         (self.root / "home").mkdir()
         (self.root / "config.toml").write_text("")
-        rendered = subprocess.run(
-            ["chezmoi", "--source", str(source), "--destination", str(self.root / "home"),
-             "--config", str(self.root / "config.toml"), "--override-data", json.dumps(self.data),
-             "execute-template", (SOURCE / SCRIPT).read_text()],
-            env=dict(os.environ, HOME=str(self.root)), text=True, capture_output=True, check=True)
         self.script = self.root / "install-packages.sh"
-        self.script.write_text(rendered.stdout)
+        self.render(self.data)
         self.calls = self.root / "calls"
         self.bin = self.root / "bin"
         self.bin.mkdir()
@@ -56,8 +51,16 @@ class PackageScriptCase(unittest.TestCase):
         for tool in ("awk", "grep"):
             (self.bin / tool).symlink_to(shutil.which(tool))
 
-    def stub(self, name, body="exit 0"):
-        path = self.bin / name
+    def render(self, data):
+        rendered = subprocess.run(
+            ["chezmoi", "--source", str(self.root / "source"), "--destination", str(self.root / "home"),
+             "--config", str(self.root / "config.toml"), "--override-data", json.dumps(data),
+             "execute-template", (SOURCE / SCRIPT).read_text()],
+            env=dict(os.environ, HOME=str(self.root)), text=True, capture_output=True, check=True)
+        self.script.write_text(rendered.stdout)
+
+    def stub(self, name, body="exit 0", directory=None):
+        path = (directory or self.bin) / name
         path.write_text(f'#!/bin/sh\necho "{name} $*" >> "{self.calls}"\n{body}\n')
         path.chmod(0o755)
 
@@ -135,6 +138,15 @@ class LinuxPackageScriptTest(PackageScriptCase):
             pass
         self.assertEqual(os.waitpid(pid, 0)[1], 0)
         self.assertIn("sudo apt install -y pkg-a pkg-b", self.calls.read_text())
+
+    def test_brew_outside_path_is_found(self):
+        self.stub_common()
+        prefix = self.root / "homebrew" / "bin"
+        prefix.mkdir(parents=True)
+        self.stub("brew", directory=prefix)
+        self.render(dict(self.data, brew_paths=["/nonexistent/brew", str(prefix / "brew")]))
+        installs, _ = self.run_script()
+        self.assertEqual(installs, ["brew install brew-b brew-c"])
 
     def test_without_package_managers_everything_is_reported(self):
         self.stub_common()
