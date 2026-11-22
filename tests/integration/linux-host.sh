@@ -83,11 +83,14 @@ if [ "$dev" != yes ]; then
 fi
 if [ "$dev" = yes ]; then editor=nvim; else editor=vim; fi
 check "zsh sets EDITOR, VISUAL and an absolute SUDO_EDITOR" as_user zsh -ic \
-    "[[ \$EDITOR == $editor && \$VISUAL == $editor && \$SUDO_EDITOR == /*/$editor && -x \$SUDO_EDITOR ]]"
+    "[[ \$EDITOR == $editor && \$VISUAL == $editor && \$SUDO_EDITOR == /*/$editor' -i NONE' && -x \${SUDO_EDITOR% -i NONE} ]]"
 # A real sudoedit of a root-owned file, as the user would run it.
 edit_probe=/etc/sudoedit-probe
-echo before > "$edit_probe"
+secret=root-only-marker
+printf '%s\nbefore\n' "$secret" > "$edit_probe"
+chmod 600 "$edit_probe"
 cat > /tmp/edit.vim <<'EOF_VIM'
+1delete
 %s/before/after/
 wq
 EOF_VIM
@@ -98,6 +101,8 @@ EOF_ZSH
 chmod 644 /tmp/edit.vim /tmp/edit.zsh
 as_user script -qec "zsh -ic 'source /tmp/edit.zsh'" /dev/null >/dev/null 2>&1 || true
 check "sudoedit edits with SUDO_EDITOR" grep -qx after "$edit_probe"
+check "sudoedit leaves no file contents in the user's editor state" sh -c \
+    "! grep -rlaF $secret $home/.local/state $home/.viminfo 2>/dev/null"
 for vim in vim vim.tiny; do
     check "$vim starts without errors" as_user env TERM=xterm-256color sh -c \
         "out=\$(timeout 30 script -qec '$vim +qa' /dev/null) && ! printf '%s' \"\$out\" | grep -E 'E[0-9]+:|Press ENTER'"

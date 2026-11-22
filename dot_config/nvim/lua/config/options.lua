@@ -78,6 +78,14 @@ vim.opt.wildignore:append({ '*/node_modules/*' })
 
 for k, v in pairs(options) do vim.opt[k] = v end
 
+-- No persistent undo in temporary directories: sudoedit edits copies of
+-- root-only files there, and undo files would keep their contents.
+vim.api.nvim_create_autocmd("BufWritePre", {
+    group = vim.api.nvim_create_augroup("NoUndoInTempDirs", { clear = true }),
+    pattern = { "/tmp/*", "/var/tmp/*", "/private/tmp/*", "/private/var/tmp/*", "/dev/shm/*" },
+    command = "setlocal noundofile"
+})
+
 -- highlight yanked text for 1 second using the "Visual" highlight group
 local augroup_hy = vim.api.nvim_create_augroup("HighlightYank", { clear = true })
 vim.api.nvim_create_autocmd("TextYankPost", {

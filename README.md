@@ -487,7 +487,8 @@ zinit cclean
 
 Only dev hosts get Neovim and its configuration.
 Every host gets a plugin-free `~/.vimrc`, which also works with `vim-tiny`, and Linux installs `vim` through apt.
-zsh sets `EDITOR` and `VISUAL` to the first of `nvim`, `vim`, `vim.tiny` and `vi`, and `SUDO_EDITOR` to its absolute path for `sudoedit`.
+zsh sets `EDITOR` and `VISUAL` to the first of `nvim`, `vim`, `vim.tiny` and `vi`, and `SUDO_EDITOR` to its absolute path for `sudoedit`, plus `-i NONE` for Neovim and Vim so root-only file contents stay out of shada and viminfo.
+Neovim and Vim also keep no undo or backup files for temporary directories, where `sudoedit` puts its copies.
 
 Configuration lives in `~/.config/nvim`:
 
