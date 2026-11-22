@@ -28,7 +28,7 @@ class InstallHomebrewTest(unittest.TestCase):
         self.bin = self.root / "bin"
         self.bin.mkdir()
         # PATH holds only stubs and the utilities the script needs.
-        for tool in ("grep", "mktemp", "rm", "tr"):
+        for tool in ("grep", "mkdir", "mktemp", "rm", "tr"):
             (self.bin / tool).symlink_to(shutil.which(tool))
         self.stub("id", 'echo "staff admin everyone"')
         self.stub("curl", 'while [ "$1" != -o ]; do shift; done; echo "echo installer ran" > "$2"')
@@ -40,12 +40,17 @@ class InstallHomebrewTest(unittest.TestCase):
         path.chmod(0o755)
 
     def render(self, os_name="darwin", brew_paths=("/nonexistent/brew",)):
-        data = {"chezmoi": {"os": os_name}, "brew_paths": list(brew_paths)}
+        data = {"chezmoi": {"os": os_name, "homeDir": str(self.root / "home")},
+                "brew_paths": list(brew_paths)}
         return subprocess.run(
             ["chezmoi", "--source", str(self.root), "--destination", str(self.root / "home"),
              "--config", str(self.root / "config.toml"), "--override-data", json.dumps(data),
              "execute-template", (SOURCE / SCRIPT).read_text()],
             text=True, capture_output=True, check=True).stdout
+
+    @property
+    def pending(self):
+        return self.root / "home/.local/state/dotfiles/homebrew-install-pending"
 
     def run_script(self, terminal):
         script = self.root / "install-homebrew.sh"
@@ -81,6 +86,7 @@ class InstallHomebrewTest(unittest.TestCase):
         self.assertIn(URL, calls)
         self.assertIn("installer ran", calls)
         self.assertEqual(list((self.root / "tmp").iterdir()), [], "the download is removed")
+        self.assertFalse(self.pending.exists())
 
     def test_failed_install_does_not_fail_the_apply(self):
         self.stub("curl", "exit 22")
@@ -88,6 +94,20 @@ class InstallHomebrewTest(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertIn("next chezmoi apply retries", output)
         self.assertNotIn("bash ", self.calls.read_text())
+        self.assertTrue(self.pending.exists())
+
+    def test_failed_install_is_retried_even_where_brew_exists(self):
+        # The installer creates bin/brew before steps that can still fail.
+        brew = self.root / "brew"
+        brew.write_text("")
+        self.stub("bash", 'exit 1')
+        self.run_script(terminal=True)
+        self.assertTrue(self.pending.exists())
+        self.assertIn("#!/bin/sh", self.render(brew_paths=[str(brew)]))
+        self.stub("bash", 'exit 0')
+        self.run_script(terminal=True)
+        self.assertFalse(self.pending.exists())
+        self.assertEqual(self.render(brew_paths=[str(brew)]).strip(), "")
 
     def test_skips_without_a_terminal(self):
         status, stderr = self.run_script(terminal=False)

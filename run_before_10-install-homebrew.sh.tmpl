@@ -1,11 +1,14 @@
 {{- $brew := "" -}}
 {{- range (get . "brew_paths" | default list) }}{{ if stat . }}{{ $brew = . }}{{ end }}{{ end -}}
-{{- if and (eq .chezmoi.os "darwin") (not $brew) -}}
+{{- /* The installer creates bin/brew before steps that can still fail. */ -}}
+{{- $pending := joinPath .chezmoi.homeDir ".local/state/dotfiles/homebrew-install-pending" -}}
+{{- if and (eq .chezmoi.os "darwin") (or (not $brew) (stat $pending)) -}}
 #!/bin/sh
 # Install Homebrew on a Mac without it: macOS packages and mise come from it.
-# This renders empty once brew exists, so a skipped install is retried on the
-# next apply.
+# This renders empty once brew exists and no earlier install failed, so a
+# skipped or failed install is retried on the next apply.
 set -eu
+pending={{ $pending | quote }}
 
 if ! id -Gn | tr ' ' '\n' | grep -qx admin; then
   echo 'install-homebrew: skipped: Homebrew needs an administrator account' >&2
@@ -16,12 +19,15 @@ if [ ! -t 0 ]; then
   echo 'install-homebrew: skipped: run chezmoi apply in a terminal to install Homebrew' >&2
   exit 0
 fi
+mkdir -p "${pending%/*}"
+: > "$pending"
 installer=$(mktemp)
 trap 'rm -f "$installer"' EXIT
 # Download completely before running, so a broken transfer runs nothing.
 if curl --proto '=https' --tlsv1.2 -fsSL -o "$installer" \
   https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh &&
   bash "$installer"; then
+  rm -f "$pending"
   exit 0
 fi
 echo 'install-homebrew: failed; the next chezmoi apply retries' >&2
