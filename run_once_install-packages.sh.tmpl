@@ -48,6 +48,7 @@ if [ -n "$skipped" ]; then
   printf 'install-packages: skipped (no usable package manager):%s\n' "$skipped" >&2
 fi
 
+{{ if eq (includeTemplate "selects-mise" .) "true" -}}
 # Release upgrades disable third-party sources; re-enable mise's when needed.
 if [ -n "$has_apt" ]; then
   mise_source=/etc/apt/sources.list.d/extrepo_mise.sources
@@ -59,6 +60,7 @@ if [ -n "$has_apt" ]; then
     sudo apt install -y mise
   fi
 fi
+{{ end -}}
 
 {{ else if eq .chezmoi.os "darwin" -}}
 #!/bin/sh

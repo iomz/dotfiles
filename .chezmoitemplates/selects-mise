@@ -1,0 +1,6 @@
+{{- /* Renders "true" when at least one mise entry applies to this host. */ -}}
+{{- $found := false -}}
+{{- range $name, $tool := .tools -}}
+{{-   if and (hasKey $tool "mise") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $)) "true") }}{{ $found = true }}{{ end -}}
+{{- end -}}
+{{- if $found }}true{{ end -}}

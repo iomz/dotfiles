@@ -45,6 +45,10 @@ check "zsh starts without errors" as_user zsh -ic 'exit 0'
 check "zsh startup prints nothing to stderr" \
     as_user sh -c 'test -z "$(zsh -ic "exit 0" 2>&1 >/dev/null)"'
 # Capture first so a failing command cannot pass as empty output.
+dev=$(as_user chezmoi execute-template \
+    '{{ if hasKey .hosts .host }}{{ if has "dev" (index .hosts .host).groups }}yes{{ end }}{{ end }}')
+echo "== dev profile: ${dev:-no}"
+if [ "$dev" = yes ]; then
 check "mise has no missing tools" as_user sh -c 'missing=$(mise ls --missing) && test -z "$missing"'
 # First start clones plugins and compiles parsers; let that finish first.
 as_user zsh -ic 'nvim --headless "+Lazy! sync" "+sleep 60" +qa' >/dev/null 2>&1 || true
@@ -57,6 +61,11 @@ sed -i '/^Enabled:/d' "$mise_source"
 echo 'Enabled: no' >> "$mise_source"
 check "package script re-enables a disabled mise source" as_user sh -c \
     'chezmoi cat ~/install-packages.sh | sh >/dev/null 2>&1 && ! grep -qi "^Enabled: no" /etc/apt/sources.list.d/extrepo_mise.sources'
+else
+check "non-dev host has no mise" as_user sh -c \
+    '! test -e ~/.config/mise/config.toml && ! command -v mise >/dev/null && ! test -e /etc/apt/sources.list.d/extrepo_mise.sources'
+check "non-dev host has no C toolchain" sh -c '! command -v cc >/dev/null'
+fi
 # Both zsh directories are glob-loaded, so leftovers must not survive an apply.
 as_user sh -c 'touch ~/.config/zsh/rc.d/99-leftover.zsh ~/.config/zsh/functions/leftover'
 check "apply removes unmanaged zsh files" as_user sh -c \

@@ -1,3 +1,4 @@
+{{- if eq (includeTemplate "selects-mise" .) "true" -}}
 {{- $names := .homebrew_guard.extra -}}
 {{- range $name, $tool := .tools -}}
 {{-   if and (hasKey $tool "mise") (ne (toString (get $tool "homebrew_guard")) "false") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $)) "true") -}}
@@ -10,3 +11,4 @@
 if (( ${+commands[brew]} )); then
     export HOMEBREW_FORBIDDEN_FORMULAE={{ $names | sortAlpha | uniq | join " " | quote }}
 fi
+{{ end -}}

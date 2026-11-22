@@ -62,6 +62,13 @@ class InventorySchemaTest(unittest.TestCase):
                     if key in tool:
                         self.assertTrue(tool[key], f"empty {key} never matches")
 
+    def test_mise_entries_are_restricted(self):
+        for name, tool in self.tools.items():
+            if "mise" in tool:
+                with self.subTest(tool=name):
+                    self.assertTrue("hosts" in tool or "groups" in tool,
+                                    "mise entries need hosts or groups; unknown hosts get no mise")
+
     def test_arch_values(self):
         for name, tool in self.tools.items():
             with self.subTest(tool=name):

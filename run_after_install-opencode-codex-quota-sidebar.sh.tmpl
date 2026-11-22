@@ -1,3 +1,4 @@
+{{ if eq (includeTemplate "tool-selected" (dict "tool" .tools.node "data" .)) "true" -}}
 #!/bin/sh
 set -eu
 
@@ -21,3 +22,4 @@ node_version="{{ .tools.node.mise }}"
 mise install "node@$node_version"
 mise exec "node@$node_version" -- npm ci --prefix "$plugin_dir" --ignore-scripts --no-audit --no-fund
 printf '%s\n' "$lock_hash" > "$stamp"
+{{ end -}}

@@ -208,6 +208,21 @@ def set_mise_version(lines, version):
     raise ToolError("entry has no mise line")
 
 
+def require_scope(tool, args):
+    """Refuse an unrestricted mise entry before anything is installed."""
+    if not (args.hosts or args.groups or "hosts" in tool or "groups" in tool):
+        raise ToolError("mise entries need --groups or --hosts, e.g. --groups dev")
+
+
+def scope_lines(args):
+    lines = []
+    if args.hosts:
+        lines.append(f"hosts = {toml_list(args.hosts.split(','))}")
+    if args.groups:
+        lines.append(f"groups = {toml_list(args.groups.split(','))}")
+    return lines
+
+
 def command_add(args, inventory):
     if not NAME.match(args.name):
         raise ToolError(f"invalid name: {args.name} (letters, digits, - and _ only)")
@@ -215,6 +230,7 @@ def command_add(args, inventory):
     if args.manager == "mise":
         if exists:
             raise ToolError(f"{args.name} already exists; use tool-bump or tool-move")
+        require_scope({}, args)
         tool_id = args.mise_id or args.name
         version = args.package or mise_latest(tool_id)
         body = []
@@ -242,10 +258,7 @@ def command_add(args, inventory):
             apply_all(args, inventory)
             return
         body = [f"{field} = {toml_string(package)}"]
-    if args.hosts:
-        body.append(f"hosts = {toml_list(args.hosts.split(','))}")
-    if args.groups:
-        body.append(f"groups = {toml_list(args.groups.split(','))}")
+    body += scope_lines(args)
     inventory.append_entry(args.name, body)
     inventory.save()
     print(f"added {args.name}: " + "; ".join(body))
@@ -321,6 +334,9 @@ def command_move(args, inventory):
     if tool is None:
         raise ToolError(f"no entry: {args.name}")
     executable = args.bin or tool.get("bin") or args.name
+    if args.hosts or args.groups:
+        if args.target != "mise" or "hosts" in tool or "groups" in tool:
+            raise ToolError("--hosts/--groups only scope an unrestricted entry moving to mise")
     keep = [line.rstrip("\n") for line in inventory.entry_lines(args.name)
             if not re.match(r"^(" + "|".join(MISE_ONLY_KEYS + ("darwin\\.brew", "bin")) + r")\s*=", line)]
     bin_line = [f"bin = {toml_string(executable)}"] if executable != args.name else []
@@ -350,12 +366,13 @@ def command_move(args, inventory):
             raise ToolError(f"{args.name} has no darwin.brew formula")
         if any(key in tool.get("linux", {}) for key in ("apt", "brew")):
             raise ToolError(f"{args.name} also declares Linux packages; move them by hand")
+        require_scope(tool, args)
         tool_id = args.mise_id or args.name
         version = args.package or mise_latest(tool_id)
         body = [line for line in keep if not line.startswith("darwin.")]
         if args.mise_id:
             body.append(f"mise_id = {toml_string(args.mise_id)}")
-        body += bin_line + [f"mise = {toml_string(version)}"]
+        body += scope_lines(args) + bin_line + [f"mise = {toml_string(version)}"]
         # Install and verify before touching the inventory, so a failure leaves
         # the entry on Homebrew and the move can simply be retried.
         run(["mise", "install", f"{tool_id}@{version}"])
@@ -401,6 +418,9 @@ def main(argv=None):
     move.add_argument("package", nargs="?", help="formula for brew, version for mise")
     move.add_argument("--bin", help="executable name when it differs from the tool name")
     move.add_argument("--mise-id", help="mise tool id when it differs from the name")
+    move_scope = move.add_mutually_exclusive_group()
+    move_scope.add_argument("--hosts", help="comma-separated hosts, when moving to mise")
+    move_scope.add_argument("--groups", help="comma-separated groups, when moving to mise")
 
     args = parser.parse_args(argv)
     try:

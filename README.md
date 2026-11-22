@@ -88,7 +88,7 @@ The sidebar footer shows the running TUI's OpenCode version from its plugin cont
 The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
 Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
 After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.
-They bootstrap the Node version pinned in the tool inventory and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
+On hosts that select Node, they bootstrap the Node version pinned in the tool inventory and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
 The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
 It reads the same read-only ChatGPT usage endpoint as quota recovery, so both windows stay visible after one is exhausted; it makes no model calls.
 Standard **Sign in with ChatGPT** token-sharing login remains valid for model calls. For this method, the sidebar shows **Using ChatGPT plan**, explains that quota is unavailable, and offers a **Manage usage** link to `https://chatgpt.com/settings/usage`. It does not query the legacy quota endpoint, display invented percentages/reset times, or ask users to change login methods. Reviewed public OpenAI documentation does not establish a supported token-sharing quota-read API; this is not proof that no private or future API exists.
@@ -338,13 +338,14 @@ For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and sys
 
 - macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
 - Debian and Ubuntu use apt; packages come from `.chezmoidata/tools.toml`.
-- Linux installs mise through apt where possible.
+- Linux installs mise through apt where possible, and only on hosts with mise entries.
 
 ### Mise Runtimes and CLIs
 
 Global versions live in `~/.config/mise/config.toml`, rendered from `.chezmoidata/tools.toml`.
 Edit the inventory, not the rendered file: changes made by `mise use` or `mise upgrade --bump` are overwritten by the next `chezmoi apply`.
 Entries can be limited to some hosts with `hosts`, `groups` or `arch`; the inventory header describes the format.
+mise entries must declare `hosts` or `groups`, so a host without them gets neither mise nor its config and shell activation.
 Use `just tool-add`, `just tool-bump`, `just tool-move` and `just tool-check` for routine changes; each edit is validated and reverted if invalid.
 `tool-add` and `tool-bump` run `chezmoi apply` afterwards (skip with `--no-apply`); committing stays manual.
 

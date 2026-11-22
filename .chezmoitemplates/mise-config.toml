@@ -6,4 +6,4 @@
 {{-   end }}
 {{- end }}
 {{- /* toToml keeps nested options (e.g. install_env) valid TOML. */ -}}
-{{ toToml (dict "tools" $tools) }}
+{{- if $tools }}{{ toToml (dict "tools" $tools) }}{{ end }}

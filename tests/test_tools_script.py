@@ -31,12 +31,15 @@ groups = ["dev"]
 [tools.ansible]
 mise_id = "pipx:ansible"
 mise = { version = "14.2.0", uvx = false, pipx_args = "--include-deps" }
+groups = ["dev"]
 
 [tools.bat]
 mise = "latest"
+groups = ["dev"]
 
 [tools.gh]
 mise = "2.95.0"
+groups = ["dev"]
 
 # --- macOS and Linux packages -------------------------------------------
 
@@ -101,12 +104,14 @@ class ToolsScriptTest(unittest.TestCase):
 
     def test_scratch_inventory_is_never_applied(self):
         # Only edits to the real inventory run chezmoi apply.
-        self.assertIn("not applied", self.tools("add", "yq", "mise", "1.0.0").stdout)
+        self.assertIn("not applied", self.tools("add", "yq", "mise", "1.0.0", "--groups", "dev").stdout)
         self.assertIn("not applied", self.tools("bump", "--no-apply").stdout)
 
     def test_add_explicit_version_and_mise_id(self):
-        self.tools("add", "prettier", "mise", "3.0.0", "--mise-id", "npm:prettier")
-        self.assertEqual(self.data()["prettier"], {"mise_id": "npm:prettier", "mise": "3.0.0"})
+        self.tools("add", "prettier", "mise", "3.0.0", "--mise-id", "npm:prettier",
+                   "--groups", "dev")
+        self.assertEqual(self.data()["prettier"], {"mise_id": "npm:prettier", "mise": "3.0.0",
+                                                   "groups": ["dev"]})
 
     def sections(self):
         """Map each section title to the entry names under it, in file order."""
@@ -123,7 +128,7 @@ class ToolsScriptTest(unittest.TestCase):
         self.assertEqual(load_tools_module().normalize(FIXTURE), FIXTURE)
 
     def test_new_entries_land_sorted_in_their_section(self):
-        self.tools("add", "aaa", "mise", "1.0.0")
+        self.tools("add", "aaa", "mise", "1.0.0", "--groups", "dev")
         self.tools("add", "fd", "apt")
         self.tools("add", "zstd", "brew")
         sections = self.sections()
@@ -152,6 +157,7 @@ class ToolsScriptTest(unittest.TestCase):
             ("add", "yq", "mise", "--hosts", "oxalsi"),  # unknown host, reverted
             ("add", "wget2", "brew", "wget"),            # package name reused
             ("add", "bad.name", "mise"),
+            ("add", "yq", "mise", "1.0.0"),              # mise without a scope
         ]
         for case in cases:
             with self.subTest(case=case):
@@ -192,6 +198,9 @@ class ToolsScriptTest(unittest.TestCase):
         self.assert_unchanged(self.tools("move", "git", "brew", check=False))
         self.assert_unchanged(self.tools("move", "gh", "mise", check=False))
         self.assert_unchanged(self.tools("move", "curl", "mise", check=False))
+        unscoped = self.tools("move", "wget", "mise", "1.0.0", check=False)
+        self.assert_unchanged(unscoped)
+        self.assertIn("need --groups or --hosts", unscoped.stderr)
 
 
 if __name__ == "__main__":

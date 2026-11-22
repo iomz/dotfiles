@@ -20,6 +20,7 @@ DATA = {
         "both": {"linux": {"apt": "pkg-b", "brew": "brew-b"}},
         "brewonly": {"linux": {"brew": "brew-c"}},
         "have": {"linux": {"apt": "pkg-have"}},
+        "runtime": {"mise": "1"},
     },
 }
 
@@ -32,8 +33,9 @@ class LinuxPackageScriptTest(unittest.TestCase):
         self.root = Path(temp.name)
         source = self.root / "source"
         (source / ".chezmoitemplates").mkdir(parents=True)
-        shutil.copyfile(SOURCE / ".chezmoitemplates/tool-selected",
-                        source / ".chezmoitemplates/tool-selected")
+        for name in ("tool-selected", "selects-mise"):
+            shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
+                            source / ".chezmoitemplates" / name)
         (self.root / "home").mkdir()
         (self.root / "config.toml").write_text("")
         rendered = subprocess.run(

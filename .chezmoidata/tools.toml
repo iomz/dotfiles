@@ -5,6 +5,7 @@
 # `darwin.brew`, never both. `mise_id` overrides the mise tool name, e.g.
 # for backend-prefixed ids such as "pipx:ansible".
 # `hosts` or `groups` restrict an entry; without either it applies everywhere.
+# mise entries must declare one of them, so unknown hosts stay free of mise.
 # Hosts and groups are declared under [hosts].
 # `arch` (list of chezmoi arch values) further limits an entry.
 # `arch` inside an OS table (e.g. `linux.arch`) limits only that OS.
@@ -32,53 +33,69 @@ groups = ["dev"]
 [tools.ansible]
 mise_id = "pipx:ansible"
 mise = { version = "15.0.0", uvx = false, pipx_args = "--include-deps" }
+groups = ["dev"]
 
 [tools.apm-cli]
 mise_id = "pipx:apm-cli"
 mise = "0.36.1"
+groups = ["dev"]
 
 [tools.bat]
 mise = "0.26.1"
+groups = ["dev"]
 
 [tools.bitwarden-cli]
 mise_id = "npm:@bitwarden/cli"
 mise = "2026.11.0"
+groups = ["dev"]
 
 [tools.bun]
 mise = "1.4.5"
+groups = ["dev"]
 
 [tools.deno]
 mise = "2.9.8"
+groups = ["dev"]
 
 [tools.direnv]
 mise = "2.38.2"
+groups = ["dev"]
 
 [tools.eza]
 mise = "0.23.5"
+groups = ["dev"]
 
 [tools.fd]
 mise = "10.5.2"
+groups = ["dev"]
 
 [tools.fzf]
 mise = "0.75.0"
+groups = ["dev"]
 
 [tools.gh]
 mise = "2.105.0"
+groups = ["dev"]
 
 [tools.ghq]
 mise = "1.12.0"
+groups = ["dev"]
 
 [tools.glab]
 mise = "1.131.0"
+groups = ["dev"]
 
 [tools.go]
 mise = "1.27.4"
+groups = ["dev"]
 
 [tools.golangci-lint]
 mise = "2.15.0"
+groups = ["dev"]
 
 [tools.just]
 mise = "1.59.0"
+groups = ["dev"]
 
 [tools.lua]
 mise = "5.5.1"
@@ -89,39 +106,51 @@ groups = ["dev"]
 
 [tools.neovim]
 mise = "0.12.6"
+groups = ["dev"]
 
 [tools.node]
 mise = "26.13.1"
+groups = ["dev"]
 
 [tools.pipx]
 mise = "1.18.19"
+groups = ["dev"]
 
 [tools.pnpm]
 mise = "12.21.0"
+groups = ["dev"]
 
 [tools.python]
 mise = "3.15.2"
+groups = ["dev"]
 
 [tools.rclone]
 mise = "1.76.0"
+groups = ["dev"]
 
 [tools.restic]
 mise = "0.20.0"
+groups = ["dev"]
 
 [tools.ripgrep]
 mise = "15.2.0"
+groups = ["dev"]
 
 [tools.starship]
 mise = "1.27.0"
+groups = ["dev"]
 
 [tools.tree-sitter]
 mise = "0.27.2"
+groups = ["dev"]
 
 [tools.uv]
 mise = "0.13.9"
+groups = ["dev"]
 
 [tools.zellij]
 mise = "0.46.0"
+groups = ["dev"]
 
 # --- macOS and Linux packages -------------------------------------------
 
@@ -204,6 +233,7 @@ darwin.brew = "jq"
 
 [tools.mise]
 darwin.brew = "mise"
+groups = ["dev"]
 
 [tools.trash]
 darwin.brew = "trash"
