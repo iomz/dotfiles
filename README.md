@@ -243,12 +243,12 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 
 ## Responsibility Split
 
-| Layer    | Owns                                                                                                                                                           | Source of truth                                                             |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `.chezmoidata/tools.toml` (brew), `run_once_install-packages.sh.tmpl` (apt) |
-| mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                                                   |
-| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh`                                 |
-| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository                                            |
+| Layer    | Owns                                                                                                                                                           | Source of truth                             |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `.chezmoidata/tools.toml`                   |
+| mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                   |
+| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
+| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
 
 Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
 
@@ -277,14 +277,14 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 
 ## Common Operations
 
-| Change                               | Edit                                                                        | Apply or verify                                                              |
-| ------------------------------------ | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Add OS dependency                    | `.chezmoidata/tools.toml` (brew), `run_once_install-packages.sh.tmpl` (apt) | Review target OS branch; run package manager manually on existing hosts      |
-| Add or update runtime/CLI            | `.chezmoidata/tools.toml`                                                   | `chezmoi apply` (runs `mise install` and `mise reshim`), then `mise current` |
-| Add zsh plugin or completion snippet | `dot_config/zsh/rc.d/02-plugin-manager.zsh`                                 | Start interactive zsh and verify plugin/widget/completion availability       |
-| Change zsh integration               | Relevant numbered file under `dot_config/zsh/rc.d/`                         | `zsh -n <file>`, then start interactive zsh                                  |
-| Change managed dotfile               | Corresponding chezmoi source path                                           | `chezmoi diff`, then `chezmoi apply`                                         |
-| Add managed file                     | Target file through `chezmoi add`                                           | Inspect source and `chezmoi diff` before commit                              |
+| Change                               | Edit                                                | Apply or verify                                                              |
+| ------------------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Add OS dependency                    | `.chezmoidata/tools.toml`                           | Review target OS branch; run package manager manually on existing hosts      |
+| Add or update runtime/CLI            | `.chezmoidata/tools.toml`                           | `chezmoi apply` (runs `mise install` and `mise reshim`), then `mise current` |
+| Add zsh plugin or completion snippet | `dot_config/zsh/rc.d/02-plugin-manager.zsh`         | Start interactive zsh and verify plugin/widget/completion availability       |
+| Change zsh integration               | Relevant numbered file under `dot_config/zsh/rc.d/` | `zsh -n <file>`, then start interactive zsh                                  |
+| Change managed dotfile               | Corresponding chezmoi source path                   | `chezmoi diff`, then `chezmoi apply`                                         |
+| Add managed file                     | Target file through `chezmoi add`                   | Inspect source and `chezmoi diff` before commit                              |
 
 ## Installation and Package Management
 
@@ -337,7 +337,7 @@ Use `starship timings` in a slow directory to identify modules to disable rather
 For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
 - macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
-- Debian and Ubuntu use apt.
+- Debian and Ubuntu use apt; packages come from `.chezmoidata/tools.toml`.
 - Linux installs mise through apt where possible.
 
 ### Mise Runtimes and CLIs
