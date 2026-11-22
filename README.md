@@ -88,7 +88,7 @@ The sidebar footer shows the running TUI's OpenCode version from its plugin cont
 The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
 Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
 After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.
-They bootstrap the Node version pinned in the managed mise config and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
+They bootstrap the Node version pinned in the tool inventory and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
 The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
 It reads the same read-only ChatGPT usage endpoint as quota recovery, so both windows stay visible after one is exhausted; it makes no model calls.
 Standard **Sign in with ChatGPT** token-sharing login remains valid for model calls. For this method, the sidebar shows **Using ChatGPT plan**, explains that quota is unavailable, and offers a **Manage usage** link to `https://chatgpt.com/settings/usage`. It does not query the legacy quota endpoint, display invented percentages/reset times, or ask users to change login methods. Reviewed public OpenAI documentation does not establish a supported token-sharing quota-read API; this is not proof that no private or future API exists.
@@ -243,14 +243,14 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 
 ## Responsibility Split
 
-| Layer    | Owns                                                                                                                                                           | Source of truth                             |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `run_once_install-packages.sh.tmpl`         |
-| mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `dot_config/mise/config.toml`               |
-| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh` |
-| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
+| Layer    | Owns                                                                                                                                                           | Source of truth                                                             |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `.chezmoidata/tools.toml` (brew), `run_once_install-packages.sh.tmpl` (apt) |
+| mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                                                   |
+| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/rc.d/02-plugin-manager.zsh`                                 |
+| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository                                            |
 
-Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
+Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
 
 ## Public Dotfiles Safety
 
@@ -277,14 +277,14 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 
 ## Common Operations
 
-| Change                               | Edit                                                | Apply or verify                                                         |
-| ------------------------------------ | --------------------------------------------------- | ----------------------------------------------------------------------- |
-| Add OS dependency                    | `run_once_install-packages.sh.tmpl`                 | Review target OS branch; run package manager manually on existing hosts |
-| Add or update runtime/CLI            | `dot_config/mise/config.toml`                       | `mise install`, `mise reshim`, then `mise current`                      |
-| Add zsh plugin or completion snippet | `dot_config/zsh/rc.d/02-plugin-manager.zsh`         | Start interactive zsh and verify plugin/widget/completion availability  |
-| Change zsh integration               | Relevant numbered file under `dot_config/zsh/rc.d/` | `zsh -n <file>`, then start interactive zsh                             |
-| Change managed dotfile               | Corresponding chezmoi source path                   | `chezmoi diff`, then `chezmoi apply`                                    |
-| Add managed file                     | Target file through `chezmoi add`                   | Inspect source and `chezmoi diff` before commit                         |
+| Change                               | Edit                                                                        | Apply or verify                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Add OS dependency                    | `.chezmoidata/tools.toml` (brew), `run_once_install-packages.sh.tmpl` (apt) | Review target OS branch; run package manager manually on existing hosts      |
+| Add or update runtime/CLI            | `.chezmoidata/tools.toml`                                                   | `chezmoi apply` (runs `mise install` and `mise reshim`), then `mise current` |
+| Add zsh plugin or completion snippet | `dot_config/zsh/rc.d/02-plugin-manager.zsh`                                 | Start interactive zsh and verify plugin/widget/completion availability       |
+| Change zsh integration               | Relevant numbered file under `dot_config/zsh/rc.d/`                         | `zsh -n <file>`, then start interactive zsh                                  |
+| Change managed dotfile               | Corresponding chezmoi source path                                           | `chezmoi diff`, then `chezmoi apply`                                         |
+| Add managed file                     | Target file through `chezmoi add`                                           | Inspect source and `chezmoi diff` before commit                              |
 
 ## Installation and Package Management
 
@@ -336,13 +336,15 @@ Use `starship timings` in a slow directory to identify modules to disable rather
 
 For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
-- macOS uses Homebrew.
+- macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
 - Debian and Ubuntu use apt.
 - Linux installs mise through apt where possible.
 
 ### Mise Runtimes and CLIs
 
-Global versions live in `~/.config/mise/config.toml`, managed from `dot_config/mise/config.toml`.
+Global versions live in `~/.config/mise/config.toml`, rendered from `.chezmoidata/tools.toml`.
+Edit the inventory, not the rendered file: changes made by `mise use` or `mise upgrade --bump` are overwritten by the next `chezmoi apply`.
+Entries can be limited to some hosts with `hosts`, `groups` or `arch`; the inventory header describes the format.
 
 Install and verify configured tools:
 
@@ -376,7 +378,7 @@ Do not run `mise use bw`; `bw` is not a mise registry tool.
 ### Neovim Providers
 
 Neovim uses mise shims for Python and Ruby providers.
-Python is configured in `dot_config/mise/config.toml`; a Ruby runtime must be available separately for the Ruby provider.
+Python is configured in `.chezmoidata/tools.toml`; a Ruby runtime must be available separately for the Ruby provider.
 Install provider packages in their corresponding runtimes:
 
 ```zsh
