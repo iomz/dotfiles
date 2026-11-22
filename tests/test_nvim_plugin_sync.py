@@ -28,7 +28,7 @@ class NvimPluginSyncTest(unittest.TestCase):
         self.source = root / "source"
         (self.source / "dot_config/nvim/lua").mkdir(parents=True)
         (self.source / ".chezmoitemplates").mkdir()
-        for name in ("is-dev", "tool-selected"):
+        for name in ("is-dev", "tool-selected", "brew-path"):
             shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
                             self.source / ".chezmoitemplates" / name)
         shutil.copyfile(SOURCE / SCRIPT, self.source / SCRIPT)

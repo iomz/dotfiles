@@ -1,0 +1,11 @@
+# chezmoi passes on the caller's PATH, which lacks Homebrew on a fresh host or
+# right after run_before_10-install-homebrew installed it.
+if ! command -v brew >/dev/null 2>&1; then
+  for brew in{{ range (get . "brew_paths" | default list) }} {{ . | quote }}{{ end }}; do
+    if [ -x "$brew" ]; then
+      PATH=${brew%/*}:$PATH
+      export PATH
+      break
+    fi
+  done
+fi

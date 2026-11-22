@@ -124,6 +124,7 @@ For macOS/Linux workstations:
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 ```
 
+On a Mac without the Xcode Command Line Tools, `/usr/bin/git` only offers to install them, so add `--use-builtin-git true` before `iomz`; the Homebrew installer adds them later.
 The host profile prompt decides how much gets installed.
 Hosts in the `dev` group of `.chezmoidata/tools.toml` get the full setup; any other name gets a light one without mise and zsh plugins.
 
@@ -338,6 +339,8 @@ Use `starship timings` in a slow directory to identify modules to disable rather
 For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
 - macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
+  Without Homebrew, `run_before_10-install-homebrew.sh.tmpl` first runs its official installer, which needs an administrator account and a terminal for the password; otherwise it says why and retries on the next apply.
+  Scripts find `brew` in its standard locations even when it is not on `PATH` yet.
 - Debian and Ubuntu use apt; packages come from `.chezmoidata/tools.toml`.
 - Without root or usable sudo, Linux falls back to Homebrew, or skips the packages and prints how to retry.
   sudo can only ask for a password when `chezmoi apply` runs in a terminal.

@@ -9,6 +9,7 @@
 # chezmoi trigger: {{ $config | sha256sum }}
 set -eu
 
+{{ includeTemplate "brew-path" . }}
 nvim=$(command -v nvim 2>/dev/null || mise which nvim 2>/dev/null || true)
 if [ -z "$nvim" ]; then
     exit 0

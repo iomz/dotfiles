@@ -3,6 +3,7 @@
 # chezmoi trigger: {{ includeTemplate "mise-config.toml" . | sha256sum }}
 set -eu
 
+{{ includeTemplate "brew-path" . }}
 if command -v mise >/dev/null 2>&1; then
   mise install
   mise reshim
