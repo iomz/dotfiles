@@ -67,11 +67,9 @@ spectrum_all() {
 
 
 # Prompt {{{
-# Prefer Starship when available. Fall back to Pure for full interactive shells.
-# Tiny setup avoids plugin-managed prompts.
-if [[ -n "${TINY_CHEZMOI}" ]]; then
-    PROMPT='%n@%m:%~ %# '
-elif command -v starship >/dev/null 2>&1; then
+# Prefer Starship when available. Fall back to Pure where zinit is loaded
+# (dev hosts), else to a plain prompt.
+if command -v starship >/dev/null 2>&1; then
     eval "$(starship init zsh)"
 elif (( ${+functions[zinit]} )); then
     eval "MODE_CURSOR_"{'SEARCH="#ff00ff blinking underline"','VICMD="green block"','VIINS="#ffff00  bar"'}";"

@@ -26,7 +26,7 @@ MANAGED = {
     ".config/vale/.vale.ini": "dot_config/vale/dot_vale.ini",
     ".config/yamlfmt/.yamlfmt": "dot_config/yamlfmt/dot_yamlfmt",
     ".hammerspoon/init.lua": "dot_hammerspoon/init.lua",
-    ".profile": "dot_profile.tmpl",
+    ".profile": "create_dot_profile.tmpl",
     ".inputrc": "dot_inputrc",
     ".mostrc": "dot_mostrc",
     ".screenrc": "dot_screenrc",
@@ -34,7 +34,8 @@ MANAGED = {
 }
 # Inventory data and partials rendered by managed templates.
 SUPPORT = (".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected",
-           ".chezmoitemplates/mise-config.toml", ".chezmoitemplates/selects-mise")
+           ".chezmoitemplates/mise-config.toml", ".chezmoitemplates/selects-mise",
+           ".chezmoitemplates/is-dev")
 
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")

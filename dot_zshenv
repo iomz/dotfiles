@@ -20,14 +20,6 @@ setopt NO_GLOBAL_RCS
 (( ${+TERM} )) || export TERM="xterm-256color"; COLORTERM="truecolor"
 (( ${+USER} )) || export USER="${USERNAME}"
 
-# Mirror the only current .profile-managed shell option without sourcing .profile
-# for every zsh process.
-if [[ -z "${TINY_CHEZMOI}" && "$(uname -s)" == "Linux" ]]; then
-    case "$(uname -m)" in
-        aarch64|arm64) export TINY_CHEZMOI=1 ;;
-    esac
-fi
-
 # Program options
 export \
     ANSIBLE_SCP_IF_SSH=y \

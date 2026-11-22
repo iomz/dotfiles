@@ -1,3 +1,4 @@
+{{ if eq (includeTemplate "is-dev" .) "true" -}}
 #!/usr/bin/env zsh
 #
 # zeno.zsh
@@ -6,7 +7,6 @@
 # after mise activation.
 
 [[ -o interactive && -t 0 ]] || return
-[[ -n "${TINY_CHEZMOI}" ]] && return
 
 # fallback if snippet not matched (default: self-insert)
 export ZENO_AUTO_SNIPPET_FALLBACK=self-insert
@@ -52,3 +52,4 @@ fi
 
 zinit lucid depth'1' blockf for \
     @yuki-yano/zeno.zsh
+{{ end -}}

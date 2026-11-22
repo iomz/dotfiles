@@ -11,6 +11,7 @@ import unittest
 SOURCE = Path(__file__).resolve().parents[1]
 MISE_FILES = (".config/mise/config.toml", ".config/zsh/rc.d/04-mise.zsh",
               ".config/zsh/rc.d/00-homebrew-guard.zsh")
+DEV_SHELL_FILES = (".config/zsh/rc.d/02-plugin-manager.zsh", ".config/zsh/rc.d/05-zeno.zsh")
 MISE_SCRIPTS = ("mise-install.sh", "install-opencode-codex-quota-sidebar.sh",
                 "install-opencode-dir-tree-bottom.sh")
 
@@ -39,20 +40,26 @@ class HostProfileTest(unittest.TestCase):
         # Files only: scripts install packages.
         self.chezmoi(host, "apply", "--force", "--exclude", "scripts")
 
-    def test_dev_host_gets_mise(self):
+    def test_dev_host_gets_mise_and_plugins(self):
         self.apply("sazanka")
-        for name in MISE_FILES:
+        for name in MISE_FILES + DEV_SHELL_FILES:
             self.assertTrue((self.home / name).is_file(), name)
         for name in MISE_SCRIPTS:
             self.assertTrue(self.chezmoi("sazanka", "cat", str(self.home / name)).strip(), name)
 
-    def test_leaving_dev_removes_mise(self):
+    def test_leaving_dev_removes_mise_and_plugins(self):
         self.apply("sazanka")
         self.apply("tinybox")
-        for name in MISE_FILES:
+        for name in MISE_FILES + DEV_SHELL_FILES:
             self.assertFalse((self.home / name).exists(), name)
         for name in MISE_SCRIPTS:
             self.assertEqual(self.chezmoi("tinybox", "cat", str(self.home / name)).strip(), "", name)
+
+    def test_existing_profile_is_left_alone(self):
+        profile = self.home / ".profile"
+        profile.write_text("# host-local\n")
+        self.apply("tinybox")
+        self.assertEqual(profile.read_text(), "# host-local\n")
 
     def test_zsh_directories_are_exact(self):
         self.apply("tinybox")

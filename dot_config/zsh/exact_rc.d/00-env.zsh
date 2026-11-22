@@ -26,29 +26,27 @@ fpath=(
 )
 
 # Brew
-if [[ -z "${TINY_CHEZMOI}" ]]; then # not TINY_CHEZMOI
-    if [[ -x /opt/homebrew/bin/brew ]]; then
-        BREW_LOCATION="/opt/homebrew/bin/brew"
-    elif [[ -x /usr/local/bin/brew ]]; then
-        BREW_LOCATION="/usr/local/bin/brew"
-    elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
-        BREW_LOCATION="/home/linuxbrew/.linuxbrew/bin/brew"
-    elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
-        BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
+if [[ -x /opt/homebrew/bin/brew ]]; then
+    BREW_LOCATION="/opt/homebrew/bin/brew"
+elif [[ -x /usr/local/bin/brew ]]; then
+    BREW_LOCATION="/usr/local/bin/brew"
+elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    BREW_LOCATION="/home/linuxbrew/.linuxbrew/bin/brew"
+elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
+    BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
+fi
+if [[ -n "${BREW_LOCATION}" ]]; then
+    eval "$("$BREW_LOCATION" shellenv)"
+    unset BREW_LOCATION
+    path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
+    fpath=( $HOMEBREW_PREFIX/share/zsh/site-functions(/N) $fpath )
+    # brew curl
+    if [[ -x /opt/homebrew/opt/curl/bin/curl ]]; then
+        path=( /opt/homebrew/opt/curl/bin $path )
     fi
-    if [[ -n "${BREW_LOCATION}" ]]; then
-        eval "$("$BREW_LOCATION" shellenv)"
-        unset BREW_LOCATION
-        path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
-        fpath=( $HOMEBREW_PREFIX/share/zsh/site-functions(/N) $fpath )
-        # brew curl
-        if [[ -x /opt/homebrew/opt/curl/bin/curl ]]; then
-            path=( /opt/homebrew/opt/curl/bin $path )
-        fi
-        # brew gnu awk
-        if [[ -x /opt/homebrew/opt/gawk/libexec/gnubin/awk ]]; then
-            path=( /opt/homebrew/opt/gawk/libexec/gnubin $path )
-        fi
+    # brew gnu awk
+    if [[ -x /opt/homebrew/opt/gawk/libexec/gnubin/awk ]]; then
+        path=( /opt/homebrew/opt/gawk/libexec/gnubin $path )
     fi
 fi
 
@@ -60,7 +58,7 @@ path=( $GOPATH/bin(N-/) $HOME/.ghg/bin(N-/) $path )
 path=(/usr/local/opt/llvm/bin(N-/) $path)
 
 # Rust - cargo, rustup and rustc
-if [[ -z "${TINY_CHEZMOI}" ]] && [[ -x $HOME/.cargo/bin/cargo ]]; then
+if [[ -x $HOME/.cargo/bin/cargo ]]; then
     path=($HOME/.cargo/bin(N-/) $path)
     source $HOME/.cargo/env
 fi

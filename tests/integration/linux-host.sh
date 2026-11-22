@@ -66,6 +66,20 @@ check "non-dev host has no mise" as_user sh -c \
     '! test -e ~/.config/mise/config.toml && ! command -v mise >/dev/null && ! test -e /etc/apt/sources.list.d/extrepo_mise.sources'
 check "non-dev host has no C toolchain" sh -c '! command -v cc >/dev/null'
 fi
+check "bash login shell reads .bashrc and ~/.local/bin" as_user bash -lic \
+    'alias ll >/dev/null && case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) exit 1 ;; esac'
+# Most of rc.d returns early without a terminal, so start zsh on a pseudo-terminal.
+tty_zsh() {
+    as_user script -qec "zsh -ilc '$1' 2>$home/zsh.err" /dev/null
+}
+if [ "$dev" = yes ]; then
+    tty_zsh exit >/dev/null 2>&1 || true # the first start clones plugins
+fi
+check "zsh on a terminal loads the interactive rc.d" tty_zsh '(( ${+widgets[insert-line-break]} ))'
+check "zsh on a terminal prints nothing to stderr" sh -c "! grep . $home/zsh.err"
+if [ "$dev" != yes ]; then
+    check "non-dev zsh downloads no plugins" as_user sh -c '! test -e ~/.local/share/zinit'
+fi
 # Both zsh directories are glob-loaded, so leftovers must not survive an apply.
 as_user sh -c 'touch ~/.config/zsh/rc.d/99-leftover.zsh ~/.config/zsh/functions/leftover'
 check "apply removes unmanaged zsh files" as_user sh -c \

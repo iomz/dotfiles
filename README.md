@@ -124,7 +124,8 @@ For macOS/Linux workstations:
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 ```
 
-Use `TINY_CHEZMOI=1` for a smaller shell setup.
+The host profile prompt decides how much gets installed.
+Hosts in the `dev` group of `.chezmoidata/tools.toml` get the full setup; any other name gets a light one without mise and zsh plugins.
 
 When `.chezmoi.toml.tmpl` changes, regenerate machine-local chezmoi data before applying files:
 
@@ -247,7 +248,7 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `.chezmoidata/tools.toml`                   |
 | mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                   |
-| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh` |
+| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
 | chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
 
 Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
@@ -281,7 +282,7 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 | ------------------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------- |
 | Add OS dependency                    | `.chezmoidata/tools.toml`                           | Review target OS branch; run package manager manually on existing hosts      |
 | Add or update runtime/CLI            | `.chezmoidata/tools.toml`                           | `chezmoi apply` (runs `mise install` and `mise reshim`), then `mise current` |
-| Add zsh plugin or completion snippet | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh`   | Start interactive zsh and verify plugin/widget/completion availability       |
+| Add zsh plugin or completion snippet | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` | Start interactive zsh and verify plugin/widget/completion availability       |
 | Change zsh integration               | Relevant numbered file under `dot_config/zsh/exact_rc.d/` | `zsh -n <file>`, then start interactive zsh                                  |
 | Change managed dotfile               | Corresponding chezmoi source path                   | `chezmoi diff`, then `chezmoi apply`                                         |
 | Add managed file                     | Target file through `chezmoi add`                   | Inspect source and `chezmoi diff` before commit                              |
@@ -389,7 +390,7 @@ The sync is best effort: a failed plugin update does not fail the apply, so chec
 
 ### Interactive Shell Integrations
 
-Zinit manages zsh-specific integrations only. It should not be used as a general binary installer.
+Zinit loads only on dev hosts and manages zsh-specific integrations only. It should not be used as a general binary installer.
 
 Managed by zinit:
 
@@ -426,8 +427,9 @@ Default zsh order:
 .zshenv -> .zprofile -> .zshrc -> .zlogin -> .zlogout
 ```
 
-On Linux ARM, `.profile` and `.zshenv` enable `TINY_CHEZMOI` by default.
-Set `TINY_CHEZMOI=1` to skip heavier interactive integrations.
+Hosts outside the `dev` group keep the options, completion, key bindings and aliases, with a plain prompt and no zinit, plugins, zeno or mise.
+chezmoi does not change the login shell.
+On Linux it creates `~/.profile` when missing, so bash logins still read `~/.bashrc`; an existing file is left untouched.
 
 ### rc.d Layout
 

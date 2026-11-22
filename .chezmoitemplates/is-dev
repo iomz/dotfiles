@@ -1,0 +1,2 @@
+{{- /* Renders "true" on hosts in the dev group; every other host is a light one. */ -}}
+{{- includeTemplate "tool-selected" (dict "tool" (dict "groups" (list "dev")) "data" .) -}}
