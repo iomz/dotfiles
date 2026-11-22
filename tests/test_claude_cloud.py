@@ -113,7 +113,8 @@ class ClaudeCloudTest(unittest.TestCase):
                                         str(self.home / ".apm/apm.yml")).stdout
                 self.assertIn("iomz/brain-vault/Skills/Common/brain-vault#", manifest)
                 self.assertEqual(len([line for line in manifest.splitlines()
-                                      if line.startswith("    - ")]), 13)
+                                      if line.startswith("    - ")]), 6)
+                self.assertNotIn("iomz/skills", manifest)
                 self.chezmoi("--override-data", override, "apply", "--dry-run")
 
     def test_legacy_config_defaults_to_workstation(self):

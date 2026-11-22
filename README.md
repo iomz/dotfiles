@@ -93,7 +93,7 @@ The custom Usage panel sends its active location with quota RPC requests; quota 
 It reads the same read-only ChatGPT usage endpoint as quota recovery, so both windows stay visible after one is exhausted; it makes no model calls.
 Standard **Sign in with ChatGPT** token-sharing login remains valid for model calls. For this method, the sidebar shows **Using ChatGPT plan**, explains that quota is unavailable, and offers a **Manage usage** link to `https://chatgpt.com/settings/usage`. It does not query the legacy quota endpoint, display invented percentages/reset times, or ask users to change login methods. Reviewed public OpenAI documentation does not establish a supported token-sharing quota-read API; this is not proof that no private or future API exists.
 Legacy Codex OAuth remains an optional compatibility path for usage percentages and quota recovery. Users who want those features can explicitly choose **Codex device code (legacy)** or **Codex browser (legacy)** under `/connect` → OpenAI. The plugin never changes the active login automatically; token-sharing quota recovery remains unavailable rather than guessing when an app cap or subscription allowance resets.
-The Caveman server plugin enables full mode by loading APM's `~/.agents/skills/caveman/SKILL.md`. On a newly provisioned host, restore the pinned shared skills with `apm install -g --target agent-skills`, then `/reload`; installing the OpenCode binary alone does not deploy skills. A missing Caveman skill is reported as a plugin error, not silently treated as active.
+The Caveman server plugin enables full mode by loading APM's `~/.agents/skills/caveman/SKILL.md`. On a newly provisioned host, restore the pinned third-party skills with `apm install -g --target agent-skills` and clone personal skills with `just skills-pull`, then `/reload`; installing the OpenCode binary alone does not deploy skills. A missing Caveman skill is reported as a plugin error, not silently treated as active.
 Restart the TUI after plugin changes. No binary rebuild is required.
 
 Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.
@@ -187,7 +187,7 @@ APM deploys `ax`, `find-skills`, `typesafe-ai`, `yomiyasu`, the Caveman skill bu
 It merges hooks into local Claude settings and owns its generated skill directories, cache, and lockfile.
 Existing Claude settings must be readable JSON objects; invalid or unusable settings stop APM deployment without replacing the file.
 `CLAUDE_CONFIG_DIR`, if set, must resolve to `~/.claude`; redirected APM deployment is rejected.
-Cloud excludes private `iomz/skills` dependencies and the vault-only `brain-vault` skill; no GitHub credentials are required.
+Cloud gets neither the private `iomz/skills` clone nor its links, and excludes the vault-only `brain-vault` skill; no GitHub credentials are required.
 
 No workstation shell/editor/mise configuration, Git configuration, credentials, or native plugin registration is deployed.
 Cloud has no `/plugin` interface; use the deployed skills, agents, and hooks.
@@ -534,7 +534,7 @@ Not tracked:
 | Generated skill cache            | `~/.codex/skills/.cache/`              | Codex or skill tooling | Always ignored                         |
 | Nested metadata and dependencies | `.git/`, `node_modules/` below a skill | upstream tooling       | Always ignored                         |
 
-Keep independently reusable public skills in their own repositories. Chezmoi manages only intentionally selected personal skills, not installer output, cloned repository metadata, or dependencies.
+Keep independently reusable public skills in their own repositories. Outside `~/.codex/skills`, chezmoi owns no skill content: it links personal skills from their clone and tracks the APM manifest, never installer output, cloned repository metadata, or dependencies.
 
 ### Shared Agent Skills
 
@@ -543,7 +543,7 @@ Its contents can come from personal source files, upstream installers, or skill 
 
 | Category | Owner | Chezmoi policy |
 | --- | --- | --- |
-| Personally authored, public-safe skill | chezmoi or its own repository | Track only through a per-skill allowlist |
+| Personal skill | `iomz/skills`, cloned to `~/.local/share/agent-skills` | Track one link per skill in `~/.claude/skills`, never its content |
 | Third-party skill | APM or upstream installer | Track a declarative manifest with pinned SHAs, not deployed files or lockfiles |
 | `.skill-lock.json` and similar installer state | installer | Never track as hand-authored configuration |
 | Caches, cloned metadata, and dependencies | package manager | Never track |
@@ -551,15 +551,29 @@ Its contents can come from personal source files, upstream installers, or skill 
 APM deploys to `~/.agents/skills` and `~/.claude/skills` (`agent-skills` and `claude` targets in `apm.yml`).
 It also owns Caveman: its skills, agents, and hooks land in `~/.claude`, and APM edits `~/.claude/settings.json`.
 APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
-`iomz/skills` supplies selected personal skills through the same deployment path.
 The vault-specific `brain-vault` skill is owned by `iomz/brain-vault` (`Skills/Common/brain-vault`) and deployed the same way.
-Workstation installs require GitHub read access to private `iomz/skills`; Cloud installs use public dependencies only.
-Keep skill names unique across `~/.agents/skills` and `~/.codex/skills` to avoid duplicate discovery.
+Workstation installs require GitHub read access to private `iomz/brain-vault`; Cloud installs use public dependencies only.
+OpenCode reads both `~/.agents/skills` and `~/.claude/skills` and prefers the `~/.agents` copy of a skill, so keep names unique across the two.
 Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
 
 The APM manifest lives at `~/.apm/apm.yml`, rendered from `dot_apm/apm.yml.tmpl`; chezmoi owns this inspected declarative input, and the commit SHA pins in it are the source of truth.
 `~/.apm/apm.lock.yaml` is generated per machine and not tracked; install with `apm install -g`, not `--frozen`.
 Do not let chezmoi and APM own the same deployed skill directory.
+
+#### Personal skills
+
+Personal skills live in private `iomz/skills`, one `skills/<name>/SKILL.md` each; a merge to its `main` followed by one explicit pull is a release.
+Dev hosts clone it to `~/.local/share/agent-skills`, and chezmoi links each skill into `~/.claude/skills`, which Claude Code and OpenCode both read.
+The clone is deliberately not a chezmoi external, so an apply never needs GitHub access and never pulls skills implicitly.
+
+```sh
+just skills-pull
+```
+
+The first run clones over SSH; later runs fast-forward `main` and stop on local changes, another branch or diverged commits, without resetting, stashing or forcing.
+Edit skills in a separate checkout, never in the live clone; `evolve-skill` reads `~/.local/share/agent-skills/AGENTS.md` at that path.
+A link would silently replace a directory of the same name, so an apply first stops if one stands in the way, and warns about same-named copies in `~/.agents/skills`, which shadow the links in OpenCode.
+To add a skill, add `private_dot_claude/skills/symlink_<name>.tmpl` after it reaches `iomz/skills` `main`.
 
 #### Updating APM-managed skills
 

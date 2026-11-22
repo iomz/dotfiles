@@ -21,11 +21,12 @@ It must not contain credentials, local state, history, caches, or machine-specif
   Put tool-specific rules in the matching template, not in the shared file.
 - For Claude Code, track only `~/.claude/CLAUDE.md`, generated from the canonical shared source.
   `~/.claude/AGENTS.md` is not a user-global instruction location.
-  Do not track `~/.claude/settings.json`, skills, agents, hooks, plugins, sessions, or caches; APM deploys skills, agents, and hooks there.
+  Do not track `~/.claude/settings.json`, skill contents, agents, hooks, plugins, sessions, or caches; APM deploys third-party skills, agents, and hooks there.
+  Personal skills are chezmoi-managed links in `~/.claude/skills` into the `~/.local/share/agent-skills` clone of `iomz/skills`; never link to an editing checkout.
 - Claude Cloud owns its Git signing configuration and launcher/session/synced-skill state.
   Never deploy `.gitconfig`, `.claude.json`, or an `exact_` Claude directory in the Cloud variant.
 - Treat `~/.agents/skills` as a shared deployment surface.
-  Track only explicitly allowlisted, personally authored, public-safe skills.
+  Track nothing there: personal skills are linked from `~/.claude/skills`, and a same-named copy here shadows the link in OpenCode.
   Keep third-party skills, installer lock files, and package-manager output outside chezmoi.
 - If APM manages shared skills, chezmoi may track an inspected public-safe manifest with pinned SHAs, but never the generated `~/.apm/apm.lock.yaml`, `~/.apm/apm_modules` or deployed copies.
 

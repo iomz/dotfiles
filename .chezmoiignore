@@ -71,6 +71,10 @@ package.json
 # settings.json holds APM-generated hooks with absolute paths, so APM owns it
 .claude/*
 !.claude/CLAUDE.md
+# Links into the iomz/skills clone, for hosts that run Claude Code and OpenCode
+{{ if and (ne (get . "variant" | default "workstation") "claude-cloud") (eq (includeTemplate "is-dev" .) "true") }}
+!.claude/skills
+{{ end }}
 
 # shared agent state and third-party skills
 .agents/**

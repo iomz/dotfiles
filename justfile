@@ -46,3 +46,25 @@ tool-check:
 # Opt-in: apply to a fresh Ubuntu 26.04 container as a host profile; requires Docker.
 test-linux-host host="sazanka" platform="":
     sh tests/integration/run-linux-host.sh {{host}} {{platform}}
+
+# Stops on local changes or another branch; never resets, stashes or forces.
+# Clone iomz/skills for the ~/.claude/skills links, or fast-forward it to main.
+skills-pull:
+    #!/bin/sh
+    set -eu
+    dir="$HOME/.local/share/agent-skills"
+    if [ ! -e "$dir" ]; then
+        exec git clone --branch main git@github.com:iomz/skills.git "$dir"
+    fi
+    branch=$(git -C "$dir" symbolic-ref --quiet --short HEAD || echo "detached HEAD")
+    if [ "$branch" != main ]; then
+        echo "skills-pull: $dir is on $branch, not main; switch back by hand" >&2
+        exit 1
+    fi
+    changes=$(git -C "$dir" status --porcelain)
+    if [ -n "$changes" ]; then
+        printf '%s\n' "$changes" >&2
+        echo "skills-pull: $dir has local changes; edit skills in a separate checkout" >&2
+        exit 1
+    fi
+    git -C "$dir" pull --ff-only origin main

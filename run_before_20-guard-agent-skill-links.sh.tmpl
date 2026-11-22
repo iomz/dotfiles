@@ -1,0 +1,27 @@
+{{- /* Renders only when something sits in the way of an iomz/skills link. */ -}}
+{{- if and (ne (get . "variant" | default "workstation") "claude-cloud") (eq (includeTemplate "is-dev" .) "true") -}}
+{{-   $blocked := list -}}
+{{-   $shadowed := list -}}
+{{-   range glob (joinPath .chezmoi.sourceDir "private_dot_claude/skills/symlink_*.tmpl") -}}
+{{-     $name := base . | trimPrefix "symlink_" | trimSuffix ".tmpl" -}}
+{{-     $link := lstat (joinPath $.chezmoi.destDir ".claude/skills" $name) -}}
+{{-     if and $link (ne $link.type "symlink") }}{{ $blocked = append $blocked (printf "~/.claude/skills/%s" $name) }}{{ end -}}
+{{-     if lstat (joinPath $.chezmoi.destDir ".agents/skills" $name) }}{{ $shadowed = append $shadowed (printf "~/.agents/skills/%s" $name) }}{{ end -}}
+{{-   end -}}
+{{-   if or $blocked $shadowed -}}
+#!/bin/sh
+# Personal skills are links into the ~/.local/share/agent-skills clone of
+# iomz/skills. chezmoi replaces a directory in a link's place without asking.
+{{-     if $shadowed }}
+echo 'agent-skills: OpenCode prefers these copies over the links in ~/.claude/skills:' >&2
+printf '  %s\n'{{ range $shadowed }} {{ . | quote }}{{ end }} >&2
+echo 'agent-skills: apm install -g removes the ones APM deployed; inspect and remove any other by hand' >&2
+{{-     end }}
+{{-     if $blocked }}
+echo 'agent-skills: these directories stand where the links go, so nothing was applied:' >&2
+printf '  %s\n'{{ range $blocked }} {{ . | quote }}{{ end }} >&2
+echo 'agent-skills: if APM deployed them, remove them with: chezmoi apply ~/.apm/apm.yml && apm install -g' >&2
+exit 1
+{{-     end }}
+{{    end -}}
+{{- end -}}
