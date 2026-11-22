@@ -7,10 +7,12 @@
 -- =============================================================
 -- Initialization
 vim.cmd("autocmd!")
+-- No plugin uses remote providers; disabling them avoids per-runtime installs.
+vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider = 0
 vim.g.mapleader = ' '       -- Remap space as leader key
-vim.g.python3_host_prog = vim.fn.expand("~/.local/share/mise/shims/python3")
-vim.g.ruby_host_prog = vim.fn.expand("~/.local/share/mise/shims/ruby")
 vim.opt.termguicolors = true
 vim.scriptencoding = 'utf-8'
 vim.wo.number = true

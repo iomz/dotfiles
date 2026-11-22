@@ -379,15 +379,8 @@ Do not run `mise use bw`; `bw` is not a mise registry tool.
 
 ### Neovim Providers
 
-Neovim uses mise shims for Python and Ruby providers.
-Python is configured in `.chezmoidata/tools.toml`; a Ruby runtime must be available separately for the Ruby provider.
-Install provider packages in their corresponding runtimes:
-
-```zsh
-python3 -m pip install --upgrade pip pynvim
-gem install neovim
-nvim +'checkhealth provider' +qa
-```
+Neovim's remote plugin providers (Node, Perl, Python, Ruby) are disabled in `dot_config/nvim/init.lua` because no plugin uses them.
+Runtime upgrades therefore need no `pynvim` or `neovim` package reinstalls.
 
 ### Interactive Shell Integrations
 
