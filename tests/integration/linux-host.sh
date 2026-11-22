@@ -71,7 +71,7 @@ check "bash login shell reads .bashrc and ~/.local/bin" as_user bash -lic \
     'alias ll >/dev/null && case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) exit 1 ;; esac'
 # Most of rc.d returns early without a terminal, so start zsh on a pseudo-terminal.
 tty_zsh() {
-    as_user script -qec "zsh -ilc '$1' 2>$home/zsh.err" /dev/null
+    as_user env TERM=xterm-256color script -qec "zsh -ilc '$1' 2>$home/zsh.err" /dev/null
 }
 if [ "$dev" = yes ]; then
     tty_zsh exit >/dev/null 2>&1 || true # the first start clones plugins
