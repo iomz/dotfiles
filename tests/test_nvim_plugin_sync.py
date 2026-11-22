@@ -24,7 +24,8 @@ class NvimPluginSyncTest(unittest.TestCase):
         shutil.copyfile(SOURCE / SCRIPT, self.source / SCRIPT)
         (self.source / "dot_config/nvim/init.lua").write_text("require('config')\n")
         (self.source / "dot_config/nvim/lua/config.lua").write_text("return {}\n")
-        (root / "config.toml").write_text("")
+        self.config = root / "config.toml"
+        self.config.write_text("")
         (root / "home").mkdir()  # glob runs relative to the destination
         self.command = ["chezmoi", "--source", str(self.source), "--destination",
                         str(root / "home"), "--config", str(root / "config.toml"),
@@ -51,7 +52,9 @@ class NvimPluginSyncTest(unittest.TestCase):
         self.assertNotEqual(self.trigger(), changed)
 
     def test_cloud_variant_renders_nothing(self):
-        self.assertEqual(self.render("--override-data", '{"variant": "claude-cloud"}').strip(), "")
+        # Config data rather than --override-data, which needs chezmoi >= 2.66.
+        self.config.write_text('[data]\nvariant = "claude-cloud"\n')
+        self.assertEqual(self.render().strip(), "")
 
 
 if __name__ == "__main__":
