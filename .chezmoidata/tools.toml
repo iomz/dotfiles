@@ -9,6 +9,9 @@
 # `arch` (list of chezmoi arch values) further limits an entry.
 # `arch` inside an OS table (e.g. `linux.arch`) limits only that OS.
 #
+# Sections (mise, macOS and Linux, macOS, Linux packages), name order and
+# key order are derived; just tool-* recipes and just tool-fmt maintain them.
+#
 # Rendered into ~/.config/mise/config.toml and the package install script.
 # Edit this file, not the rendered output.
 
@@ -118,17 +121,21 @@ mise = "0.13.9"
 [tools.zellij]
 mise = "0.46.0"
 
-# --- Homebrew: core bootstrap -------------------------------------------
+# --- macOS and Linux packages -------------------------------------------
 
 [tools.ca-certificates]
 darwin.brew = "ca-certificates"
 linux.apt = "ca-certificates"
 
-[tools.cmake]
-darwin.brew = "cmake"
+[tools.chafa]
+darwin.brew = "chafa"
+linux.apt = "chafa"
+linux.arch = ["amd64"]
 
-[tools.coreutils]
-darwin.brew = "coreutils"
+[tools.code-minimap]
+darwin.brew = "code-minimap"
+linux.apt = "code-minimap"
+groups = ["dev"]
 
 [tools.gawk]
 darwin.brew = "gawk"
@@ -138,33 +145,33 @@ linux.apt = "gawk"
 darwin.brew = "git"
 linux.apt = "git"
 
-[tools.gnu-getopt]
-darwin.brew = "gnu-getopt"
-
-[tools.gnu-sed]
-darwin.brew = "gnu-sed"
-
 [tools.gpg]
 darwin.brew = "gnupg"
 linux.apt = "gnupg"
-
-[tools.jq]
-darwin.brew = "jq"
-
-[tools.mise]
-darwin.brew = "mise"
 
 [tools.xz]
 darwin.brew = "xz"
 linux.apt = "xz-utils"
 
-# --- Homebrew: daily CLIs -----------------------------------------------
+# --- macOS packages -----------------------------------------------------
+
+[tools.act]
+darwin.brew = "act"
+
+[tools.antigravity-cli]
+darwin.brew = "antigravity-cli"
 
 [tools.bat-extras]
 darwin.brew = "bat-extras"
 
 [tools.cheat]
 darwin.brew = "cheat"
+
+[tools.cmake]
+darwin.brew = "cmake"
+
+[tools.coreutils]
+darwin.brew = "coreutils"
 
 [tools.delta]
 darwin.brew = "git-delta"
@@ -178,8 +185,23 @@ darwin.brew = "dust"
 [tools.glow]
 darwin.brew = "glow"
 
+[tools.gnu-getopt]
+darwin.brew = "gnu-getopt"
+
+[tools.gnu-sed]
+darwin.brew = "gnu-sed"
+
+[tools.goreleaser]
+darwin.brew = "goreleaser"
+
 [tools.hyperfine]
 darwin.brew = "hyperfine"
+
+[tools.jq]
+darwin.brew = "jq"
+
+[tools.mise]
+darwin.brew = "mise"
 
 [tools.trash]
 darwin.brew = "trash"
@@ -190,23 +212,7 @@ darwin.brew = "watch"
 [tools.wget]
 darwin.brew = "wget"
 
-# --- Homebrew: specialized ----------------------------------------------
-
-[tools.act]
-darwin.brew = "act"
-
-[tools.antigravity-cli]
-darwin.brew = "antigravity-cli"
-
-[tools.chafa]
-darwin.brew = "chafa"
-linux.apt = "chafa"
-linux.arch = ["amd64"]
-
-[tools.goreleaser]
-darwin.brew = "goreleaser"
-
-# --- apt: Linux only -----------------------------------------------------
+# --- Linux packages -----------------------------------------------------
 
 [tools.build-essential]
 # C toolchain: nvim-treesitter compiles parsers and mise builds lua from source.
@@ -227,11 +233,6 @@ linux.apt = "unzip"
 
 [tools.zsh]
 linux.apt = "zsh"
-
-[tools.code-minimap]
-darwin.brew = "code-minimap"
-groups = ["dev"]
-linux.apt = "code-minimap"
 
 # --- Homebrew guard -----------------------------------------------------
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.
