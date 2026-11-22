@@ -10,6 +10,12 @@ import unittest
 
 
 SOURCE = Path(__file__).resolve().parents[1]
+DATA = '''[data]
+variant = "{variant}"
+host = "{host}"
+[data.hosts.devbox]
+groups = ["dev"]
+'''
 SCRIPT = "run_onchange_after_nvim-plugin-sync.sh.tmpl"
 
 
@@ -21,11 +27,15 @@ class NvimPluginSyncTest(unittest.TestCase):
         root = Path(temp.name)
         self.source = root / "source"
         (self.source / "dot_config/nvim/lua").mkdir(parents=True)
+        (self.source / ".chezmoitemplates").mkdir()
+        for name in ("is-dev", "tool-selected"):
+            shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
+                            self.source / ".chezmoitemplates" / name)
         shutil.copyfile(SOURCE / SCRIPT, self.source / SCRIPT)
         (self.source / "dot_config/nvim/init.lua").write_text("require('config')\n")
         (self.source / "dot_config/nvim/lua/config.lua").write_text("return {}\n")
         self.config = root / "config.toml"
-        self.config.write_text("")
+        self.config.write_text(DATA.format(variant="workstation", host="devbox"))
         (root / "home").mkdir()  # glob runs relative to the destination
         self.command = ["chezmoi", "--source", str(self.source), "--destination",
                         str(root / "home"), "--config", str(root / "config.toml"),
@@ -53,7 +63,11 @@ class NvimPluginSyncTest(unittest.TestCase):
 
     def test_cloud_variant_renders_nothing(self):
         # Config data rather than --override-data, which needs chezmoi >= 2.66.
-        self.config.write_text('[data]\nvariant = "claude-cloud"\n')
+        self.config.write_text(DATA.format(variant="claude-cloud", host="devbox"))
+        self.assertEqual(self.render().strip(), "")
+
+    def test_non_dev_host_renders_nothing(self):
+        self.config.write_text(DATA.format(variant="workstation", host="tinybox"))
         self.assertEqual(self.render().strip(), "")
 
 

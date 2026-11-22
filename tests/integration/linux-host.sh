@@ -10,7 +10,7 @@ home=/home/$user
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 # What a freshly installed server already has, plus chezmoi's installer needs.
-apt-get install -y -qq sudo curl ca-certificates git >/dev/null
+apt-get install -y -qq sudo curl ca-certificates git vim-tiny >/dev/null
 
 useradd -m -s /bin/bash "$user"
 printf '%s ALL=(ALL) NOPASSWD:ALL\n' "$user" > /etc/sudoers.d/$user
@@ -64,6 +64,7 @@ check "package script re-enables a disabled mise source" as_user sh -c \
 else
 check "non-dev host has no mise" as_user sh -c \
     '! test -e ~/.config/mise/config.toml && ! command -v mise >/dev/null && ! test -e /etc/apt/sources.list.d/extrepo_mise.sources'
+check "non-dev host has no Neovim config" as_user sh -c '! test -e ~/.config/nvim'
 check "non-dev host has no C toolchain" sh -c '! command -v cc >/dev/null'
 fi
 check "bash login shell reads .bashrc and ~/.local/bin" as_user bash -lic \
@@ -80,6 +81,27 @@ check "zsh on a terminal prints nothing to stderr" sh -c "! grep . $home/zsh.err
 if [ "$dev" != yes ]; then
     check "non-dev zsh downloads no plugins" as_user sh -c '! test -e ~/.local/share/zinit'
 fi
+if [ "$dev" = yes ]; then editor=nvim; else editor=vim; fi
+check "zsh sets EDITOR, VISUAL and an absolute SUDO_EDITOR" as_user zsh -ic \
+    "[[ \$EDITOR == $editor && \$VISUAL == $editor && \$SUDO_EDITOR == /*/$editor && -x \$SUDO_EDITOR ]]"
+# A real sudoedit of a root-owned file, as the user would run it.
+edit_probe=/etc/sudoedit-probe
+echo before > "$edit_probe"
+cat > /tmp/edit.vim <<'EOF_VIM'
+%s/before/after/
+wq
+EOF_VIM
+cat > /tmp/edit.zsh <<EOF_ZSH
+SUDO_EDITOR+=" -S /tmp/edit.vim"
+timeout --foreground 60 sudo -e $edit_probe
+EOF_ZSH
+chmod 644 /tmp/edit.vim /tmp/edit.zsh
+as_user script -qec "zsh -ic 'source /tmp/edit.zsh'" /dev/null >/dev/null 2>&1 || true
+check "sudoedit edits with SUDO_EDITOR" grep -qx after "$edit_probe"
+for vim in vim vim.tiny; do
+    check "$vim starts without errors" as_user sh -c \
+        "out=\$(timeout 30 script -qec '$vim +qa' /dev/null) && ! printf '%s' \"\$out\" | grep -E 'E[0-9]+:|Press ENTER'"
+done
 # Both zsh directories are glob-loaded, so leftovers must not survive an apply.
 as_user sh -c 'touch ~/.config/zsh/rc.d/99-leftover.zsh ~/.config/zsh/functions/leftover'
 check "apply removes unmanaged zsh files" as_user sh -c \

@@ -134,7 +134,7 @@ fzf-edit-widget() {
         return
     }
 
-    editor_cmd=(${(z)${EDITOR:-nvim}})
+    editor_cmd=(${(z)${EDITOR:-vi}})
 
     "${editor_cmd[@]}" -- "$file" < /dev/tty > /dev/tty 2>&1
     zle reset-prompt
@@ -155,7 +155,7 @@ fzf-edit-all-widget() {
         return
     }
 
-    editor_cmd=(${(z)${EDITOR:-nvim}})
+    editor_cmd=(${(z)${EDITOR:-vi}})
 
     "${editor_cmd[@]}" -- "$file" < /dev/tty > /dev/tty 2>&1
     zle reset-prompt

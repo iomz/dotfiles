@@ -79,6 +79,12 @@ package.json
 .apm/apm_modules/
 .apm/apm_modules/**
 
+# Neovim is for dev hosts; others use plain vim
+{{ if ne (includeTemplate "is-dev" .) "true" }}
+.config/nvim
+.config/nvim/**
+{{ end }}
+
 # macOS launchd agent for OpenCode Codex resume wake-ups
 {{ if ne .chezmoi.os "darwin" }}
 Library/**

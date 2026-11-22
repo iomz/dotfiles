@@ -55,6 +55,10 @@ class HostProfileTest(unittest.TestCase):
         for name in MISE_SCRIPTS:
             self.assertEqual(self.chezmoi("tinybox", "cat", str(self.home / name)).strip(), "", name)
 
+    def test_only_dev_hosts_manage_neovim(self):
+        self.assertIn(".config/nvim/init.lua", self.chezmoi("sazanka", "managed").splitlines())
+        self.assertNotIn(".config/nvim", self.chezmoi("tinybox", "managed"))
+
     def test_existing_profile_is_left_alone(self):
         profile = self.home / ".profile"
         profile.write_text("# host-local\n")

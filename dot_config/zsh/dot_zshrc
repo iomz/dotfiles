@@ -24,13 +24,16 @@ for f in ${ZDOTDIR}/rc.d/<->-*zsh(N); do
 done
 
 # Editor
-if command nvim --version > /dev/null 2>&1; then
-    export EDITOR=nvim
-    export VISUAL=nvim
-elif whence vim > /dev/null; then
-    export EDITOR=vim
-    export VISUAL=vim
-fi
+# SUDO_EDITOR must be absolute: classic sudo silently opens the system editor
+# for a bare name, even one on PATH.
+for editor in nvim vim vim.tiny vi; do
+    editor_path=$(whence -p "$editor") || continue
+    # A mise shim can exist without an active version.
+    [[ "$editor" != nvim ]] || "$editor_path" --version > /dev/null 2>&1 || continue
+    export EDITOR=$editor VISUAL=$editor SUDO_EDITOR=$editor_path
+    break
+done
+unset editor editor_path
 
 # Pager
 export PAGER=less

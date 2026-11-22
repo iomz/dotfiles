@@ -1,4 +1,4 @@
-{{ if ne (get . "variant" | default "workstation") "claude-cloud" -}}
+{{ if and (ne (get . "variant" | default "workstation") "claude-cloud") (eq (includeTemplate "is-dev" .) "true") -}}
 {{- $config := "" -}}
 {{- range glob (joinPath .chezmoi.sourceDir "dot_config/nvim/**") -}}
 {{-   if not (stat .).isDir }}{{ $config = print $config . "\n" (include .) }}{{ end -}}

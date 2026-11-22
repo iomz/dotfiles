@@ -1,218 +1,43 @@
-"       _       _ _         _
-"      (_)_ __ (_) |___   _(_)_ __ ___
-"      | | '_ \| | __\ \ / / | '_ ` _ \ 
-"      | | | | | | |_ \ V /| | | | | | |
-"      |_|_| |_|_|\__(_)_/ |_|_| |_| |_|
-"=============================================
-"---------------------------------------------
-" NeoBundle configuration
-"---------------------------------------------
+" Plain Vim, no plugins. Dev hosts use Neovim; this is the editor everywhere else.
+" vim-tiny has no +eval and skips `if` blocks, so anything needing it goes there.
 set nocompatible
-let s:neobundle_dir = expand('~/.local/share/vim/bundle/neobundle.vim')
 
-if filereadable(s:neobundle_dir . '/autoload/neobundle.vim')
-if has('vim_starting')
-    execute 'set runtimepath+=' . fnameescape(s:neobundle_dir)
-endif
-
-"---------------------------------------------
-" Install and configure vim plugins
-"---------------------------------------------
-call neobundle#begin(expand('~/.local/share/vim/bundle'))
-
-" Manage neobundle itself
-NeoBundleFetch 'Shougo/neobundle.vim'
-
-"---------------------------------------------
-" Unite.vim
-"---------------------------------------------
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/neomru.vim'
-
-" List buffers
-nnoremap <silent> fb :<C-u>Unite buffer<CR>
-" List file_mru as buffer
-nnoremap <silent> fu :<C-u>Unite file_mru buffer<CR>
-" List files
-nnoremap <silent> ff :<C-u>UniteWithBufferDir -buffer-name=dotfiles file<CR>
-" List recent files
-nnoremap <silent> fm :<C-u>Unite file_mru<CR>
-" List registers
-nnoremap <silent> fr :<C-u>Unite -buffer-name=register register<CR>
-" List and set a yank
-let g:unite_source_history_yank_enable = 1
-nnoremap <silent> fy :<C-u>Unite history/yank<CR>
-
-"---------------------------------------------
-" vim-renamer
-"---------------------------------------------
-NeoBundle 'qpkorr/vim-renamer'
-
-"---------------------------------------------
-" vim-quickrun
-"---------------------------------------------
-NeoBundle 'thinca/vim-quickrun'
-let g:quickrun_no_default_key_mappings = 1
-nnoremap <silent> <C-q> :QuickRun<CR>
-
-"---------------------------------------------
-" lightline.vim
-"---------------------------------------------
-NeoBundle 'itchyny/lightline.vim'
-
-if !has('gui_running')
-  set t_Co=256
-endif
-
-let g:lightline = {
-      \ 'colorscheme': 'solarized',
-      \ 'mode_map': { 'c': 'NORMAL' },
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
-      \ },
-      \ 'component_function': {
-      \   'modified': 'MyModified',
-      \   'readonly': 'MyReadonly',
-      \   'fugitive': 'MyFugitive',
-      \   'filename': 'MyFilename',
-      \   'fileformat': 'MyFileformat',
-      \   'filetype': 'MyFiletype',
-      \   'fileencoding': 'MyFileencoding',
-      \   'mode': 'MyMode',
-      \ }
-      \ }
-
-function! MyModified()
-  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
-endfunction
-
-function! MyReadonly()
-  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '[ReadOnly]' : ''
-endfunction
-
-function! MyFilename()
-  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() : 
-        \  &ft == 'unite' ? unite#get_status_string() : 
-        \  &ft == 'vimshell' ? vimshell#get_status_string() :
-        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
-        \ ('' != MyModified() ? ' ' . MyModified() : '')
-endfunction
-
-function! MyFugitive()
-  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
-    let _ = fugitive#head()
-    return strlen(_) ? ''._ : ''
-  endif
-  return ''
-endfunction
-
-function! MyFileformat()
-  return winwidth(0) > 70 ? &fileformat : ''
-endfunction
-
-function! MyFiletype()
-  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'no ft') : ''
-endfunction
-
-function! MyFileencoding()
-  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
-endfunction
-
-function! MyMode()
-  return winwidth(0) > 60 ? lightline#mode() : ''
-endfunction
-
-call neobundle#end()
-
-" Check if the plugin for the language is installed
-NeoBundleCheck
-
-if !has('vim_starting')
-    " #When .vimrc reloaded
-    call neobundle#call_hook('on_source')
-endif
-endif
-
-" Use available built-in and optional plugin indentations
-filetype plugin indent on
-
-"---------------------------------------------
-" Indentation
-"---------------------------------------------
-au BufNewFile,BufRead *.conf set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.md set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.rb set tabstop=2 shiftwidth=2
-au BufNewFile,BufRead *.xml set tabstop=2 shiftwidth=2
-
-"---------------------------------------------
-" File encoding configuration
-"---------------------------------------------
-if &encoding !=# 'utf-8'
-	set encoding=japan
-	set fileencoding=japan
-endif
-
-if has('iconv')
-	let s:enc_enc = 'ecu-jp'
-	let s:enc_jis = 'iso-2022-jp'
-
-    " Check if iconv is compatible with eucJP-ms
-	if iconv("\x87\x64\x87\x6a", 'cp932', 'eucjp-ms') ==# "\xad\xc5\xad\xcb"
-		let s:enc_euc = 'eucjp-ms'
-		let s:enc_jis = 'iso-2022-jp-3'
-    " Check if iconv is compatible with euc-jisx0213
-	elseif iconv("\x87\x64\x87\x6a", 'cp932', 'euc-jisx0213') ==# "\xad\xc5\xad\xcb"
-		let s:enc_euc = 'euc-jisx0213'
-		let s:enc_jis = 'iso-2022-jp-3'
-	endif
-
-    " Set fileencoding
-	if &encoding ==# 'utf-8'
-		let s:fileencodings_default = &fileencodings
-		let &fileencodings = 'utf-8,'. s:enc_jis .','. s:enc_euc .',cp932'
-		let &fileencodings = &fileencodings .','. s:fileencodings_default
-		unlet s:fileencodings_default
-	else
-		let &fileencodings = &fileencodings .','. s:enc_jis
-		set fileencodings+=utf-8,ucs-2le,ucs-2
-		if &encoding =~# '^\(euc-jp\|euc-jisx0213\|eucjp-ms\)$'
-			set fileencodings+=cp932
-			set fileencodings-=euc-jp
-			set fileencodings-=euc-jisx0213
-			set fileencodings-=eucjp-ms
-			let &encoding = s:enc_euc
-			let &fileencoding = s:enc_euc
-		else
-			let &fileencodings = &fileencodings .','. s:enc_euc
-		endif
-	endif
-
-	unlet s:enc_euc
-	unlet s:enc_jis
-endif
-
-" If no Japanese included in the file use encoding
-if has('autocmd')
-	function! AU_ReCheck_FENC()
-		if &fileencoding =~# 'iso-2022-jp' && search("[^\x01-\x7e]", 'n') == 0
-			let &fileencoding=&encoding
-		endif
-	endfunction
-endif
-
-" Auto recognize newline codes
+" Files
+set autoread
+set hidden
+set modeline
 set fileformats=unix,dos,mac
+set fileencodings=ucs-bom,utf-8,iso-2022-jp,euc-jp,cp932,latin1
 
-" Print multi-byte characters in a proper width
-if exists('ambiwidth')
-	set ambiwidth=double
-endif
+" Indentation
+set autoindent
+set expandtab
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set backspace=indent,eol,start
 
+" Display and search; silent! covers options missing from vim-tiny
+set number
+set wrap
+set display=lastline
+set laststatus=2
+set scrolloff=10
+set ignorecase
+set smartcase
+silent! set ambiwidth=double
+silent! set cursorline
+silent! set hlsearch
+silent! set matchtime=1
+silent! set pumheight=10
+silent! set showcmd
+silent! set showmatch
+silent! set smarttab
+silent! set title
+silent! syntax on
+silent! filetype plugin indent on
 
-"---------------------------------------------
-" Key remappings
-"---------------------------------------------
+" Keys
 nnoremap Y y$
 nnoremap + <C-a>
 nnoremap - <C-x>
@@ -220,77 +45,24 @@ inoremap <C-b> <Left>
 inoremap <C-n> <Down>
 inoremap <C-p> <Up>
 inoremap <C-f> <Right>
-"inoremap { {}<LEFT>
-"inoremap [ []<LEFT>
-"inoremap ( ()<LEFT>
-"inoremap " ""<LEFT>
-"inoremap ' ''<LEFT>
-"inoremap < <><LEFT>
 
-"---------------------------------------------
-" Options
-"---------------------------------------------
-set autoindent
-set autoread
-set backspace=indent,eol,start
-set backup
-let s:vim_state_home = empty($XDG_STATE_HOME) ? expand('~/.local/state') : expand($XDG_STATE_HOME)
-let s:vim_backup_dir = s:vim_state_home . '/vim/backup'
-let s:vim_swap_dir = s:vim_state_home . '/vim/swap'
-call mkdir(s:vim_backup_dir, 'p', 0700)
-call mkdir(s:vim_swap_dir, 'p', 0700)
-execute 'set backupdir=' . fnameescape(s:vim_backup_dir . '//')
-set cursorline
-execute 'set directory=' . fnameescape(s:vim_swap_dir . '//')
-set display=lastline
-set equalalways
-set expandtab
-set hidden
-set hlsearch
-set ignorecase
-set laststatus=2
-set matchtime=1
-set modeline
-set number
-set pumheight=10
-set scrolloff=10
-set shiftwidth=4
-set showcmd
-set showmatch
-set smarttab
-set smartcase
-set softtabstop=4
-"set statusline=%<%f%=%h%w%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%9(\ %m%r\ %)[%4v][%12(\ %5l/%5L%)]
-set tabstop=4
-set tags=
-set title
-set undolevels=200
-set wrap
-set writebackup
+if 1
+  " Keep backup and swap files out of the working directory.
+  let s:state = (empty($XDG_STATE_HOME) ? expand('~/.local/state') : expand($XDG_STATE_HOME)) . '/vim'
+  for s:dir in ['backup', 'swap']
+    if !isdirectory(s:state . '/' . s:dir)
+      call mkdir(s:state . '/' . s:dir, 'p', 0700)
+    endif
+  endfor
+  execute 'set backupdir=' . fnameescape(s:state . '/backup//')
+  execute 'set directory=' . fnameescape(s:state . '/swap//')
+  set backup
+  " sudoedit works on copies of root-owned files; do not keep backups of them.
+  set backupskip+=/var/tmp/*,/dev/shm/*
 
-" Syntax highlight
-syntax on
-
-"---------------------------------------------
-" augroup and autocmd
-"---------------------------------------------
-augroup InsertHook
+  augroup vimrc
     autocmd!
-    autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
-    autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=ccdc90
-augroup END
-
-augroup BinaryXXD
-	autocmd!
-	autocmd BufReadPre  *.bin let &binary =1
-	autocmd BufReadPost * if &binary | silent %!xxd -g 1
-	autocmd BufReadPost * set ft=xxd | endif
-	autocmd BufWritePre * if &binary | %!xxd -r | endif
-	autocmd BufWritePost * if &binary | silent %!xxd -g 1
-	autocmd BufWritePost * set nomod | endif
-augroup END
-
-augroup swapchoice-readonly
-  autocmd!
-  autocmd SwapExists * let v:swapchoice = 'o'
-augroup END
+    autocmd BufNewFile,BufRead *.conf,*.md,*.rb,*.xml setlocal tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd SwapExists * let v:swapchoice = 'o'
+  augroup END
+endif

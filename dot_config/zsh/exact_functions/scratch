@@ -28,7 +28,7 @@ fi
 
 : >| "$file" || return
 
-editor="${EDITOR:-nvim}"
+editor="${EDITOR:-vi}"
 print -r -- "scratch: $file"
 
 ${(z)editor} "$file"

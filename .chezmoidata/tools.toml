@@ -263,6 +263,9 @@ linux.apt = "extrepo"
 [tools.unzip]
 linux.apt = "unzip"
 
+[tools.vim]
+linux.apt = "vim"
+
 [tools.zsh]
 linux.apt = "zsh"
 
