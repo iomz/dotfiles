@@ -38,3 +38,7 @@ tool-move *args:
 tool-check:
     python3 -m unittest tests.test_tool_inventory
     chezmoi diff --no-pager
+
+# Opt-in: apply to a fresh Ubuntu 26.04 container as a host profile; requires Docker.
+test-linux-host host="sazanka" platform="":
+    sh tests/integration/run-linux-host.sh {{host}} {{platform}}
