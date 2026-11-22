@@ -1,8 +1,7 @@
-"""Exercise scripts/tools.py against a temporary copy of the inventory."""
+"""Exercise scripts/tools.py against a fixed temporary inventory."""
 
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -12,6 +11,38 @@ import unittest
 
 SOURCE = Path(__file__).resolve().parents[1]
 SCRIPT = SOURCE / "scripts/tools.py"
+# Fixed fixture, independent of the real inventory's versions.
+FIXTURE = """\
+# Fixture inventory.
+
+[hosts.oxalis]
+groups = ["dev"]
+
+[tools.ansible]
+mise_id = "pipx:ansible"
+mise = { version = "14.2.0", uvx = false, pipx_args = "--include-deps" }
+
+[tools.bat]
+mise = "latest"
+
+[tools.gh]
+mise = "2.95.0"
+
+[tools.git]
+darwin.brew = "git"
+linux.apt = "git"
+
+[tools.wget]
+darwin.brew = "wget"
+
+[tools.curl]
+linux.apt = "curl"
+
+# --- Homebrew guard ---
+
+[homebrew_guard]
+extra = ["poetry"]
+"""
 
 
 class ToolsScriptTest(unittest.TestCase):
@@ -20,7 +51,7 @@ class ToolsScriptTest(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         root = Path(temp.name)
         self.inventory = root / "tools.toml"
-        shutil.copyfile(SOURCE / ".chezmoidata/tools.toml", self.inventory)
+        self.inventory.write_text(FIXTURE)
         self.original = self.inventory.read_text()
         bin_dir = root / "bin"
         bin_dir.mkdir()
