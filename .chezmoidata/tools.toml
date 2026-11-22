@@ -228,6 +228,11 @@ linux.apt = "unzip"
 [tools.zsh]
 linux.apt = "zsh"
 
+[tools.code-minimap]
+darwin.brew = "code-minimap"
+groups = ["dev"]
+linux.apt = "code-minimap"
+
 # --- Homebrew guard -----------------------------------------------------
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.
 # Entries with `homebrew_guard = false` are left out.
