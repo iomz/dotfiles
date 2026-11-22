@@ -80,8 +80,9 @@ check "zsh on a terminal loads the interactive rc.d" tty_zsh '(( ${+widgets[inse
 check "zsh on a terminal prints nothing to stderr" sh -c "! grep . $home/zsh.err"
 # zsh only uses file.zwc when it holds that same file, so a combined digest is dead weight.
 check "zsh login compiles each startup file on its own" as_user zsh -fc '
-    for i in {1..20}; do [[ -s ~/.config/zsh/.zshrc.zwc ]] && break; sleep 0.5; done
-    [[ -s ~/.config/zsh/.zshrc.zwc && -s ~/.config/zsh/rc.d/00-env.zsh.zwc ]] || exit 1
+    compiled() { [[ -s ~/.config/zsh/.zshrc.zwc && -s ~/.config/zsh/rc.d/00-env.zsh.zwc ]] }
+    for i in {1..20}; do compiled && break; sleep 0.5; done
+    compiled || exit 1
     for z in ~/.zshenv.zwc ~/.config/zsh/{,rc.d/}*.zwc(DN); do
         [[ "$(zcompile -t $z | sed -n 2p)" == ${z%.zwc} ]] || { print -- "$z"; exit 1; }
     done'
