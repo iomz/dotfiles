@@ -84,6 +84,8 @@ mise = "1.59.0"
 mise = "5.5.1"
 # Homebrew nmap depends on Homebrew lua; guarding it blocks nmap upgrades.
 homebrew_guard = false
+# Built from source by mise, which needs the dev-only C toolchain on Linux.
+groups = ["dev"]
 
 [tools.neovim]
 mise = "0.12.6"
