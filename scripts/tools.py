@@ -11,6 +11,7 @@ import argparse
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import tomllib
@@ -355,14 +356,17 @@ def command_move(args, inventory):
         if args.mise_id:
             body.append(f"mise_id = {toml_string(args.mise_id)}")
         body += bin_line + [f"mise = {toml_string(version)}"]
+        # Install and verify before touching the inventory, so a failure leaves
+        # the entry on Homebrew and the move can simply be retried.
+        run(["mise", "install", f"{tool_id}@{version}"])
+        found = subprocess.run(["mise", "exec", f"{tool_id}@{version}", "--", "sh", "-c",
+                                f"command -v {shlex.quote(executable)}"], capture_output=True, text=True)
+        if found.returncode != 0 or "/installs/" not in found.stdout:
+            raise ToolError(f"mise does not provide '{executable}'; inventory unchanged")
         inventory.replace_entry(args.name, body)
         inventory.save()
         apply_rendered()
-        run(["mise", "install", f"{tool_id}@{version}"])
         run(["mise", "reshim"])
-        found = subprocess.run(["mise", "which", executable], capture_output=True, text=True)
-        if found.returncode != 0 or "/installs/" not in found.stdout:
-            raise ToolError(f"mise does not provide '{executable}'; Homebrew formula kept")
         print(f"verified {found.stdout.strip()}")
         if confirm(f"Uninstall Homebrew formula {formula}?"):
             run(["brew", "uninstall", formula])
