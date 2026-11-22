@@ -4,8 +4,8 @@
 {{-   if not (stat .).isDir }}{{ $config = print $config . "\n" (include .) }}{{ end -}}
 {{- end -}}
 #!/bin/sh
-# Sync Neovim plugins whenever the managed config changes, so a host never runs
-# new config against plugins checked out for an older one.
+# Sync Neovim plugins whenever the managed config changes. Best effort: a failed
+# plugin update does not fail the apply; rerun :Lazy sync to retry.
 # chezmoi trigger: {{ $config | sha256sum }}
 set -eu
 

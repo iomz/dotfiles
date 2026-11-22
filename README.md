@@ -381,7 +381,8 @@ Do not run `mise use bw`; `bw` is not a mise registry tool.
 
 Neovim's remote plugin providers (Node, Perl, Python, Ruby) are disabled in `dot_config/nvim/init.lua` because no plugin uses them.
 Runtime upgrades therefore need no `pynvim` or `neovim` package reinstalls.
-When the managed Neovim config changes, `chezmoi apply` runs `Lazy! sync` once (`run_onchange_after_nvim-plugin-sync.sh.tmpl`), so plugins never lag behind the config; plugin commits are not pinned across hosts.
+When the managed Neovim config changes, `chezmoi apply` runs `Lazy! sync` once (`run_onchange_after_nvim-plugin-sync.sh.tmpl`); plugin commits are not pinned across hosts.
+The sync is best effort: a failed plugin update does not fail the apply, so check its output and rerun `:Lazy sync` to retry.
 
 ### Interactive Shell Integrations
 
