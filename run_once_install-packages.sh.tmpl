@@ -109,6 +109,17 @@ wanted="
   {{ join "\n  " $formulae }}
 "
 
+# shellcheck disable=SC2086 # word splitting is intended
+set -- $wanted
+if ! command -v brew >/dev/null 2>&1; then
+  if [ $# -gt 0 ]; then
+    printf 'install-packages: skipped (no usable package manager):%s\n' "$(printf ' %s' "$@")" >&2
+    # A run_once script is not retried after it succeeds.
+    printf '%s\n' 'install-packages: to retry later: sh -c "$(chezmoi cat ~/install-packages.sh)"' >&2
+  fi
+  exit 0
+fi
+
 # Call brew only for missing names (canonical names, not aliases), so nothing
 # already installed is checked, warned about or upgraded.
 installed=$(brew list -1 --formula 2>/dev/null; brew list -1 --cask 2>/dev/null)

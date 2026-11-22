@@ -26,8 +26,9 @@ DATA = {
 }
 
 
-@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
-class LinuxPackageScriptTest(unittest.TestCase):
+class PackageScriptCase(unittest.TestCase):
+    data = DATA
+
     def setUp(self):
         temp = tempfile.TemporaryDirectory(prefix="package-script-")
         self.addCleanup(temp.cleanup)
@@ -41,7 +42,7 @@ class LinuxPackageScriptTest(unittest.TestCase):
         (self.root / "config.toml").write_text("")
         rendered = subprocess.run(
             ["chezmoi", "--source", str(source), "--destination", str(self.root / "home"),
-             "--config", str(self.root / "config.toml"), "--override-data", json.dumps(DATA),
+             "--config", str(self.root / "config.toml"), "--override-data", json.dumps(self.data),
              "execute-template", (SOURCE / SCRIPT).read_text()],
             env=dict(os.environ, HOME=str(self.root)), text=True, capture_output=True, check=True)
         self.script = self.root / "install-packages.sh"
@@ -69,6 +70,9 @@ class LinuxPackageScriptTest(unittest.TestCase):
         installs = [line for line in self.calls.read_text().splitlines() if " install " in line]
         return installs, result.stderr
 
+
+@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
+class LinuxPackageScriptTest(PackageScriptCase):
     def stub_common(self):
         self.stub("sudo")
         self.stub("mise")
@@ -137,6 +141,30 @@ class LinuxPackageScriptTest(unittest.TestCase):
         installs, stderr = self.run_script()
         self.assertEqual(installs, [])
         self.assertIn("pkg-a pkg-b brew-c pkg-have", stderr)
+
+
+@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
+class DarwinPackageScriptTest(PackageScriptCase):
+    data = {
+        "chezmoi": {"os": "darwin", "arch": "arm64"},
+        "host": "h",
+        "hosts": {},
+        "tools": {
+            "have": {"darwin": {"brew": "f-have"}},
+            "want": {"darwin": {"brew": "f-want"}},
+        },
+    }
+
+    def test_installs_only_missing_formulae(self):
+        self.stub("brew", '[ "$1" != list ] || echo f-have')
+        installs, _ = self.run_script()
+        self.assertEqual(installs, ["brew install f-want"])
+
+    def test_missing_homebrew_skips_without_failing(self):
+        installs, stderr = self.run_script()
+        self.assertEqual(installs, [])
+        self.assertIn("skipped (no usable package manager): f-have f-want\n", stderr)
+        self.assertIn("to retry later", stderr)
 
 
 if __name__ == "__main__":
