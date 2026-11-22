@@ -2,9 +2,11 @@
 #
 # One entry per tool; the table key is the tool's identity.
 # An entry declares either `mise` (cross-platform) or OS tables such as
-# `darwin.brew`, never both.
+# `darwin.brew`, never both. `mise_id` overrides the mise tool name, e.g.
+# for backend-prefixed ids such as "pipx:ansible".
 # `hosts` or `groups` restrict an entry; without either it applies everywhere.
 # Hosts and groups are declared under [hosts].
+# `arch` (list of chezmoi arch values) further limits an entry.
 #
 # Rendered into ~/.config/mise/config.toml and the package install script.
 # Edit this file, not the rendered output.
