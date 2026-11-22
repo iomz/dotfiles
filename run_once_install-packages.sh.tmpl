@@ -3,36 +3,17 @@
 set -eu
 
 sudo apt update
+# apt packages selected for this host from .chezmoidata/tools.toml.
+{{- $packages := list }}
+{{- range $name, $tool := .tools }}
+{{-   if and (hasKey $tool "linux") (hasKey $tool.linux "apt") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" "linux")) "true") }}
+{{-     $packages = append $packages $tool.linux.apt }}
+{{-   end }}
+{{- end }}
+{{- if $packages }}
 sudo apt install -y \
-  git \
-  curl \
-  ca-certificates \
-{{- if and (ne .chezmoi.arch "aarch64") (ne .chezmoi.arch "arm64") }}
-  chafa \
+  {{ join " \\\n  " $packages }}
 {{- end }}
-  gnupg \
-  dirmngr \
-  gawk \
-  build-essential \
-  pkg-config \
-  libssl-dev \
-  zlib1g-dev \
-  libbz2-dev \
-  libreadline-dev \
-  libsqlite3-dev \
-  libncursesw5-dev \
-  unzip \
-  xz-utils \
-  tk-dev \
-  libxml2-dev \
-  libxmlsec1-dev \
-  libffi-dev \
-  liblzma-dev \
-{{- if and (ne .chezmoi.arch "aarch64") (ne .chezmoi.arch "arm64") }}
-  linux-headers-$(uname -r) \
-{{- end }}
-  zsh \
-  extrepo
 
 if ! command -v mise >/dev/null 2>&1; then
   sudo extrepo enable mise
@@ -47,7 +28,7 @@ set -eu
 # Homebrew formulae selected for this host from .chezmoidata/tools.toml.
 {{- $formulae := list }}
 {{- range $name, $tool := .tools }}
-{{-   if and (hasKey $tool "darwin") (hasKey $tool.darwin "brew") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $)) "true") }}
+{{-   if and (hasKey $tool "darwin") (hasKey $tool.darwin "brew") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" "darwin")) "true") }}
 {{-     $formulae = append $formulae $tool.darwin.brew }}
 {{-   end }}
 {{- end }}

@@ -1,6 +1,8 @@
-{{- /* Renders "true" when tool entry .tool applies to the host in .data. */ -}}
+{{- /* Renders "true" when tool entry .tool applies to the host in .data.
+       Optional .os also applies that OS table's own arch filter. */ -}}
 {{- $tool := .tool -}}
 {{- $data := .data -}}
+{{- $os := get . "os" | default "" -}}
 {{- $host := get $data "host" | default "" -}}
 {{- $selected := true -}}
 {{- if hasKey $tool "hosts" -}}
@@ -17,5 +19,11 @@
 {{- end -}}
 {{- if and $selected (hasKey $tool "arch") -}}
 {{-   $selected = has $data.chezmoi.arch $tool.arch -}}
+{{- end -}}
+{{- if and $selected $os (hasKey $tool $os) -}}
+{{-   $osTable := index $tool $os -}}
+{{-   if hasKey $osTable "arch" -}}
+{{-     $selected = has $data.chezmoi.arch $osTable.arch -}}
+{{-   end -}}
 {{- end -}}
 {{- if $selected }}true{{ end -}}
