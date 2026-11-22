@@ -221,7 +221,7 @@ python3 -m unittest discover -s tests -v
 ```
 
 Tests cover macOS/Linux rendering, Cloud selection and allowlisting, host-state preservation, checksum-verified noninteractive bootstrap, and idempotency with APM stubbed.
-They do not require network access.
+They do not require network access, but need chezmoi 2.66 or later.
 
 For real Ubuntu 24.04 x86_64/dash, pinned chezmoi/APM, settings merge/preservation, and idempotency checks:
 
@@ -246,7 +246,7 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 
 | Layer    | Owns                                                                                                                                                           | Source of truth                             |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| apt/brew | OS bootstrap packages, native build dependencies, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                    | `.chezmoidata/tools.toml`                   |
+| apt/brew | OS bootstrap packages, the C toolchain on dev hosts, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                 | `.chezmoidata/tools.toml`                   |
 | mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                   |
 | zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
 | chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
@@ -418,14 +418,10 @@ Managed by mise or brew instead:
 Managed startup order:
 
 ```text
-$HOME/.zshenv -> $HOME/.config/zsh/.zshrc -> $ZDOTDIR/rc.d/**
+$HOME/.zshenv -> $ZDOTDIR/.zshrc -> $ZDOTDIR/rc.d/* -> $HOME/.zprofile -> $ZDOTDIR/.zlogin
 ```
 
-Default zsh order:
-
-```text
-.zshenv -> .zprofile -> .zshrc -> .zlogin -> .zlogout
-```
+`$ZDOTDIR` is `~/.config/zsh`, so zsh itself never reads `~/.zprofile`; the managed `.zshrc` sources it, and only login shells read `.zlogin`.
 
 Hosts outside the `dev` group keep the options, completion, key bindings and aliases, with a plain prompt and no zinit, plugins, zeno or mise.
 chezmoi does not change the login shell.
