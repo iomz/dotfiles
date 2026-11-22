@@ -69,10 +69,20 @@ diff --git a/packages/theme/src/tui/syntax.ts b/packages/theme/src/tui/syntax.ts
 +    }),
      rule(["extmark.agent"], theme.categorical[0][step], { bold: true }),
      rule(["extmark.skill"], (theme.categorical[1] ?? theme.categorical[0])[step], { bold: true }),
-@@ -17,4 +17,4 @@
--    rule(["extmark.paste"], theme.text.action.primary.focused, {
--      background: feedback.warning.base,
+@@ -16,12 +19,7 @@
+-    rule(
+-      ["extmark.paste"],
+-      // The page color: dark in dark mode, light in light mode. A transparent page (the system theme) falls back to the selected-row text.
+-      theme.background.base.a === 1 ? theme.background.base : theme.text.action.primary.focused,
+-      {
+-        background: feedback.warning.base,
+-        bold: true,
+-      },
+-    ),
 +    rule(["extmark.paste"], theme.text.base, {
 +      background: theme.background.formfield.selected,
-       bold: true,
-     }),
++      bold: true,
++    }),
+     rule(["comment", "comment.documentation"], syntax.comment, { italic: true }),
+     rule(["string", "symbol", "character.special", "character"], syntax.string),
+     rule(["number", "boolean", "constant", "float"], syntax.number),
