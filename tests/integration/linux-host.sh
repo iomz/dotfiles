@@ -102,6 +102,9 @@ for vim in vim vim.tiny; do
     check "$vim starts without errors" as_user env TERM=xterm-256color sh -c \
         "out=\$(timeout 30 script -qec '$vim +qa' /dev/null) && ! printf '%s' \"\$out\" | grep -E 'E[0-9]+:|Press ENTER'"
 done
+check "vim starts without errors when its state directory is unusable" as_user env \
+    TERM=xterm-256color XDG_STATE_HOME=/proc/unusable sh -c \
+    "out=\$(timeout 30 script -qec 'vim +qa' /dev/null) && ! printf '%s' \"\$out\" | grep -E 'E[0-9]+:|Press ENTER'"
 # Both zsh directories are glob-loaded, so leftovers must not survive an apply.
 as_user sh -c 'touch ~/.config/zsh/rc.d/99-leftover.zsh ~/.config/zsh/functions/leftover'
 check "apply removes unmanaged zsh files" as_user sh -c \

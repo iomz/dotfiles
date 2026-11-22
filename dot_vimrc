@@ -49,14 +49,22 @@ inoremap <C-f> <Right>
 if 1
   " Keep backup and swap files out of the working directory.
   let s:state = (empty($XDG_STATE_HOME) ? expand('~/.local/state') : expand($XDG_STATE_HOME)) . '/vim'
-  for s:dir in ['backup', 'swap']
-    if !isdirectory(s:state . '/' . s:dir)
-      call mkdir(s:state . '/' . s:dir, 'p', 0700)
+  " sudo keeps HOME on macOS: root must not create directories in a user's home.
+  let s:sudo_root = $USER ==# 'root' && !empty($SUDO_USER)
+  if !s:sudo_root
+    for s:dir in ['backup', 'swap']
+      if !isdirectory(s:state . '/' . s:dir)
+        silent! call mkdir(s:state . '/' . s:dir, 'p', 0700)
+      endif
+    endfor
+    if filewritable(s:state . '/backup') == 2
+      execute 'set backupdir=' . fnameescape(s:state . '/backup//')
+      set backup
     endif
-  endfor
-  execute 'set backupdir=' . fnameescape(s:state . '/backup//')
-  execute 'set directory=' . fnameescape(s:state . '/swap//')
-  set backup
+    if filewritable(s:state . '/swap') == 2
+      execute 'set directory=' . fnameescape(s:state . '/swap//')
+    endif
+  endif
   " sudoedit works on copies of root-owned files; do not keep backups of them.
   set backupskip+=/var/tmp/*,/dev/shm/*
 
