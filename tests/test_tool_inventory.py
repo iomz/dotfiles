@@ -1,5 +1,6 @@
 """Validate the per-host tool inventory and its selection template."""
 
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -77,6 +78,15 @@ class InventorySchemaTest(unittest.TestCase):
                 for key in ("hold", "homebrew_guard"):
                     if key in tool:
                         self.assertIsInstance(tool[key], bool)
+
+    def test_layout_is_normalized(self):
+        # Sections, entry order and key order are derived; just tool-* keeps them.
+        spec = importlib.util.spec_from_file_location("tools_script", SOURCE / "scripts/tools.py")
+        tools = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tools)
+        text = INVENTORY.read_text()
+        self.assertEqual(tools.normalize(text), text,
+                         "run any just tool-* recipe, or scripts/tools.py normalize, to fix the layout")
 
     def test_package_names_are_unique_per_manager(self):
         seen = {}
