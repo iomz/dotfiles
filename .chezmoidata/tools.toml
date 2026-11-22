@@ -72,6 +72,8 @@ mise = "1.52.0"
 
 [tools.lua]
 mise = "5.4.8"
+# Homebrew nmap depends on Homebrew lua; guarding it blocks nmap upgrades.
+homebrew_guard = false
 
 [tools.neovim]
 mise = "0.12.3"
@@ -210,6 +212,7 @@ darwin.brew = "goreleaser"
 
 # --- Homebrew guard -----------------------------------------------------
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.
+# Entries with `homebrew_guard = false` are left out.
 # These extra names have no mise entry of their own; they are carried over
 # from the previous hand-written list.
 
