@@ -116,7 +116,7 @@ def set_mise_version(lines, version):
     for index, line in enumerate(lines):
         if re.match(r"^mise\s*=", line):
             if line.split("=", 1)[1].strip().startswith("{"):
-                new, count = re.subn(r'(\bversion\s*=\s*)"[^"]*"', r"\g<1>" + toml_string(version), line, 1)
+                new, count = re.subn(r'(\bversion\s*=\s*)"[^"]*"', r"\g<1>" + toml_string(version), line, count=1)
                 if not count:
                     raise ToolError("mise table has no version")
             else:
