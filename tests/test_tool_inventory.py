@@ -18,7 +18,7 @@ SELECTOR = SOURCE / ".chezmoitemplates/tool-selected"
 
 ENTRY_KEYS = {"mise", "mise_id", "hold", "homebrew_guard", "hosts", "groups", "arch",
               "bin", "darwin", "linux"}
-OS_KEYS = {"darwin": {"brew", "arch"}, "linux": {"apt", "brew", "arch"}}
+OS_KEYS = {"darwin": {"brew", "cask", "arch"}, "linux": {"apt", "brew", "arch"}}
 ARCHES = {"amd64", "arm64"}
 
 
@@ -61,6 +61,12 @@ class InventorySchemaTest(unittest.TestCase):
                 for key in ("hosts", "groups"):
                     if key in tool:
                         self.assertTrue(tool[key], f"empty {key} never matches")
+
+    def test_a_mac_entry_is_a_formula_or_a_cask(self):
+        for name, tool in self.tools.items():
+            with self.subTest(tool=name):
+                self.assertFalse({"brew", "cask"} <= set(tool.get("darwin", {})),
+                                 "an app is installed one way: darwin.brew or darwin.cask")
 
     def test_mise_entries_are_restricted(self):
         for name, tool in self.tools.items():

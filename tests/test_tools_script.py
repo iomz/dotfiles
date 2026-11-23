@@ -149,8 +149,15 @@ class ToolsScriptTest(unittest.TestCase):
         self.tools("add", "curl", "brew")
         self.assertEqual(self.data()["curl"], {"linux": {"apt": "curl"}, "darwin": {"brew": "curl"}})
 
+    def test_add_cask_lands_in_the_apps_section(self):
+        self.tools("add", "zed", "cask")
+        self.assertEqual(self.data()["zed"], {"darwin": {"cask": "zed"}})
+        text = self.inventory.read_text()
+        self.assertGreater(text.index("[tools.zed]"), text.index("# --- macOS apps"))
+
     def test_rejected_adds_leave_file_unchanged(self):
         cases = [
+            ("add", "git", "cask"),                      # already a formula on macOS
             ("add", "gh", "mise"),                       # duplicate entry
             ("add", "gh", "apt"),                        # mise entry gets OS package
             ("add", "git", "brew"),                      # field already declared

@@ -191,6 +191,11 @@ linux.apt = "mtr-tiny"
 darwin.brew = "ncdu"
 linux.apt = "ncdu"
 
+[tools.rsync]
+# Newer than the openrsync macOS ships.
+darwin.brew = "rsync"
+linux.apt = "rsync"
+
 [tools.smartmontools]
 darwin.brew = "smartmontools"
 linux.apt = "smartmontools"
@@ -209,11 +214,31 @@ linux.apt = "xz-utils"
 darwin.brew = "act"
 hosts = ["oxalis"]
 
+[tools.autossh]
+darwin.brew = "autossh"
+
+[tools.bandcamp-dl]
+darwin.brew = "bandcamp-dl"
+hosts = ["oxalis"]
+
 [tools.bat-extras]
 darwin.brew = "bat-extras"
 
+[tools.blueutil]
+darwin.brew = "blueutil"
+hosts = ["oxalis"]
+
 [tools.cheat]
 darwin.brew = "cheat"
+
+[tools.chezmoi]
+darwin.brew = "chezmoi"
+
+[tools.cloc]
+darwin.brew = "cloc"
+
+[tools.cloudflared]
+darwin.brew = "cloudflared"
 
 [tools.cmake]
 darwin.brew = "cmake"
@@ -231,6 +256,24 @@ darwin.brew = "duf"
 [tools.dust]
 darwin.brew = "dust"
 
+[tools.exiftool]
+darwin.brew = "exiftool"
+
+[tools.ffmpegthumbnailer]
+darwin.brew = "ffmpegthumbnailer"
+hosts = ["oxalis"]
+
+[tools.figlet]
+darwin.brew = "figlet"
+hosts = ["oxalis"]
+
+[tools.gifsicle]
+darwin.brew = "gifsicle"
+hosts = ["oxalis"]
+
+[tools.git-lfs]
+darwin.brew = "git-lfs"
+
 [tools.gnu-getopt]
 darwin.brew = "gnu-getopt"
 
@@ -241,21 +284,203 @@ darwin.brew = "gnu-sed"
 darwin.brew = "goreleaser"
 hosts = ["oxalis"]
 
+[tools.graphviz]
+darwin.brew = "graphviz"
+hosts = ["oxalis"]
+
+[tools.hexedit]
+darwin.brew = "hexedit"
+
 [tools.hyperfine]
 darwin.brew = "hyperfine"
+
+[tools.imagemagick]
+darwin.brew = "imagemagick"
+
+[tools.ipinfo]
+darwin.brew = "ipinfo"
+
+[tools.jadx]
+darwin.brew = "jadx"
+hosts = ["oxalis"]
+
+[tools.john-jumbo]
+darwin.brew = "john-jumbo"
+hosts = ["oxalis"]
+
+[tools.llvm]
+darwin.brew = "llvm"
+hosts = ["oxalis"]
+
+[tools.lsusb]
+darwin.brew = "lsusb"
+
+[tools.mecab-ipadic]
+darwin.brew = "mecab-ipadic"
+hosts = ["oxalis"]
+
+[tools.mecab-unidic]
+darwin.brew = "mecab-unidic"
+hosts = ["oxalis"]
 
 [tools.mise]
 darwin.brew = "mise"
 groups = ["stem"]
 
+[tools.mkvtoolnix]
+darwin.brew = "mkvtoolnix"
+hosts = ["oxalis"]
+
+[tools.most]
+darwin.brew = "most"
+hosts = ["oxalis"]
+
+[tools.nmap]
+darwin.brew = "nmap"
+
+[tools.p7zip]
+darwin.brew = "p7zip"
+
+[tools.pinentry-mac]
+darwin.brew = "pinentry-mac"
+
+[tools.progress]
+darwin.brew = "progress"
+
+[tools.pstree]
+darwin.brew = "pstree"
+
+[tools.sshfs-mac]
+# Needs the macfuse app.
+darwin.brew = "gromgit/fuse/sshfs-mac"
+hosts = ["oxalis"]
+
+[tools.streamlink]
+darwin.brew = "streamlink"
+hosts = ["oxalis"]
+
+[tools.textidote]
+darwin.brew = "textidote"
+hosts = ["oxalis"]
+
+[tools.tig]
+darwin.brew = "tig"
+
+[tools.topgrade]
+darwin.brew = "topgrade"
+
 [tools.trash]
 darwin.brew = "trash"
+
+[tools.unbound]
+darwin.brew = "unbound"
+hosts = ["oxalis"]
+
+[tools.universal-ctags]
+darwin.brew = "universal-ctags"
+
+[tools.vale]
+darwin.brew = "vale"
+
+[tools.wakeonlan]
+darwin.brew = "wakeonlan"
 
 [tools.watch]
 darwin.brew = "watch"
 
 [tools.wget]
 darwin.brew = "wget"
+
+[tools.wimlib]
+darwin.brew = "wimlib"
+hosts = ["oxalis"]
+
+[tools.xmlto]
+darwin.brew = "xmlto"
+hosts = ["oxalis"]
+
+[tools.zig]
+darwin.brew = "zig"
+hosts = ["oxalis"]
+
+# --- macOS apps ---------------------------------------------------------
+
+[tools.anki]
+darwin.cask = "anki"
+
+[tools.bitwarden]
+darwin.cask = "bitwarden"
+
+[tools.brave-browser]
+darwin.cask = "brave-browser"
+
+[tools.chatgpt]
+darwin.cask = "chatgpt"
+
+[tools.claude]
+darwin.cask = "claude"
+
+[tools.cmux]
+darwin.cask = "cmux"
+
+[tools.docker-desktop]
+darwin.cask = "docker-desktop"
+
+[tools.font-hack-nerd-font]
+darwin.cask = "font-hack-nerd-font"
+
+[tools.google-japanese-ime]
+darwin.cask = "google-japanese-ime"
+
+[tools.hammerspoon]
+darwin.cask = "hammerspoon"
+
+[tools.handbrake-app]
+darwin.cask = "handbrake-app"
+
+[tools.karabiner-elements]
+darwin.cask = "karabiner-elements"
+
+[tools.macfuse]
+darwin.cask = "macfuse"
+hosts = ["oxalis"]
+
+[tools.obs]
+darwin.cask = "obs"
+
+[tools.obsidian]
+darwin.cask = "obsidian"
+
+[tools.plex]
+darwin.cask = "plex"
+
+[tools.raindropio]
+darwin.cask = "raindropio"
+
+[tools.raycast]
+darwin.cask = "raycast"
+
+[tools.shutter-encoder]
+darwin.cask = "shutter-encoder"
+hosts = ["oxalis"]
+
+[tools.superlist]
+darwin.cask = "superlist"
+
+[tools.tailscale-app]
+darwin.cask = "tailscale-app"
+
+[tools.the-unarchiver]
+darwin.cask = "the-unarchiver"
+
+[tools.visual-studio-code]
+darwin.cask = "visual-studio-code"
+
+[tools.vlc]
+darwin.cask = "vlc"
+
+[tools.whatsapp]
+darwin.cask = "whatsapp"
 
 # --- Linux packages -----------------------------------------------------
 
@@ -268,7 +493,7 @@ groups = ["stem"]
 linux.apt = "curl"
 
 [tools.dig]
-# Linux only, like lsof, rsync and tcpdump: macOS ships them.
+# Linux only, like lsof and tcpdump: macOS ships them.
 linux.apt = "bind9-dnsutils"
 
 [tools.dirmngr]
@@ -283,9 +508,6 @@ groups = ["stem"]
 
 [tools.lsof]
 linux.apt = "lsof"
-
-[tools.rsync]
-linux.apt = "rsync"
 
 [tools.tcpdump]
 linux.apt = "tcpdump"
@@ -302,8 +524,9 @@ linux.apt = "zsh"
 # --- Homebrew guard -----------------------------------------------------
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.
 # Entries with `homebrew_guard = false` are left out.
-# These extra names have no mise entry of their own; they are carried over
-# from the previous hand-written list.
+# These extra names have no mise entry of their own: python3 and ruby are carried
+# over from the previous hand-written list, and zsh must stay the system one,
+# which is the login shell.
 
 [homebrew_guard]
-extra = ["python3", "ruby"]
+extra = ["python3", "ruby", "zsh"]
