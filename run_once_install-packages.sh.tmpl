@@ -61,14 +61,29 @@ while read -r apt_name brew_name <&3; do
 done 3<<EOF_PAIRS
 $pairs
 EOF_PAIRS
+# One unknown name fails a whole apt or brew install, as on an older release
+# that lacks a package, so install only names the manager knows.
+unknown=
 if [ -n "$apt_missing" ]; then
   as_root apt update
+  known=
+  for name in $apt_missing; do
+    if apt-cache policy "$name" 2>/dev/null | grep -q '^ *Candidate: [^(]'; then
+      known="$known $name"
+    else
+      unknown="$unknown $name"
+    fi
+  done
   # shellcheck disable=SC2086 # word splitting is intended
-  as_root apt install -y $apt_missing
+  [ -z "$known" ] || as_root apt install -y $known
 fi
 if [ -n "$brew_missing" ]; then
+  known=
+  for name in $brew_missing; do
+    if brew info "$name" >/dev/null 2>&1; then known="$known $name"; else unknown="$unknown $name"; fi
+  done
   # shellcheck disable=SC2086 # word splitting is intended
-  HOMEBREW_NO_INSTALL_UPGRADE=1 brew install $brew_missing
+  [ -z "$known" ] || HOMEBREW_NO_INSTALL_UPGRADE=1 brew install $known
 fi
 {{ if eq (includeTemplate "selects-mise" .) "true" -}}
 # Release upgrades disable third-party sources; re-enable mise's when needed.
@@ -89,6 +104,9 @@ if ! command -v mise >/dev/null 2>&1; then
   fi
 fi
 {{ end -}}
+if [ -n "$unknown" ]; then
+  printf 'install-packages: skipped (unknown to the package manager):%s\n' "$unknown" >&2
+fi
 if [ -n "$skipped" ]; then
   printf 'install-packages: skipped (no usable package manager):%s\n' "$skipped" >&2
   # A run_once script is not retried after it succeeds.
@@ -126,11 +144,21 @@ fi
 # already installed is checked, warned about or upgraded.
 installed=$(brew list -1 --formula 2>/dev/null; brew list -1 --cask 2>/dev/null)
 missing=
+unknown=
 for formula in $wanted; do
-  printf '%s\n' "$installed" | grep -qx "$formula" || missing="$missing $formula"
+  printf '%s\n' "$installed" | grep -qx "$formula" && continue
+  # One unknown name fails the whole brew install.
+  if brew info "$formula" >/dev/null 2>&1; then
+    missing="$missing $formula"
+  else
+    unknown="$unknown $formula"
+  fi
 done
 if [ -n "$missing" ]; then
   # shellcheck disable=SC2086 # word splitting is intended
   HOMEBREW_NO_INSTALL_UPGRADE=1 brew install $missing
+fi
+if [ -n "$unknown" ]; then
+  printf 'install-packages: skipped (unknown to Homebrew):%s\n' "$unknown" >&2
 fi
 {{ end -}}

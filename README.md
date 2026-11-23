@@ -356,6 +356,7 @@ On helm hosts, `run_once_install-packages.sh.tmpl` installs bootstrap and system
 - Without root or usable sudo, Linux falls back to Homebrew, or skips the packages and prints how to retry.
   sudo can only ask for a password when `chezmoi apply` runs in a terminal.
 - Linux installs mise through apt where possible, and only on hosts with mise entries.
+- Names apt or Homebrew does not know, such as a package missing from an older release, are skipped and reported instead of failing the install.
 
 ### Mise Runtimes and CLIs
 
