@@ -62,7 +62,11 @@ if [ "$variant" != helm ]; then
   echo "host-slim: nothing to slim on an $variant host"
   exit 0
 fi
-host=$("$chezmoi" execute-template '{{ .host }}')
+host=$("$chezmoi" execute-template '{{ get . "host" | default "" }}')
+if [ -z "$host" ]; then
+  echo 'host-slim: the chezmoi config sets no host; run chezmoi init first' >&2
+  exit 1
+fi
 if [ "$("$chezmoi" execute-template '{{ includeTemplate "is-stem" . }}')" = true ]; then
   echo "host-slim: $host is a stem host; nothing to slim"
   exit 0

@@ -25,7 +25,8 @@ class HostSlimTest(unittest.TestCase):
     def configure(self, host, variant="helm"):
         config = self.home / ".config/chezmoi/chezmoi.toml"
         config.parent.mkdir(parents=True, exist_ok=True)
-        config.write_text(f'sourceDir = "{SOURCE}"\n[data]\nvariant = "{variant}"\nhost = "{host}"\n'
+        host_line = f'host = "{host}"\n' if host else ""
+        config.write_text(f'sourceDir = "{SOURCE}"\n[data]\nvariant = "{variant}"\n{host_line}'
                           'git_name = "Test"\ngit_email = "test@example.org"\n')
 
     def apply(self, host):
@@ -62,6 +63,12 @@ class HostSlimTest(unittest.TestCase):
         self.assertIn("stem host; nothing to slim", self.slim())
         self.configure("sandbox", variant="agent-sandbox")
         self.assertIn("nothing to slim on an agent-sandbox host", self.slim())
+
+    def test_a_config_from_before_the_host_key_asks_for_chezmoi_init(self):
+        self.configure(None)
+        result = subprocess.run(["sh", str(SCRIPT)], env=self.env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("run chezmoi init first", result.stderr)
 
     def test_dry_run_lists_and_moves_nothing(self):
         self.leaf_home()
