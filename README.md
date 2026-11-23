@@ -1,134 +1,56 @@
 ![Linux](https://img.shields.io/static/v1?style=for-the-badge&message=Linux&color=222222&logo=Linux&logoColor=FCC624&label=)
 ![macOS](https://img.shields.io/static/v1?style=for-the-badge&message=macOS&color=000000&logo=macOS&logoColor=FFFFFF&label=)
 ![Neovim](https://img.shields.io/static/v1?style=for-the-badge&message=Neovim&color=57A143&logo=Neovim&logoColor=FFFFFF&label=)
-![Zsh](https://img.shields.io/static/v1?style=for-the-badge&message=Zsh&color=224466&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmciIHdpZHRoPSI2NzIiIGhlaWdodD0iNjcyIj48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZyIgd2lkdGg9IjY3MiIgaGVpZ2h0PSI2NjAiIGZpbGw9Im5vbmUiIHZpZXdCb3g9Ijg5IDc2IDY3MiA2NzIiPjxnIHN0cm9rZT0iI2YxNWEyNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBzdHJva2Utd2lkdGg9IjMyLjE0NyIgZD0iTTQwMyAyMzAgMTA0LjUgNTg1LjUiLz48Y2lyY2xlIGN4PSIxODAuMjE2IiBjeT0iMzA5LjcxNiIgcj0iNjEuNjE0IiBzdHJva2Utd2lkdGg9IjUwLjIwNCIvPjxjaXJjbGUgY3g9IjMyNi4yNjUiIGN5PSI1MDUuOTciIHI9IjYxLjYxNCIgc3Ryb2tlLXdpZHRoPSI1MC4yMDQiLz48cGF0aCBzdHJva2Utd2lkdGg9IjMyLjE0NyIgZD0iTTczOS42NDUgNTc2LjYxSDUyNi40ODYiLz48L2c+PC9zdmc+PHN0eWxlPkBtZWRpYSAocHJlZmVycy1jb2xvci1zY2hlbWU6bGlnaHQpezpyb290e2ZpbHRlcjpub25lfX08L3N0eWxlPjwvc3ZnPg==&logoColor=FFFFFF&label=)
+![Zsh](https://img.shields.io/static/v1?style=for-the-badge&message=Zsh&color=224466&logo=zsh&logoColor=F15A24&label=)
 
 # dotfiles
 
-Personal Linux and macOS dotfiles, plus a minimal agent sandbox (used on Claude Cloud), managed by [chezmoi](https://www.chezmoi.io/).
+Personal dotfiles for Linux and macOS hosts, plus a minimal agent sandbox, managed by [chezmoi](https://www.chezmoi.io/).
+One tool inventory decides what each host gets, so a laptop, a home server and a tiny appliance share one source.
 
-## Contents
+- [Hosts](#hosts)
+- [Quick start](#quick-start)
+- [Everyday commands](#everyday-commands)
+- [Tools and packages](#tools-and-packages)
+- [Agents and skills](#agents-and-skills)
+- [Agent sandbox](#agent-sandbox)
+- [First apply on an existing host](#first-apply-on-an-existing-host)
+- [Public repository rules](#public-repository-rules)
+- [Testing](#testing)
+- [More](#more)
 
-- [Quick Start](#quick-start)
-- [Agent Sandbox](#agent-sandbox)
-- [Responsibility Split](#responsibility-split)
-- [Public Dotfiles Safety](#public-dotfiles-safety)
-- [Common Operations](#common-operations)
-- [Installation and Package Management](#installation-and-package-management)
-- [Zsh](#zsh)
-- [Neovim](#neovim)
-- [Codex](#codex)
-- [OpenCode](#opencode)
-- [Ansible](#ansible)
-- [Fonts](#fonts)
-- [WakaTime](#wakatime)
+## Hosts
 
-## OpenCode
+Every host has a **variant** and, on helm hosts, a **tier**.
 
-### Explicit installation and updates
+| Variant | What it is | Gets |
+| --- | --- | --- |
+| `helm` (default) | a machine you operate | shell, editor, tools and agent setup, by tier |
+| `agent-sandbox` | a disposable agent workspace, such as Claude Cloud | agent instructions and public skills only |
 
-Applying chezmoi deploys OpenCode configuration and helper scripts, not the OpenCode binary. It never invokes the installer or updater automatically on Linux or macOS.
-Install only on a chosen host, such as nasatya, by running:
+| Tier | Hosts | Gets |
+| --- | --- | --- |
+| **stem** | in the `stem` group of `.chezmoidata/tools.toml` | everything: mise runtimes, Neovim, zsh plugins, personal skills |
+| **leaf** | every other host, declared or not | base and ops packages, slim zsh, plain vim |
+
+The variant is chosen once at `chezmoi init` (`CHEZMOI_VARIANT`) and stored in the local chezmoi config.
+The old names `workstation` and `claude-cloud` keep working until the next `chezmoi init` rewrites them.
+
+## Quick start
+
+Any helm host:
 
 ```sh
-# Requires Git, Python 3.11+, and Bun compatible with the selected upstream release.
-# Use mise exec when Bun is not on PATH; v2.2.0 requires Bun ^1.4.4.
-mise install bun@1.4.4
-mise exec bun@1.4.4 -- ~/.local/bin/opencode-update --install
-```
-
-`--install` explicitly clones the upstream source checkout if missing, builds with the local patch, verifies the candidate, creates a missing `~/.local/bin/opencode` launcher, and initializes managed generations. It never overwrites an existing public launcher or converts invalid generation pointers.
-The first installation points `active` and `previous` at the same generation; rollback becomes useful after the first subsequent update. Interrupted bootstrap pointer changes are journaled and recovered on the next invocation.
-On an uninstalled host, plain `opencode-update` refuses to bootstrap; `--install` is required. No hostname allowlist is needed: installation is command-driven, not triggered by chezmoi apply.
-
-```sh
-opencode-update             # Update an existing installation.
-opencode-rollback           # Restore its previous generation.
-```
-
-Supported native targets are macOS and glibc Linux, on ARM64 or x86_64. macOS verifies candidate architecture with `lipo`; Linux uses `file` to check its ELF architecture. Musl Linux is not supported.
-Credentials and session data remain host-local; do not copy them from another machine as part of installation.
-
-### Theme and build policy
-
-The `cmux-transparent` CLI theme keeps the main view, sidebar, and command surfaces transparent, with opaque dialogs, a blue-gray input fill, slate borders, red user accents, blue secondary text, and a mint scrollbar.
-`opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` to an isolated source worktree before building.
-By default it fetches tags from `anomalyco/opencode` and selects the highest stable `v2.<minor>.<patch>` tag numerically, excluding prereleases and local-only tags.
-It does not follow the stale `v2` branch or GitHub's latest published Release, which may still be V1.
-Use `OPENCODE_UPDATE_REF=refs/tags/v2.1.1 opencode-update` to select a specific tag, or `OPENCODE_UPDATE_REF=origin/dev opencode-update` to follow a branch; explicit refs are fetched before resolution.
-Output identifies the repository, selected upstream ref/commit, and effective build target separately. A selected ancestor retains the active source rather than downgrading it.
-Divergent upstream history does not block updates: the fetched target builds in isolation, with patch checks, build verification, and rollback retention unchanged. An explicit divergent ref can select an older release.
-No per-commit approval is required; the former `OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA` variable is ignored.
-Use `opencode-update -h` or `--help` for help without fetching, building, or changing generations.
-The patch adds a sidebar divider, uses the theme's border token for tool blocks, marks user prompts with a bold `YOU` label and agent-colored border, and uses the form-field background for the input box.
-It also wires the transcript scrollbar to its own token and renders image/file badges with the main text color on the form-field selection background.
-Open the command palette with `Ctrl+X`, then `P`; `Ctrl+P`/`Ctrl+N` move up/down in the input box.
-`Ctrl+B`/`Ctrl+F` move left/right one character; `Ctrl+K` deletes from the cursor to the end of the line.
-Build keeps its red theme accent; Plan has an explicit cyan agent color. Attachment badges use dark orange for readable main-text contrast, including submitted file/skill tags.
-Patch SHA-256 is recorded in each build manifest and generation name; changing the patch rebuilds even when the upstream commit is unchanged.
-If the patch conflicts with upstream, the update stops without changing the active build.
-Before installing build dependencies, the updater checks installed Bun against the target's `packageManager` caret requirement; install/select a compatible runtime with mise if it stops.
-`opencode-rollback` restores the previous generation, including its patch state.
-Restart the TUI after activating a new build.
-
-Run offline updater checks with `python3 -m unittest discover -s tests -p 'test_opencode_borders.py'`.
-Use `scripts/opencode-theme-lab.html` for a local dark-terminal color preview with role-specific pickers and attachment contrast checks.
-The lab includes the personal palette, a main-text picker, optional badge-text linking, and inline attachment RGB/hex controls that do not open an overlapping native picker.
-The lab exports color preferences only; it does not modify OpenCode configuration.
-
-### Sidebar trial bundle
-
-- `opencode-git-plugin@0.3.0`: working-tree files and native diff preview, refreshed every 8 seconds. `Ctrl+X`, then `Shift+G`, focuses the list; arrow keys stage/unstage only in list mode and `c` opens a commit prompt.
-- `opencode-dir-tree-tui@1.0.6`: expandable project tree and Git badges, placed last below the other sidebar panels and collapsed on TUI startup by a local wrapper. Click its heading to expand. `/dirtree-sidebar` controls visibility, mouse actions, and ignored paths. Right-click opens a file/folder in its system default application.
-- Personal Sidebar Dashboard: context meter, selected agent/model, estimated API cost, session token totals, loaded-transcript activity, running subagents, and location-scoped background shells. It reads OpenCode's cached data; no model calls, telemetry, or extra authentication.
-- Usage: Codex plan and 12-cell quota bars immediately below Context window. Blue heading and mint bars, amber below 26% remaining, red below 11% remaining.
-
-Dashboard panels can be disabled individually through `context`, `usage`, `session`, `tokens`, `activity`, and `workers` in its `cli.json` plugin options. Sidebar colors are configurable there too. The dashboard embeds the quota component; its CLI plugin entry handles recovery notifications without adding a second panel.
-The sidebar footer shows the running TUI's OpenCode version from its plugin context, not the installed binary or active-generation manifest. Restart the TUI after an update to run the new client version.
-The dashboard replaces the stock context section; disabling it should also remove `-opencode.sidebar.context` to restore the stock section.
-Third-party code remains in local package caches or ignored `node_modules`; only pinned package references and lock files are tracked here.
-After-apply installers restore local quota/tree plugin dependencies when missing or when their pinned lockfiles change, including after the config sweep.
-On hosts that select Node, they bootstrap the Node version pinned in the tool inventory and run npm through `mise exec`, avoiding inherited asdf shims even before the full runtime installation finishes.
-The custom Usage panel sends its active location with quota RPC requests; quota errors display as unavailable rather than checking indefinitely.
-It reads the same read-only ChatGPT usage endpoint as quota recovery, so both windows stay visible after one is exhausted; it makes no model calls.
-Standard **Sign in with ChatGPT** token-sharing login remains valid for model calls. For this method, the sidebar shows **Using ChatGPT plan**, explains that quota is unavailable, and offers a **Manage usage** link to `https://chatgpt.com/settings/usage`. It does not query the legacy quota endpoint, display invented percentages/reset times, or ask users to change login methods. Reviewed public OpenAI documentation does not establish a supported token-sharing quota-read API; this is not proof that no private or future API exists.
-Legacy Codex OAuth remains an optional compatibility path for usage percentages and quota recovery. Users who want those features can explicitly choose **Codex device code (legacy)** or **Codex browser (legacy)** under `/connect` → OpenAI. The plugin never changes the active login automatically; token-sharing quota recovery remains unavailable rather than guessing when an app cap or subscription allowance resets.
-The Caveman server plugin enables full mode by loading APM's `~/.agents/skills/caveman/SKILL.md`. On a newly provisioned host, restore the pinned third-party skills with `just apm-install` and clone personal skills with `just skills-pull`, then `/reload`; installing the OpenCode binary alone does not deploy skills. A missing Caveman skill is reported as a plugin error, not silently treated as active.
-Restart the TUI after plugin changes. No binary rebuild is required.
-
-Run dashboard helper checks with `bun test tests/opencode-sidebar.test.ts`.
-Run Caveman and quota logic checks with `node --test tests/opencode-caveman.test.mjs tests/opencode-codex-resume.test.mjs`.
-Dashboard panels reserve fixed row counts, including startup placeholders; Workers shows counts only, without transient command/title rows or blank detail slots. Quota reset times have dedicated non-wrapping rows so refreshes do not shift neighboring panels.
-Renderer checks use the build checkout's runtime: from its `packages/tui` directory, run `OPENCODE_TUI_SOURCE="$PWD" bun test ~/.local/share/chezmoi/tests/opencode-sidebar-render.test.ts` after applying the plugins.
-
-### Opt-in Codex quota recovery
-
-- `/codex-resume`: recover the current session once after a confirmed OpenAI quota failure.
-- `/codex-resume --repeat`: keep recovering this session after future quota failures; can be enabled before quota runs out.
-- `/codex-resume --status`: show the current mode and schedule.
-- `/codex-resume --cancel`: cancel pending recovery and disable repeat.
-
-Recovery runs in the server's per-project plugin, even with the sidebar or TUI closed, but only while that project's server services are running. The server stops a project's services after 60 minutes without session activity (an open TUI does not count), which also stops the recovery timer. The armed state is kept in plugin storage, so recovery continues as soon as anything boots that project again. On macOS, the `io.github.iomz.opencode-codex-resume-wake` LaunchAgent does that: while a check is pending, the plugin writes `<due epoch seconds>\t<directory>` to `$XDG_STATE_HOME/opencode/codex-resume-wake/`, and every 60 seconds `opencode-codex-resume-wake` calls the plugin's status RPC for due projects, which boots their services. Expect resumes up to a minute after reset. Non-local workspaces and Linux hosts are not woken; switching to the project's TUI still boots it. Wake failures go to `~/Library/Logs/opencode-codex-resume-wake.log`. It checks the active OpenAI OAuth account through the read-only ChatGPT usage endpoint, waits for the latest exhausted quota window plus two seconds, then checks every 10 seconds until requests are explicitly allowed. Recovery makes no model calls while waiting. Spark uses its separate quota bucket; missing or unrecognized quota data never authorizes a resume. This internal endpoint can change without notice.
-
-Once available, the plugin queues `Resume from where you paused.` in the same session without switching its model, variant, agent, or permissions. An immediate quota rejection keeps the recovery active; the first successful model step completes a once-only recovery. Manual prompts cancel the pending timer but retain repeat mode. Model/agent changes, moves, deletion, and explicit cancellation disable recovery. Authentication/account changes pause the pending recovery until it is armed again.
-
-The Usage panel adds a recovery status row while armed, showing the scheduled resume as local 24-hour `HH:MM`. Command results appear as toasts. Schedules and stable admission IDs live in OpenCode's plugin storage, not this repository, and survive server restarts. A stable ID prevents duplicate admission if the server stops between queueing a prompt and recording its acceptance. Recovery resumes when the server and that session's location plugin are running again; it cannot wake a sleeping or powered-off machine.
-
-Run scheduler and quota-reader checks with `node --test tests/opencode-codex-resume.test.mjs`. Run wake-script checks with `python3 -m unittest tests/test_opencode_codex_resume_wake.py`. Include the SDK integration check with `OPENCODE_PLUGIN_NODE_MODULES="$HOME/.config/opencode/cli-plugins/codex-quota-sidebar/node_modules" node --test tests/opencode-codex-resume*.test.mjs`.
-
-## Quick Start
-
-For macOS/Linux hosts you operate (the `helm` variant):
-
-```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 ```
 
-On a Mac without the Xcode Command Line Tools, `/usr/bin/git` only offers to install them, so add `--use-builtin-git true` before `iomz`; the Homebrew installer adds them later.
-The host profile prompt decides how much gets installed.
-Hosts come in two tiers: **stem** hosts, in the `stem` group of `.chezmoidata/tools.toml`, get the full development setup; every other host is a **leaf** and gets a light one without mise and zsh plugins.
+The prompt asks for the host name, which picks the tier.
+The apply installs packages, and on a host whose login shell is not zsh it runs `chsh`; both may ask for your password.
 
-On a new stem host, log in to GitHub once with `gh`, the only credential private sources need, then install shared skills and clone personal ones:
+On a fresh Mac, `/usr/bin/git` only offers to install the Xcode Command Line Tools, so add `--use-builtin-git true` before `iomz`.
+The Homebrew installer, which the apply runs when Homebrew is missing, adds them later.
+
+A new stem host then needs one GitHub login, the only credential private sources use:
 
 ```sh
 cd ~/.local/share/chezmoi
@@ -137,25 +59,132 @@ just apm-install
 just skills-pull && chezmoi apply
 ```
 
-When `.chezmoi.toml.tmpl` changes, regenerate machine-local chezmoi data before applying files:
+When `.chezmoi.toml.tmpl` changes, chezmoi warns on the next apply; regenerate the local config first:
 
-```zsh
+```sh
 chezmoi init
 chezmoi apply
 ```
 
-## Agent Sandbox
+## Everyday commands
 
-The `agent-sandbox` variant provisions agent instructions, skills, agents, and hooks for a disposable agent workspace, without deploying the helm shell or tooling configuration.
-Claude Cloud is its current target.
+Run `just` recipes from `~/.local/share/chezmoi`.
 
-### Claude Cloud Environment setup
+| Command | Does |
+| --- | --- |
+| `chezmoi update` | pull this repository and apply it |
+| `just tool-add <name> <manager>` | add a tool to the inventory, then apply |
+| `just tool-bump [name]` | update pinned mise versions, then apply |
+| `just tool-move <name> mise\|brew` | move a macOS tool between mise and Homebrew |
+| `just tool-check` | validate the inventory and preview the diff |
+| `just skills-pull` | clone or fast-forward personal skills |
+| `just apm-install` | install the pinned third-party skills and plugins |
+| `just test` | run the unit tests |
 
-Requirements: Linux x86_64, a POSIX shell, Git, curl, Node.js, Python 3.10+ with `venv`/pip, and standard Ubuntu tools including `sha256sum`/tar.
-The hosted Ubuntu 24.04 image supplies these tools and includes `~/.local/bin` on PATH.
-Allow network access to GitHub release assets, public GitHub repositories, and PyPI.
+## Tools and packages
 
-Paste this into Claude Cloud's **Environment setup field**, before Claude starts:
+### Who owns what
+
+| Layer | Owns | Declared in |
+| --- | --- | --- |
+| apt / Homebrew | OS packages, ops tools, macOS apps | `.chezmoidata/tools.toml` |
+| mise | versioned runtimes and developer CLIs, on stem hosts | `.chezmoidata/tools.toml` |
+| zinit | zsh plugins and completion snippets, on stem hosts | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
+| chezmoi | dotfiles, templates and helper scripts | this repository |
+
+### The inventory
+
+`.chezmoidata/tools.toml` declares each tool once; its header describes the format.
+
+- A tool uses either `mise = "<version>"` or OS keys: `darwin.brew`, `darwin.cask` (macOS apps), `linux.apt`, `linux.brew`.
+- `hosts = [...]` or `groups = [...]` limits it; neither means every host. mise entries must declare one.
+- `arch`, `hold` and `bin` are optional filters and hints.
+- `~/.config/mise/config.toml` is rendered from it: edit the inventory, not the rendered file, and never `mise use`.
+
+Edit with the `just tool-*` recipes; each validates the result and reverts an invalid edit.
+`tool-add` and `tool-bump` apply afterwards (skip with `--no-apply`); committing stays manual.
+
+### What an apply installs
+
+`run_once_install-packages.sh.tmpl` installs what is missing and never upgrades or removes anything.
+
+- **Linux:** apt when root is available (running as root, `sudo -n`, or a sudo password prompt on a terminal), else Homebrew, else it skips and prints how to retry.
+- **macOS:** Homebrew formulae, then apps one by one, so a password prompt or a failed app does not stop the rest.
+  Without Homebrew, `run_before_10-install-homebrew.sh.tmpl` runs its official installer first; it needs an administrator account and a terminal.
+- **Unknown names**, such as a package missing from an older release, are skipped and reported instead of failing the install.
+- **mise** comes from apt on Linux and Homebrew on macOS, only on stem hosts; `run_onchange_after_mise-install.sh.tmpl` runs `mise install` when the config changes.
+- **Locale:** Linux generates `en_US.UTF-8` and makes it the system default; zsh exports it as `LANG` and `LC_ALL` everywhere.
+- **Login shell:** on helm hosts whose login shell is not zsh, an apply runs `chsh -s` with `/bin/zsh` or `/usr/bin/zsh`.
+
+Mac App Store apps (LINE, Kindle) and unnotarized apps stay manual.
+Removing a tool from the inventory does not uninstall it.
+
+Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE`, so Homebrew refuses formulae that mise owns, plus Homebrew's `zsh`.
+
+## Agents and skills
+
+### Instructions
+
+`.chezmoitemplates/AGENTS.md` is the single source of global agent instructions.
+It renders to `~/.claude/CLAUDE.md`, and to `~/.codex/AGENTS.md` with a Codex appendix.
+The repository's own `AGENTS.md` holds maintenance rules for this repository and is not deployed.
+
+### Who owns which skills
+
+| Skills | Source | Deployed by |
+| --- | --- | --- |
+| personal | private [`iomz/skills`](https://github.com/iomz/skills), cloned to `~/.local/share/agent-skills` | chezmoi links, one per skill, in `~/.claude/skills` |
+| third-party (`ax`, `find-skills`, `typesafe-ai`) and `brain-vault` | upstream repositories, pinned by commit in `dot_apm/apm.yml.tmpl` | APM, into `~/.agents/skills` and `~/.claude/skills` |
+| Caveman and `yomiyasu` | upstream, pinned the same way | APM, as native Claude Code plugins under `~/.agents/plugins` |
+
+chezmoi never tracks skill contents, APM output or its lockfile.
+OpenCode reads both `~/.agents/skills` and `~/.claude/skills` and prefers the `~/.agents` copy, so keep names unique across the two.
+
+### Personal skills
+
+A merge to `iomz/skills` `main` followed by `just skills-pull` is a release.
+The recipe clones over HTTPS with the `gh` login, later fast-forwards `main`, and stops on local changes, another branch or diverged commits; it never resets, stashes or forces.
+
+- Edit skills in a separate checkout, never in the live clone.
+- To add a skill, add `private_dot_claude/skills/symlink_<name>.tmpl` once it is on `iomz/skills` `main`.
+- An apply stops if a directory stands where a link goes, since chezmoi would replace it, and warns about same-named copies in `~/.agents/skills`.
+
+### Third-party skills and plugins
+
+`just apm-install` runs `apm install -g` with the `gh` token, which private `iomz/brain-vault` needs.
+Updates are manual and reviewed:
+
+1. `apm outdated -g` lists candidates; "outdated" and "unknown" do not prove a skill changed.
+2. Read the upstream diff, especially hook code, which runs on every session.
+3. Change only that pin with `chezmoi edit ~/.apm/apm.yml`, then `chezmoi apply ~/.apm/apm.yml` and `just apm-install`.
+4. Ask a new Claude Code session whether Caveman is active, then commit.
+
+Never run `apm update -g --yes` as a routine.
+Older APM releases cannot deploy Caveman's plugin hooks; bump APM with `just tool-bump apm-cli` first when needed.
+
+### Codex
+
+Only `~/.codex/AGENTS.md` is tracked; `config.toml`, auth, hooks, sessions and `~/.codex/skills/.system/` stay local.
+Caveman for Codex needs a local `~/.codex/hooks.json` SessionStart hook, and the local `config.toml` should include:
+
+```toml
+[features]
+codex_git_commit = true
+
+[git]
+commit_attribution = "Co-authored-by: Codex <noreply@openai.com>"
+```
+
+## Agent sandbox
+
+The `agent-sandbox` variant gives a disposable agent workspace your instructions and public skills, and nothing else: no shell, editor or Git config, no credentials, no private skills.
+It deploys only:
+
+- `~/.claude/CLAUDE.md`
+- `~/.apm/apm.yml`, with public dependencies only
+- a script that installs the APM version pinned in the inventory into `~/.local/share/agent-sandbox/apm` and runs `apm install -g --target agent-skills,claude --https`
+
+For Claude Cloud, paste this into the environment's **Environment setup** field:
 
 ```sh
 set -eu
@@ -170,489 +199,58 @@ fi
 sh "$source/scripts/bootstrap-agent-sandbox.sh"
 ```
 
-The script installs chezmoi **2.65.0** from its GitHub release asset, verifies SHA-256 before extraction, and initializes the `agent-sandbox` variant with `--no-tty --promptDefaults`.
-A matching installed binary is reused.
+The bootstrap installs a SHA-256-verified chezmoi 2.65.0 on Linux x86_64 and initializes the variant without prompts.
+It needs Git, curl, Node.js and Python 3.10+ with `venv`, and network access to GitHub and PyPI.
 
-Each setup run refreshes this dedicated checkout from `main` and reapplies the `agent-sandbox` variant; keep it free of local edits.
-Cloud may reuse the provisioned filesystem without rerunning setup; rerun setup or invalidate the environment cache to pick up changes on `main`.
-To use another checkout, run `sh /path/to/dotfiles/scripts/bootstrap-agent-sandbox.sh` during setup.
-For a non-default source path, retain `chezmoi --source /path/to/dotfiles` on later commands.
+- Each setup run refreshes the checkout from `main`; keep it free of local edits.
+- APM runs on the first apply and whenever the manifest or script changes; a failure is retried by the next apply.
+- Existing Claude settings must be valid JSON, and `CLAUDE_CONFIG_DIR`, if set, must be `~/.claude`; otherwise APM refuses to run.
+- The sandbox's own `.gitconfig`, `~/.claude.json` and session files stay its own.
+- Use a separate home rather than converting a helm host: switching variants does not remove deployed files.
 
-With the pinned chezmoi already installed, use `CHEZMOI_VARIANT=agent-sandbox chezmoi init --apply --no-tty --promptDefaults iomz`.
-For an existing checkout, run `CHEZMOI_VARIANT=agent-sandbox chezmoi --source "$PWD" init --apply --no-tty --promptDefaults` from its source directory.
-The selector is saved in machine-local chezmoi `[data].variant`; later `chezmoi apply` and `chezmoi init` retain it without the environment variable.
-The default variant is `helm`; unknown selectors fail initialization.
-The old names `workstation` and `claude-cloud` keep working until the next `chezmoi init` rewrites them.
-Switching back requires `CHEZMOI_VARIANT=helm chezmoi init`, but switching variants does not remove previously deployed files.
-Use a separate sandbox home rather than converting a helm host.
+## First apply on an existing host
 
-### Deployment scope
+The first helm apply moves configuration that this repository now owns into a private backup, `~/.chezmoi-backups/pre-install.<timestamp>.<suffix>`, so stale plugins and configs cannot load next to the new setup.
+It runs once (`run_once_before_00-cleanup-legacy-config.sh.tmpl`); nothing is deleted.
 
-Chezmoi deploys only:
+- It moves whole trees such as `~/.config/{nvim,zsh,git,mise,opencode,...}`, `~/.vim` and `~/.hammerspoon`, and dotfiles such as `.vimrc`, `.gitconfig`, `.profile` and the zsh startup files.
+- History, credentials, runtimes, data and cache directories, and agent directories stay untouched.
+- Preview with `chezmoi apply --dry-run`; the script prints its backup path, and you restore what you need from there.
+  Treat backups as sensitive: a swept config can hold secrets.
+- An existing `~/.zprofile` lands in the backup too; copy back what you need.
+- After sweeping a running OpenCode, wait for its tasks, run `opencode service restart`, then reopen the TUI.
+- A failed move stops the apply and retries next time; on `Permission denied`, fix the reported path's ownership, never with `sudo chezmoi apply`.
+- To skip the cleanup on a host, create `~/.chezmoi-backups/.pre-install-complete` before applying.
 
-- `~/.claude/CLAUDE.md`, generated from `.chezmoitemplates/AGENTS.md` for user-global instructions.
-- `~/.apm/apm.yml`, containing SHA-pinned public dependencies.
-- An after-apply script that installs the `apm-cli` version pinned in `.chezmoidata/tools.toml` in `~/.local/share/agent-sandbox/apm` and runs `apm install -g --target agent-skills,claude --https`.
+## Public repository rules
 
-APM deploys `ax`, `find-skills`, `typesafe-ai`, and the Caveman and `yomiyasu` native Claude Code plugins with their skills, agents, and hooks.
-It merges hooks into local Claude settings and owns its generated skill directories, cache, and lockfile.
-Existing Claude settings must be readable JSON objects; invalid or unusable settings stop APM deployment without replacing the file.
-`CLAUDE_CONFIG_DIR`, if set, must resolve to `~/.claude`; redirected APM deployment is rejected.
-Cloud gets neither the private `iomz/skills` clone nor its links, and excludes the vault-only `brain-vault` skill; no GitHub credentials are required.
+This repository is public, so files are added by allowlist, never as whole application directories.
 
-No helm shell/editor/mise configuration, Git configuration, credentials, or native plugin registration is deployed.
-Cloud has no `/plugin` interface; use the deployed skills, agents, and hooks.
-Skill-associated optional tools such as `ax`, `gh`, or `npx` are not installed by this variant; supply them in the Cloud image when needed.
+| Allowed | Never |
+| --- | --- |
+| reproducible configuration | auth files, tokens, credentials |
+| public helper scripts | private keys, machine-local secrets |
+| templates without secrets | sessions, state databases, history |
+| encrypted secret templates | logs, caches, browser data, generated or vendored files |
 
-Provision before startup so agents and SessionStart hooks are available from the first prompt.
-Installing a SessionStart hook during an active session does not replay the initial event.
+Use `chezmoi add` for new files.
+`README.md`, `LICENSE`, `AGENTS.md` and `docs/` stay in the repository only, through `.chezmoiignore`.
 
-Cloud's `.gitconfig` (including signing configuration), `~/.claude.json`, and unrelated `.claude` launcher/session/synced-skill files remain Cloud-owned.
-Chezmoi manages only the allowlisted instruction file and manifest, plus its own machine-local configuration/state.
-Use repo `.mcp.json` for repo MCP needs; this variant does not manage it.
+## Testing
 
-APM installation runs on first apply and when the Cloud manifest/script changes; failures are retried by the next apply.
-For an explicit reinstall without a manifest change:
-
-```sh
-(
-  set -e
-  script=$(mktemp)
-  trap 'rm -f "$script"' 0
-  chezmoi cat "$HOME/agent-sandbox-apm.sh" > "$script"
-  sh "$script"
-)
-```
-
-### Validation
-
-```sh
-just test
-# Or, without just:
-python3 -m unittest discover -s tests -v
-```
-
-Tests cover macOS/Linux rendering, Cloud selection and allowlisting, host-state preservation, checksum-verified noninteractive bootstrap, and idempotency with APM stubbed.
-They do not require network access, but need chezmoi 2.66 or later.
-
-For real Ubuntu 24.04 x86_64/dash, pinned chezmoi/APM, settings merge/preservation, and idempotency checks:
-
-```sh
-just test-integration
-# Or, without just:
-sh tests/integration/run-agent-sandbox.sh
-```
-
-This opt-in test requires Docker with Linux amd64 execution/emulation and network access to Ubuntu packages, GitHub releases/repositories, and PyPI.
-It runs in a disposable container with the checkout mounted read-only, HOME `/root`, and cwd outside HOME.
-Use `chezmoi apply --dry-run` to inspect a selected deployment without running installers.
-Hosted-Cloud APM provisioning and first-prompt skill/agent/hook discovery still require validation in the target environment.
-
-### Shared agent instructions
-
-`.chezmoitemplates/AGENTS.md` is the single source for global instructions.
-Claude receives a generated `~/.claude/CLAUDE.md` deployment artifact; Codex receives the same text at `~/.codex/AGENTS.md` with its tool-specific appendix.
-The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is not deployed.
-
-## Responsibility Split
-
-| Layer    | Owns                                                                                                                                                           | Source of truth                             |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| apt/brew | OS bootstrap packages, the C toolchain on stem hosts, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                | `.chezmoidata/tools.toml`                   |
-| mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                   |
-| zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
-| chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
-
-Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names, which also keep Homebrew's `zsh` out so the login shell stays the system one. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
-
-## Public Dotfiles Safety
-
-This repository is public. Add files by allowlist, not by whole application directory.
-
-Allowed:
-
-- reproducible configuration
-- public helper scripts
-- templates without secrets
-- encrypted secret templates
-
-Denied:
-
-- auth files, tokens, and connector credentials
-- private keys and machine-local secrets
-- sessions, state databases, and history
-- logs, caches, and browser data
-- generated or vendored content
-
-Use `chezmoi add` for new managed files when possible. Keep repo-only files such as `README.md`, `LICENSE`, and root `AGENTS.md` ignored by chezmoi.
-
-`.chezmoiignore` contains target paths. Source paths use chezmoi naming, for example `dot_config/` for `~/.config/`.
-
-## Common Operations
-
-| Change                               | Edit                                                | Apply or verify                                                              |
-| ------------------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Add OS dependency                    | `.chezmoidata/tools.toml`                           | Review target OS branch; run package manager manually on existing hosts      |
-| Add or update runtime/CLI            | `.chezmoidata/tools.toml`                           | `chezmoi apply` (runs `mise install` and `mise reshim`), then `mise current` |
-| Add zsh plugin or completion snippet | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` | Start interactive zsh and verify plugin/widget/completion availability       |
-| Change zsh integration               | Relevant numbered file under `dot_config/zsh/exact_rc.d/` | `zsh -n <file>`, then start interactive zsh                                  |
-| Change managed dotfile               | Corresponding chezmoi source path                   | `chezmoi diff`, then `chezmoi apply`                                         |
-| Add managed file                     | Target file through `chezmoi add`                   | Inspect source and `chezmoi diff` before commit                              |
-
-## Installation and Package Management
-
-### Pre-installation Cleanup
-
-On the first helm apply, `run_once_before_00-cleanup-legacy-config.sh.tmpl` moves repo-owned application configuration into a timestamped `~/.chezmoi-backups/pre-install.<UTC timestamp>.<random suffix>` before installing packages or writing managed files.
-The backup directory is private (mode `0700`); nothing is deleted or added to Git.
-This noninteractive migration also runs once on existing helm hosts when they first receive the script.
-
-The application allowlist covers:
-
-- Config trees under `~/.config`: `vim`, `nvim`, `zsh`, `git`, `direnv`, `mise`, `rtx`, `ghostty`, `zellij`, `zeno`, `vale`, `yamlfmt`, `tig`, and `opencode`; plus `starship.toml`.
-- Home-level config trees: `~/.vim`, `~/.zsh`, and `~/.hammerspoon`.
-- Home-level dotfiles: `.vimrc`, `.gvimrc`, `.exrc`, `.gitconfig`, `.profile`, `.inputrc`, `.mostrc`, `.screenrc`, `.tigrc`, `.mise.toml`, `.rtx.toml`, and `.tool-versions`.
-- Zsh startup files: `.zshenv`, `.zprofile`, `.zshrc`, `.zlogin`, `.zlogout`, plus their `.zwc` files.
-
-Whole config trees move, including unknown files, so stale plugins, hooks, alternate configs, and modules cannot load alongside the fresh setup.
-Standalone history and credential files, runtime installations, data/cache/state directories, unrelated applications, and project-local configs stay untouched.
-Claude, Codex, APM, and shared agent deployment directories are excluded; OpenCode's config tree is swept except for its host-owned `service.json`, and its separate auth/session data is not.
-Any secrets or history embedded in a swept config tree remain in its private local backup; treat backups as sensitive and never publish them.
-Symlinks in the allowlist are moved without modifying their targets; a symlinked `~/.config` or backup root fails deployment without prompting or moving anything.
-Claude Cloud skips this migration.
-
-Preview with `chezmoi apply --dry-run` before applying.
-The script prints its backup path; restore selected local customizations from there after reviewing them.
-After sweeping a running OpenCode installation, wait for active tasks to finish, run `opencode service restart`, then reopen the TUI.
-Restarting only the TUI can leave the background service with stale per-location plugin state and an unavailable Usage panel.
-The migration does not restart applications or services automatically.
-In particular, an existing `~/.zprofile` is backed up, not automatically restored, since managed Zsh explicitly sources it.
-Subsequent applies leave new local customizations alone.
-`~/.chezmoi-backups/.pre-install-complete` also prevents repeat cleanup if the script changes or chezmoi's script state is reset.
-Failed moves stop deployment, retain completed backups, and retry on the next apply; completion is recorded only after all moves succeed.
-Permission checks run before moving configuration; failures caused by ACLs, mount points or immutable flags can still occur during a move.
-For `Permission denied`, inspect the affected path and its parent (on Linux: `ls -ld "$HOME" "$HOME/.vim"`, `getfacl "$HOME" "$HOME/.vim"`, `lsattr -d "$HOME/.vim"`, and `findmnt -T "$HOME/.vim"`).
-Correct only the verified ownership or permission problem, then run `chezmoi init` to regenerate an outdated config template and `chezmoi apply` to retry; upgrading chezmoi alone does not fix filesystem permissions.
-Do not run `sudo chezmoi apply` or recursively change ownership of the entire home directory.
-If this host must keep its existing config trees, explicitly opt out of the entire cleanup by creating the regular file `~/.chezmoi-backups/.pre-install-complete` in a real, private backup directory before retrying.
-This skips cleanup, not later managed-file writes; review `chezmoi diff` and keep any backups from the failed attempt.
-An intentional new sweep requires removing this completion marker and resetting this script's chezmoi run state.
-Inherited config-path overrides such as `XDG_CONFIG_HOME` or `ZDOTDIR` and system-level configs are outside this home-scoped migration.
-
-### Prompt Latency
-
-Starship uses a 10 ms directory scan timeout and a 100 ms command timeout, and does not follow symlinks during detection.
-Slow optional modules may be missing; these are per-operation limits, not a hard deadline for the whole prompt.
-Use `starship timings` in a slow directory to identify modules to disable rather than increasing timeouts.
-
-### System Dependencies
-
-On helm hosts, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
-
-- macOS uses Homebrew: formulae (`darwin.brew`) and apps (`darwin.cask`) come from `.chezmoidata/tools.toml`.
-  Apps install one at a time, since some ask for the password, and a failed one does not stop the rest.
-  Mac App Store apps and unnotarized apps stay manual.
-  Without Homebrew, `run_before_10-install-homebrew.sh.tmpl` first runs its official installer, which needs an administrator account and a terminal for the password; otherwise it says why and retries on the next apply.
-  Scripts find `brew` in its standard locations even when it is not on `PATH` yet.
-- Debian and Ubuntu use apt; packages come from `.chezmoidata/tools.toml`.
-- Without root or usable sudo, Linux falls back to Homebrew, or skips the packages and prints how to retry.
-  sudo can only ask for a password when `chezmoi apply` runs in a terminal.
-- Linux installs mise through apt where possible, and only on hosts with mise entries.
-- Names apt or Homebrew does not know, such as a package missing from an older release, are skipped and reported instead of failing the install.
-- Linux generates `en_US.UTF-8` and makes it the system locale; zsh exports it as `LANG` and `LC_ALL` everywhere and drops `LANGUAGE`.
-
-### Mise Runtimes and CLIs
-
-Global versions live in `~/.config/mise/config.toml`, rendered from `.chezmoidata/tools.toml`.
-Edit the inventory, not the rendered file: changes made by `mise use` or `mise upgrade --bump` are overwritten by the next `chezmoi apply`.
-Entries can be limited to some hosts with `hosts`, `groups` or `arch`; the inventory header describes the format.
-mise entries must declare `hosts` or `groups`, so a host without them gets neither mise nor its config and shell activation.
-Use `just tool-add`, `just tool-bump`, `just tool-move` and `just tool-check` for routine changes; each edit is validated and reverted if invalid.
-`tool-add` and `tool-bump` run `chezmoi apply` afterwards (skip with `--no-apply`); committing stays manual.
-
-Install and verify configured tools:
-
-```zsh
-mise install
-mise reshim
-mise doctor
-mise current
-mise outdated
-```
-
-Run `mise reshim` after changing tools so new executables become available.
-`run_onchange_after_mise-install.sh.tmpl` also runs installation and reshim when managed mise configuration changes.
-
-### Bitwarden CLI
-
-Bitwarden CLI is pinned through mise's npm backend. Managed tool name is `npm:@bitwarden/cli`; executable name is `bw`.
-
-Apply and verify:
-
-```zsh
-chezmoi apply ~/.config/mise/config.toml
-mise install
-mise reshim
-mise which bw
-bw --version
-```
-
-Do not run `mise use bw`; `bw` is not a mise registry tool.
-
-### Neovim Providers
-
-Neovim's remote plugin providers (Node, Perl, Python, Ruby) are disabled in `dot_config/nvim/init.lua` because no plugin uses them.
-Runtime upgrades therefore need no `pynvim` or `neovim` package reinstalls.
-When the managed Neovim config changes, `chezmoi apply` runs `Lazy! sync` once (`run_onchange_after_nvim-plugin-sync.sh.tmpl`); plugin commits are not pinned across hosts.
-The sync is best effort: a failed plugin update does not fail the apply, so check its output and rerun `:Lazy sync` to retry.
-
-### Interactive Shell Integrations
-
-Zinit loads only on stem hosts and manages zsh-specific integrations only. It should not be used as a general binary installer.
-
-Managed by zinit:
-
-- zsh plugins
-- zsh completion snippets
-- Pure fallback prompt
-- zsh-autosuggestions
-- fast-syntax-highlighting
-- zeno.zsh
-- zsh-z and other shell-only helpers
-
-Managed by mise or brew instead:
-
-- standalone CLI binaries
-- language runtimes
-- GitHub release binaries used outside zsh
-- tools that need OS integration
-
-## Zsh
-
-### Startup Order
-
-`~/.zshenv` points zsh at `~/.config/zsh`.
-
-Managed startup order:
-
-```text
-$HOME/.zshenv -> $ZDOTDIR/.zshrc -> $ZDOTDIR/rc.d/* -> $HOME/.zprofile -> $ZDOTDIR/.zlogin
-```
-
-`$ZDOTDIR` is `~/.config/zsh`, so zsh itself never reads `~/.zprofile`; the managed `.zshrc` sources it, and only login shells read `.zlogin`.
-
-Leaf hosts keep the options, completion, key bindings and aliases, with a plain prompt and no zinit, plugins, zeno or mise.
-On helm hosts whose login shell is not zsh, an apply runs `chsh -s` with the system zsh listed in `/etc/shells`, never a mise or Homebrew zsh whose path can change.
-`chsh` asks for the account password, so without an interactive shell the apply only prints the command; the script stops appearing once zsh is the login shell.
-On Linux it creates `~/.profile` when missing, so bash logins still read `~/.bashrc`; an existing file is left untouched.
-
-### rc.d Layout
-
-`rc.d` and `functions` are exact directories: `chezmoi apply` deletes unmanaged files in them.
-Put host-local customization in `~/.zprofile`, which zsh sources last.
-
-Files load numerically:
-
-- `00-env.zsh`: environment values not set in `.zshenv`
-- `01-options.zsh`: shell options and history
-- `02-plugin-manager.zsh`: zinit bootstrap, zsh plugins, and completion snippets
-- `03-tools.zsh`: reserved tool-integration slot, currently empty
-- `04-mise.zsh`: mise activation
-- `05-zeno.zsh`: zeno configuration
-- `06-widgets.zsh`: ZLE widgets
-- `07-style.zsh`: colors, prompt, ZLE highlighting, pager styling, and optional stderr coloring
-- `08-completion.zsh`: completion paths, `compinit`, and completion styles
-- `09-hooks.zsh`: shell hooks
-- `10-bindkeys.zsh`: key bindings
-- `20-aliases.zsh`: aliases and command shortcuts
-- `21-dirs.zsh`: named directories
-
-### Startup Profiling
-
-Set `ZPROF` before starting zsh to enable `zprof`. Set `ENABLE_ZPROFTIME` to write trace logs under `/tmp/zproftime.XXXX`.
-
-```console
-zproftime-sort /tmp/zproftime.* | head
-```
-
-See [How to profile your zsh startup time](https://esham.io/2018/02/zsh-profiling).
-
-### Completion Maintenance
-
-Completion setup is split between zinit snippets, Homebrew-managed completion directories, and local zstyle configuration.
-
-Homebrew completions are discovered through `fpath`, not through zinit snippets.
-If `compinit` reports insecure directories, inspect and fix them:
-
-```zsh
-compaudit
-compaudit | xargs chmod go-w
-```
-
-Set `ZSH_TRUST_INSECURE_COMPLETIONS=1` only as a temporary escape hatch.
-
-After zinit snippet updates, inspect and clean completion links when needed:
-
-```zsh
-zinit completions
-zinit cclean
-```
-
-## Neovim
-
-Only stem hosts get Neovim and its configuration.
-Every host gets a plugin-free `~/.vimrc`, which also works with `vim-tiny`, and Linux installs `vim` through apt.
-zsh sets `EDITOR` and `VISUAL` to the first of `nvim`, `vim`, `vim.tiny` and `vi`, and `SUDO_EDITOR` to its absolute path for `sudoedit`, plus `-i NONE` for Neovim and Vim so root-only file contents stay out of shada and viminfo.
-Neovim and Vim also keep no undo or backup files for temporary directories, where `sudoedit` puts its copies.
-
-Configuration lives in `~/.config/nvim`:
-
-```text
-init.lua
-lua/config/
-  commands.lua
-  keymaps.lua
-  options.lua
-  platform/
-    macos.lua
-    windows.lua
-    wsl.lua
-  plugins.lua
-after/plugin/
-plugin/
-```
-
-`init.lua` handles global startup, theme loading, lazy.nvim bootstrap, base modules, and OS-specific modules. Plugin specs live in `lua/config/plugins.lua`.
-
-Runtime plugin configuration remains under `after/plugin/` and `plugin/` to preserve Neovim load semantics.
-
-## Codex
-
-Managed Codex files are intentionally narrow.
-
-Tracked:
-
-- `~/.codex/AGENTS.md`
-
-Not tracked:
-
-- `~/.codex/config.toml`, auth files, and hooks
-- sessions, history, caches, and state databases
-- `~/.codex/skills/.system/`
-
-### Skill Ownership
-
-| Category                         | Location                               | Owner                  | Chezmoi policy                         |
-| -------------------------------- | -------------------------------------- | ---------------------- | -------------------------------------- |
-| Personal and public-safe         | `~/.codex/skills/<name>/`              | chezmoi                | Track only after inspecting every file |
-| Private or machine-local         | `~/.codex/skills/.local/<name>/`       | local machine          | Always ignored                         |
-| Codex system skills              | `~/.codex/skills/.system/`             | Codex                  | Always ignored                         |
-| Generated skill cache            | `~/.codex/skills/.cache/`              | Codex or skill tooling | Always ignored                         |
-| Nested metadata and dependencies | `.git/`, `node_modules/` below a skill | upstream tooling       | Always ignored                         |
-
-Keep independently reusable public skills in their own repositories. Outside `~/.codex/skills`, chezmoi owns no skill content: it links personal skills from their clone and tracks the APM manifest, never installer output, cloned repository metadata, or dependencies.
-
-### Shared Agent Skills
-
-`~/.agents/skills` is a cross-client deployment surface, not a directory for chezmoi to mirror wholesale.
-Its contents can come from personal source files, upstream installers, or skill package managers, so ownership must remain explicit.
-
-| Category | Owner | Chezmoi policy |
+| Test | Command | Needs |
 | --- | --- | --- |
-| Personal skill | `iomz/skills`, cloned to `~/.local/share/agent-skills` | Track one link per skill in `~/.claude/skills`, never its content |
-| Third-party skill | APM or upstream installer | Track a declarative manifest with pinned SHAs, not deployed files or lockfiles |
-| `.skill-lock.json` and similar installer state | installer | Never track as hand-authored configuration |
-| Caches, cloned metadata, and dependencies | package manager | Never track |
+| unit | `just test` | chezmoi 2.66+, no network |
+| Linux host, in a container | `just test-linux-host <host>` | Docker |
+| agent sandbox, in a container | `just test-integration` | Docker with linux/amd64 |
 
-APM deploys to `~/.agents/skills` and `~/.claude/skills` (`agent-skills` and `claude` targets in `apm.yml`).
-It also owns Caveman and `yomiyasu`: APM deploys them as native Claude Code plugins under `~/.agents/plugins` and enables them in `~/.claude/settings.json`, alongside their skills in `~/.agents/skills`.
-APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
-The vault-specific `brain-vault` skill is owned by `iomz/brain-vault` (`Skills/Common/brain-vault`) and deployed the same way.
-Helm installs read private `iomz/brain-vault` with the `gh` login; agent-sandbox installs use public dependencies only.
-OpenCode reads both `~/.agents/skills` and `~/.claude/skills` and prefers the `~/.agents` copy of a skill, so keep names unique across the two.
-Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
+`AGENTS.md` says when each runs: unit tests after every change, container tests once per pull request that touches what Linux hosts apply.
 
-The APM manifest lives at `~/.apm/apm.yml`, rendered from `dot_apm/apm.yml.tmpl`; chezmoi owns this inspected declarative input, and the commit SHA pins in it are the source of truth.
-`~/.apm/apm.lock.yaml` is generated per machine and not tracked; install with `just apm-install`, which runs `apm install -g` (not `--frozen`) with the `gh` token.
-Do not let chezmoi and APM own the same deployed skill directory.
+## More
 
-#### Personal skills
+- [Zsh](docs/zsh.md): startup order, `rc.d`, prompt, profiling, completion
+- [Neovim and Vim](docs/neovim.md): editor selection, layout, plugin sync
+- [OpenCode](docs/opencode.md): build and updates, theme, sidebar, quota recovery
 
-Personal skills live in private `iomz/skills`, one `skills/<name>/SKILL.md` each; a merge to its `main` followed by one explicit pull is a release.
-Dev hosts clone it to `~/.local/share/agent-skills`, and chezmoi links each skill into `~/.claude/skills`, which Claude Code and OpenCode both read.
-The clone is deliberately not a chezmoi external, so an apply never needs GitHub access and never pulls skills implicitly.
-
-```sh
-just skills-pull
-```
-
-Both run over HTTPS with the `gh` login, so no SSH key is needed; the first run clones, and later runs fast-forward `main` and stop on local changes, another branch or diverged commits, without resetting, stashing or forcing.
-Edit skills in a separate checkout, never in the live clone; `evolve-skill` reads `~/.local/share/agent-skills/AGENTS.md` at that path.
-A link would silently replace a directory of the same name, so an apply first stops if one stands in the way, and warns about same-named copies in `~/.agents/skills`, which shadow the links in OpenCode.
-To add a skill, add `private_dot_claude/skills/symlink_<name>.tmpl` after it reaches `iomz/skills` `main`.
-
-#### Updating APM-managed skills
-
-Updates are manual and review-driven; no scheduled job updates skills in the background.
-Start with this read-only inventory:
-
-```sh
-apm outdated -g
-```
-
-An `outdated` result means APM found a newer annotated upstream tag.
-It does not prove the selected skill changed; compare the pinned and proposed skill subpaths before advancing the pin.
-An `unknown` result means APM could not establish a newer version for that commit-pinned dependency; it does not prove the dependency is current.
-
-Do not use `apm update -g --yes` as a blanket routine.
-Dependencies are deliberately pinned to commit SHAs, and APM will not replace a revision pin with a branch or lightweight tag.
-Inspect the authoritative upstream diff, release notes, skill contents, license, and provenance before changing only the intended pin in the chezmoi-managed manifest.
-
-```sh
-chezmoi edit ~/.apm/apm.yml
-chezmoi apply ~/.apm/apm.yml
-just apm-install
-chezmoi diff ~/.apm/apm.yml
-git diff --check
-git diff -- dot_apm/apm.yml.tmpl
-```
-
-Verify changed skill frontmatter and any associated CLI before committing.
-Older APM releases cannot deploy Caveman's plugin hooks, so bump APM with `just tool-bump` before Caveman when needed. After a bump, ask a new Claude Code session whether Caveman is active; its session-start hook reports the mode.
-Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
-
-Caveman activation for Codex requires a local `~/.codex/hooks.json` SessionStart hook.
-Codex hooks are not managed by chezmoi.
-
-Local `~/.codex/config.toml` should include:
-
-```toml
-[features]
-codex_git_commit = true
-
-[git]
-commit_attribution = "Co-authored-by: Codex <noreply@openai.com>"
-```
-
-## Ansible
-
-Mise manages Ansible through its pipx backend as an isolated Python CLI application.
-
-```zsh
-mise install pipx:ansible
-mise which ansible
-```
-
-## Fonts
-
-On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF into user font directory during first `chezmoi apply`. Terminal font selection stays manual.
-
-## WakaTime
-
-WakaTime is not managed by chezmoi. Its API key is machine-local, and `chezmoi apply` should not require password-manager access.
-
-Configure WakaTime manually where needed:
-
-```zsh
-wakatime --api-key
-```
+Not managed here: WakaTime's API key (`wakatime --api-key` per host) and terminal font selection.
+On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF once.

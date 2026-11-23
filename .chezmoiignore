@@ -7,6 +7,10 @@ AGENTS.md
 # LICENSE
 LICENSE
 
+# docs
+docs
+docs/**
+
 # repository tooling
 scripts/**
 tests/**
