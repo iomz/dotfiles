@@ -33,10 +33,10 @@ class HostSlimTest(unittest.TestCase):
         subprocess.run(["chezmoi", "apply", "--force", "--no-tty", "--exclude", "scripts"],
                        env=self.env, stdin=subprocess.DEVNULL, capture_output=True, check=True)
 
-    def slim(self, *args):
-        result = subprocess.run(["sh", str(SCRIPT), *args], env=self.env, text=True,
+    def slim(self, *args, env=None, code=0):
+        result = subprocess.run(["sh", str(SCRIPT), *args], env=env or self.env, text=True,
                                 capture_output=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.returncode, code, result.stderr)
         return result.stdout
 
     def write(self, path, text="x\n"):
@@ -90,12 +90,35 @@ class HostSlimTest(unittest.TestCase):
         self.assertTrue((self.home / ".local/share/keep/data").exists())
         self.assertIn("nothing to slim", self.slim())
 
+        # Restoring keeps what exists again, user data named MOVED, and the home's mode.
+        self.write(".config/nvim/init.lua", "new\n")
+        self.write("MOVED", "mine\n")
+        self.home.chmod(0o751)
         restore = out.rsplit("To restore: ", 1)[1].strip()
-        subprocess.run(["sh", "-c", restore], env=self.env, check=True)
-        self.assertTrue((self.home / ".config/nvim/lazy-lock.json").exists())
+        subprocess.run(["sh", "-c", restore], env=self.env, check=True, capture_output=True)
+        self.assertTrue((self.home / ".local/share/mise/installs/node/x").exists())
         self.assertTrue((self.home / ".claude/skills/evolve-skill").is_symlink())
         self.assertEqual((self.home / ".profile").read_text(), "export TINY_CHEZMOI=1\n")
-        self.assertFalse((self.home / "MOVED").exists())
+        self.assertEqual((self.home / ".config/nvim/init.lua").read_text(), "new\n")
+        self.assertTrue((backup / ".config/nvim/lazy-lock.json").exists())
+        self.assertTrue((backup / "MOVED").exists())
+        self.assertEqual((self.home / "MOVED").read_text(), "mine\n")
+        self.assertEqual(self.home.stat().st_mode & 0o777, 0o751)
+
+    def test_a_failed_managed_query_moves_nothing(self):
+        self.leaf_home()
+        real = shutil.which("chezmoi")
+        bin_dir = self.home.parent / "bin"
+        bin_dir.mkdir()
+        fake = bin_dir / "chezmoi"
+        fake.write_text("#!/bin/sh\n"
+                        'case " $* " in *" managed "*) case " $* " in *--override-data*) ;; *) exit 1 ;; esac ;; esac\n'
+                        f'exec "{real}" "$@"\n')
+        fake.chmod(0o755)
+        env = dict(self.env, PATH=f"{bin_dir}{os.pathsep}{self.env['PATH']}")
+        self.slim("--apply", env=env, code=1)
+        self.assertFalse((self.home / ".chezmoi-backups").exists())
+        self.assertTrue((self.home / ".config/nvim").exists())
 
     def test_a_profile_with_more_than_the_legacy_line_stays(self):
         self.leaf_home()

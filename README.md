@@ -237,7 +237,7 @@ chezmoi apply
 - It compares what a stem host manages with what this host manages, and adds the stem-only tool data: mise, zinit, Neovim and the personal skills clone.
 - It also catches the old one-line `~/.profile` (`export TINY_CHEZMOI=1`), which hid `~/.bashrc` from bash logins; the next apply creates the current one.
 - It never deletes, never touches apt or snap packages, and does nothing on stem hosts or in the agent sandbox.
-- `--apply` prints the command that restores everything from the backup.
+- `--apply` prints the `--restore <backup>` command that moves everything back; it never overwrites a path that exists again.
 
 ## Public repository rules
 
