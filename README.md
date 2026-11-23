@@ -181,7 +181,7 @@ Chezmoi deploys only:
 
 - `~/.claude/CLAUDE.md`, generated from `.chezmoitemplates/AGENTS.md` for user-global instructions.
 - `~/.apm/apm.yml`, containing SHA-pinned public dependencies.
-- An after-apply script that installs `apm-cli==0.38.0` in `~/.local/share/claude-cloud/apm` and runs `apm install -g --target agent-skills,claude --https`.
+- An after-apply script that installs the `apm-cli` version pinned in `.chezmoidata/tools.toml` in `~/.local/share/claude-cloud/apm` and runs `apm install -g --target agent-skills,claude --https`.
 
 APM deploys `ax`, `find-skills`, `typesafe-ai`, and the Caveman and `yomiyasu` native Claude Code plugins with their skills, agents, and hooks.
 It merges hooks into local Claude settings and owns its generated skill directories, cache, and lockfile.
@@ -549,7 +549,7 @@ Its contents can come from personal source files, upstream installers, or skill 
 | Caches, cloned metadata, and dependencies | package manager | Never track |
 
 APM deploys to `~/.agents/skills` and `~/.claude/skills` (`agent-skills` and `claude` targets in `apm.yml`).
-It also owns Caveman and `yomiyasu`: APM 0.38 deploys them as native Claude Code plugins under `~/.agents/plugins` and enables them in `~/.claude/settings.json`, alongside their skills in `~/.agents/skills`.
+It also owns Caveman and `yomiyasu`: APM deploys them as native Claude Code plugins under `~/.agents/plugins` and enables them in `~/.claude/settings.json`, alongside their skills in `~/.agents/skills`.
 APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
 The vault-specific `brain-vault` skill is owned by `iomz/brain-vault` (`Skills/Common/brain-vault`) and deployed the same way.
 Workstation installs require GitHub read access to private `iomz/brain-vault`; Cloud installs use public dependencies only.
@@ -602,7 +602,7 @@ git diff -- dot_apm/apm.yml.tmpl
 ```
 
 Verify changed skill frontmatter and any associated CLI before committing.
-Caveman needs APM 0.38 or later: older APM cannot deploy its plugin hooks. After a bump, check that a new Claude Code session shows `Loading caveman mode...`.
+Older APM releases cannot deploy Caveman's plugin hooks, so bump APM with `just tool-bump` before Caveman when needed. After a bump, check that a new Claude Code session shows `Loading caveman mode...`.
 Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
 
 Caveman activation for Codex requires a local `~/.codex/hooks.json` SessionStart hook.

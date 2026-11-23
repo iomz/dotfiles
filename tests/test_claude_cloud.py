@@ -9,10 +9,12 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tomllib
 import unittest
 
 
 SOURCE = Path(__file__).resolve().parents[1]
+APM_VERSION = tomllib.loads((SOURCE / ".chezmoidata/tools.toml").read_text())["tools"]["apm-cli"]["mise"]
 
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
@@ -140,7 +142,7 @@ class ClaudeCloudTest(unittest.TestCase):
         apm = bin_dir / "apm"
         apm.write_text('''#!/bin/sh
 if [ "$1" = "--version" ]; then
-  echo 'Agent Package Manager (APM) CLI version 0.38.0'
+  echo 'Agent Package Manager (APM) CLI version ''' + APM_VERSION + ''''
   exit 0
 fi
 printf '%s\\n' "$*" >> "$HOME/apm-calls"
@@ -319,7 +321,7 @@ cp "$FIXTURES/apm" "$(dirname "$0")/apm"
         fake_apm = fixtures / "apm"
         fake_apm.write_text('''#!/bin/sh
 if [ "$1" = '--version' ]; then
-  echo 'Agent Package Manager (APM) CLI version 0.38.0'
+  echo 'Agent Package Manager (APM) CLI version ''' + APM_VERSION + ''''
 else
   printf '%s\\n' "$*" >> "$HOME/apm-calls"
 fi
@@ -333,7 +335,7 @@ fi
                                     text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.home / "pip-calls").read_text().splitlines(), [
-            "-m pip install --no-input --disable-pip-version-check apm-cli==0.38.0",
+            "-m pip install --no-input --disable-pip-version-check apm-cli==" + APM_VERSION,
         ])
         self.assertEqual((self.home / "apm-calls").read_text().splitlines(), [
             "install -g --target agent-skills,claude --https",
