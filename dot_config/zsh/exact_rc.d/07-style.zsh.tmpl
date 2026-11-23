@@ -1,3 +1,4 @@
+# chezmoi:template:left-delimiter="<%" right-delimiter="%>"
 #!/usr/bin/env zsh
 #
 # Styles
@@ -68,7 +69,8 @@ spectrum_all() {
 
 # Prompt {{{
 # Prefer Starship when available. Fall back to Pure where zinit is loaded
-# (stem hosts), else to a plain prompt.
+# (stem hosts), else to a plain prompt in Starship's colors: red user, the
+# host in its Starship color, cyan path, and a red % after a failed command.
 if command -v starship >/dev/null 2>&1; then
     eval "$(starship init zsh)"
 elif (( ${+functions[zinit]} )); then
@@ -91,7 +93,7 @@ elif (( ${+functions[zinit]} )); then
         multisrc'(async|pure).zsh' \
         @sindresorhus/pure
 else
-    PROMPT='%n@%m:%~ %# '
+    PROMPT='%B%F{red}%n%f%b@%B%F{<% includeTemplate "host-color" . | default "12" %>}%m%f%b:%B%F{cyan}%~%f%b %(?.%F{green}.%F{red})%#%f '
 fi
 # }}}
 

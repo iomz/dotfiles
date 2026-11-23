@@ -35,7 +35,8 @@ MANAGED = {
 # Inventory data and partials rendered by managed templates.
 SUPPORT = (".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected",
            ".chezmoitemplates/mise-config.toml", ".chezmoitemplates/selects-mise",
-           ".chezmoitemplates/is-stem", ".chezmoitemplates/variant")
+           ".chezmoitemplates/is-stem", ".chezmoitemplates/variant",
+           ".chezmoitemplates/host-color")
 
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")

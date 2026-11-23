@@ -57,7 +57,7 @@ cd ~ && sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --use-builtin-git t
 
 - Do not install Homebrew or the Xcode Command Line Tools first: `/usr/bin/git` only offers to install the tools, and the apply runs the Homebrew installer, which adds them.
 - The full Xcode from the App Store is independent; install it whenever a project needs it.
-- The install script leaves chezmoi in `~/bin`; once `command -v chezmoi` shows Homebrew's copy, `~/bin/chezmoi` can go.
+- chezmoi lives in `~/bin` on every host, macOS included, and updates itself with `chezmoi upgrade`; Homebrew must not install it.
 
 A new stem host then needs one GitHub login, the only credential private sources use:
 
