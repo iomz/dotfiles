@@ -27,7 +27,8 @@ as_user() {
 
 echo "== chezmoi init --apply (host=$host)"
 as_user chezmoi init --apply --no-tty --promptDefaults \
-    --promptString "Host profile=$host"
+    --promptString "Host profile=$host" 2>/tmp/init.err || { cat /tmp/init.err >&2; exit 1; }
+cat /tmp/init.err >&2
 
 echo "== checks"
 status=0
@@ -41,6 +42,11 @@ check() {
         status=1
     fi
 }
+# useradd gave the user bash; without a terminal the apply only names the command.
+check "apply prints how to make zsh the login shell" grep -q 'chsh -s /.*/zsh' /tmp/init.err
+usermod -s "$(command -v zsh)" "$user"
+check "the login shell script disappears once zsh is the login shell" as_user sh -c \
+    'status=$(chezmoi status) && ! printf "%s\n" "$status" | grep -q login-shell'
 check "zsh starts without errors" as_user zsh -ic 'exit 0'
 check "zsh startup prints nothing to stderr" \
     as_user sh -c 'test -z "$(zsh -ic "exit 0" 2>&1 >/dev/null)"'

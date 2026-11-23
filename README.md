@@ -438,7 +438,8 @@ $HOME/.zshenv -> $ZDOTDIR/.zshrc -> $ZDOTDIR/rc.d/* -> $HOME/.zprofile -> $ZDOTD
 `$ZDOTDIR` is `~/.config/zsh`, so zsh itself never reads `~/.zprofile`; the managed `.zshrc` sources it, and only login shells read `.zlogin`.
 
 Leaf hosts keep the options, completion, key bindings and aliases, with a plain prompt and no zinit, plugins, zeno or mise.
-chezmoi does not change the login shell.
+On helm hosts whose login shell is not zsh, an apply runs `chsh -s` with the system zsh listed in `/etc/shells`, never a mise or Homebrew zsh whose path can change.
+`chsh` asks for the account password, so without an interactive shell the apply only prints the command; the script stops appearing once zsh is the login shell.
 On Linux it creates `~/.profile` when missing, so bash logins still read `~/.bashrc`; an existing file is left untouched.
 
 ### rc.d Layout
