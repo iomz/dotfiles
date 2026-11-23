@@ -180,6 +180,30 @@ linux.apt = "git"
 darwin.brew = "gnupg"
 linux.apt = "gnupg"
 
+[tools.htop]
+darwin.brew = "htop"
+linux.apt = "htop"
+
+[tools.jq]
+darwin.brew = "jq"
+linux.apt = "jq"
+
+[tools.mtr]
+darwin.brew = "mtr"
+linux.apt = "mtr-tiny"
+
+[tools.ncdu]
+darwin.brew = "ncdu"
+linux.apt = "ncdu"
+
+[tools.tmux]
+darwin.brew = "tmux"
+linux.apt = "tmux"
+
+[tools.tree]
+darwin.brew = "tree"
+linux.apt = "tree"
+
 [tools.xz]
 darwin.brew = "xz"
 linux.apt = "xz-utils"
@@ -188,6 +212,7 @@ linux.apt = "xz-utils"
 
 [tools.act]
 darwin.brew = "act"
+hosts = ["oxalis"]
 
 [tools.antigravity-cli]
 darwin.brew = "antigravity-cli"
@@ -200,6 +225,7 @@ darwin.brew = "cheat"
 
 [tools.cmake]
 darwin.brew = "cmake"
+hosts = ["oxalis"]
 
 [tools.coreutils]
 darwin.brew = "coreutils"
@@ -224,12 +250,10 @@ darwin.brew = "gnu-sed"
 
 [tools.goreleaser]
 darwin.brew = "goreleaser"
+hosts = ["oxalis"]
 
 [tools.hyperfine]
 darwin.brew = "hyperfine"
-
-[tools.jq]
-darwin.brew = "jq"
 
 [tools.mise]
 darwin.brew = "mise"
@@ -254,11 +278,28 @@ groups = ["stem"]
 [tools.curl]
 linux.apt = "curl"
 
+[tools.dig]
+# Linux only, like lsof, rsync and tcpdump: macOS ships them.
+linux.apt = "bind9-dnsutils"
+
 [tools.dirmngr]
+# Key retrieval for the mise apt source.
 linux.apt = "dirmngr"
+groups = ["stem"]
 
 [tools.extrepo]
+# Enables the mise apt source.
 linux.apt = "extrepo"
+groups = ["stem"]
+
+[tools.lsof]
+linux.apt = "lsof"
+
+[tools.rsync]
+linux.apt = "rsync"
+
+[tools.tcpdump]
+linux.apt = "tcpdump"
 
 [tools.unzip]
 linux.apt = "unzip"

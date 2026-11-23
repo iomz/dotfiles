@@ -48,6 +48,8 @@ class PackageScriptCase(unittest.TestCase):
         # PATH holds only stubs and the utilities the script needs, so a real
         # apt-get or brew on the test machine cannot leak in.
         self.stub("id", "echo 1000")
+        # Every package is known unless named in $UNKNOWN.
+        self.stub("apt-cache", 'case " $UNKNOWN " in *" $2 "*) echo "  Candidate: (none)" ;; *) echo "  Candidate: 1.0" ;; esac')
         for tool in ("awk", "grep"):
             (self.bin / tool).symlink_to(shutil.which(tool))
 
@@ -64,11 +66,11 @@ class PackageScriptCase(unittest.TestCase):
         path.write_text(f'#!/bin/sh\necho "{name} $*" >> "{self.calls}"\n{body}\n')
         path.chmod(0o755)
 
-    def run_script(self):
+    def run_script(self, unknown=""):
         self.calls.write_text("")
         result = subprocess.run([shutil.which("sh"), str(self.script)], text=True, capture_output=True,
                                 stdin=subprocess.DEVNULL,
-                                env=dict(os.environ, PATH=str(self.bin)))
+                                env=dict(os.environ, PATH=str(self.bin), UNKNOWN=unknown))
         self.assertEqual(result.returncode, 0, result.stderr)
         installs = [line for line in self.calls.read_text().splitlines() if " install " in line]
         return installs, result.stderr
@@ -148,6 +150,14 @@ class LinuxPackageScriptTest(PackageScriptCase):
         installs, _ = self.run_script()
         self.assertEqual(installs, ["brew install brew-b brew-c"])
 
+    def test_unknown_names_are_skipped_and_reported(self):
+        self.stub_common()
+        self.stub("apt-get")
+        self.stub("brew", 'case " $UNKNOWN " in *" $2 "*) [ "$1" != info ] ;; esac')
+        installs, stderr = self.run_script(unknown="pkg-b brew-c")
+        self.assertEqual(installs, ["sudo apt install -y pkg-a"])
+        self.assertIn("skipped (unknown to the package manager): pkg-b brew-c", stderr)
+
     def test_without_package_managers_everything_is_reported(self):
         self.stub_common()
         installs, stderr = self.run_script()
@@ -171,6 +181,12 @@ class DarwinPackageScriptTest(PackageScriptCase):
         self.stub("brew", '[ "$1" != list ] || echo f-have')
         installs, _ = self.run_script()
         self.assertEqual(installs, ["brew install f-want"])
+
+    def test_unknown_formulae_are_skipped_and_reported(self):
+        self.stub("brew", 'case "$1 $2" in "info f-want") exit 1 ;; list*) echo f-have ;; esac')
+        installs, stderr = self.run_script()
+        self.assertEqual(installs, [])
+        self.assertIn("skipped (unknown to Homebrew): f-want", stderr)
 
     def test_missing_homebrew_skips_without_failing(self):
         installs, stderr = self.run_script()
