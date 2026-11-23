@@ -8,7 +8,7 @@ require('jaq-nvim').setup {
 
         -- Uses shell commands
         external = {
-            markdown = "glow %",
+            markdown = "bat --paging=never %",
             python   = "python3 %",
             go       = "go run %",
             sh       = "sh %"
