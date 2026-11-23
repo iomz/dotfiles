@@ -33,7 +33,7 @@ It must not contain credentials, local state, history, caches, or machine-specif
 ## Chezmoi Rules
 
 - Use `chezmoi add` for new managed files when possible.
-- Keep repo-only files such as `README.md`, `LICENSE`, and this `AGENTS.md` ignored by chezmoi so they do not apply into `$HOME`.
+- Keep repo-only files such as `README.md`, `docs/`, `LICENSE`, and this `AGENTS.md` ignored by chezmoi so they do not apply into `$HOME`.
 - Use source-path names intentionally, for example `dot_config/` for `~/.config/`.
 
 ## Working Tree Rules
