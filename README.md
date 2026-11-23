@@ -126,9 +126,9 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 
 On a Mac without the Xcode Command Line Tools, `/usr/bin/git` only offers to install them, so add `--use-builtin-git true` before `iomz`; the Homebrew installer adds them later.
 The host profile prompt decides how much gets installed.
-Hosts in the `dev` group of `.chezmoidata/tools.toml` get the full setup; any other name gets a light one without mise and zsh plugins.
+Hosts come in two tiers: **stem** hosts, in the `stem` group of `.chezmoidata/tools.toml`, get the full development setup; every other host is a **leaf** and gets a light one without mise and zsh plugins.
 
-On a new dev host, log in to GitHub once with `gh`, the only credential private sources need, then install shared skills and clone personal ones:
+On a new stem host, log in to GitHub once with `gh`, the only credential private sources need, then install shared skills and clone personal ones:
 
 ```sh
 cd ~/.local/share/chezmoi
@@ -258,7 +258,7 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 
 | Layer    | Owns                                                                                                                                                           | Source of truth                             |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| apt/brew | OS bootstrap packages, the C toolchain on dev hosts, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                 | `.chezmoidata/tools.toml`                   |
+| apt/brew | OS bootstrap packages, the C toolchain on stem hosts, GUI-adjacent tools, system integration, and host-managed convenience CLIs                                | `.chezmoidata/tools.toml`                   |
 | mise     | Versioned developer environments, reproducible runtimes, runtime-adjacent package managers, and developer CLIs that should not follow the host package manager | `.chezmoidata/tools.toml`                   |
 | zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
 | chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
@@ -404,7 +404,7 @@ The sync is best effort: a failed plugin update does not fail the apply, so chec
 
 ### Interactive Shell Integrations
 
-Zinit loads only on dev hosts and manages zsh-specific integrations only. It should not be used as a general binary installer.
+Zinit loads only on stem hosts and manages zsh-specific integrations only. It should not be used as a general binary installer.
 
 Managed by zinit:
 
@@ -437,7 +437,7 @@ $HOME/.zshenv -> $ZDOTDIR/.zshrc -> $ZDOTDIR/rc.d/* -> $HOME/.zprofile -> $ZDOTD
 
 `$ZDOTDIR` is `~/.config/zsh`, so zsh itself never reads `~/.zprofile`; the managed `.zshrc` sources it, and only login shells read `.zlogin`.
 
-Hosts outside the `dev` group keep the options, completion, key bindings and aliases, with a plain prompt and no zinit, plugins, zeno or mise.
+Leaf hosts keep the options, completion, key bindings and aliases, with a plain prompt and no zinit, plugins, zeno or mise.
 chezmoi does not change the login shell.
 On Linux it creates `~/.profile` when missing, so bash logins still read `~/.bashrc`; an existing file is left untouched.
 
@@ -495,7 +495,7 @@ zinit cclean
 
 ## Neovim
 
-Only dev hosts get Neovim and its configuration.
+Only stem hosts get Neovim and its configuration.
 Every host gets a plugin-free `~/.vimrc`, which also works with `vim-tiny`, and Linux installs `vim` through apt.
 zsh sets `EDITOR` and `VISUAL` to the first of `nvim`, `vim`, `vim.tiny` and `vi`, and `SUDO_EDITOR` to its absolute path for `sudoedit`, plus `-i NONE` for Neovim and Vim so root-only file contents stay out of shada and viminfo.
 Neovim and Vim also keep no undo or backup files for temporary directories, where `sudoedit` puts its copies.

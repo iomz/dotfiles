@@ -1,4 +1,4 @@
-"""Apply the real source as a dev and as a non-dev host into throwaway homes."""
+"""Apply the real source as a stem and as a leaf host into throwaway homes."""
 
 import os
 from pathlib import Path
@@ -86,7 +86,7 @@ class HostProfileTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("~/.claude/skills/say-what-it-is", result.stderr)
         self.assertIn("apm install -g", result.stderr)
-        self.assertIsNone(self.run_guard("tinybox"), "non-dev hosts get no links")
+        self.assertIsNone(self.run_guard("tinybox"), "leaf hosts get no links")
 
     def test_guard_warns_about_copies_that_shadow_links_in_opencode(self):
         (self.home / ".agents/skills/evolve-skill").mkdir(parents=True)

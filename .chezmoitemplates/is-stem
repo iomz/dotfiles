@@ -1,0 +1,2 @@
+{{- /* Renders "true" on hosts in the stem group; every other host is a leaf. */ -}}
+{{- includeTemplate "tool-selected" (dict "tool" (dict "groups" (list "stem")) "data" .) -}}

@@ -1,5 +1,5 @@
 {{- /* Renders only when something sits in the way of an iomz/skills link. */ -}}
-{{- if and (ne (includeTemplate "variant" .) "agent-sandbox") (eq (includeTemplate "is-dev" .) "true") -}}
+{{- if and (ne (includeTemplate "variant" .) "agent-sandbox") (eq (includeTemplate "is-stem" .) "true") -}}
 {{-   $blocked := list -}}
 {{-   $shadowed := list -}}
 {{-   range glob (joinPath .chezmoi.sourceDir "private_dot_claude/skills/symlink_*.tmpl") -}}

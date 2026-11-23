@@ -35,7 +35,7 @@ MANAGED = {
 # Inventory data and partials rendered by managed templates.
 SUPPORT = (".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected",
            ".chezmoitemplates/mise-config.toml", ".chezmoitemplates/selects-mise",
-           ".chezmoitemplates/is-dev", ".chezmoitemplates/variant")
+           ".chezmoitemplates/is-stem", ".chezmoitemplates/variant")
 
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
@@ -60,7 +60,7 @@ class PreinstallCleanupTest(unittest.TestCase):
             'echo installed > "$HOME/install-probe"\n'
         )
         self.config = self.root / "config.toml"
-        # A dev profile, so every managed file renders with content.
+        # A stem profile, so every managed file renders with content.
         self.config.write_text('[data]\nvariant = "helm"\nhost = "oxalis"\n')
         self.env = dict(os.environ, HOME=str(self.home))
         self.command = [

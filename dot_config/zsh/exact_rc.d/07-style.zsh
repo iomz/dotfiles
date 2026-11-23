@@ -68,7 +68,7 @@ spectrum_all() {
 
 # Prompt {{{
 # Prefer Starship when available. Fall back to Pure where zinit is loaded
-# (dev hosts), else to a plain prompt.
+# (stem hosts), else to a plain prompt.
 if command -v starship >/dev/null 2>&1; then
     eval "$(starship init zsh)"
 elif (( ${+functions[zinit]} )); then

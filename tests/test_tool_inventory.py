@@ -117,11 +117,11 @@ class ToolSelectionTest(unittest.TestCase):
     TOOLS = {
         "everywhere": {"mise": "1"},
         "named": {"mise": "1", "hosts": ["alpha"]},
-        "grouped": {"mise": "1", "groups": ["dev"]},
+        "grouped": {"mise": "1", "groups": ["stem"]},
         "amd64-only": {"mise": "1", "arch": ["amd64"]},
         "linux-amd64": {"darwin": {"brew": "x"}, "linux": {"apt": "x", "arch": ["amd64"]}},
     }
-    HOSTS = {"alpha": {"groups": ["dev"]}, "beta": {}}
+    HOSTS = {"alpha": {"groups": ["stem"]}, "beta": {}}
 
     def setUp(self):
         temp = tempfile.TemporaryDirectory(prefix="chezmoi-tools-")

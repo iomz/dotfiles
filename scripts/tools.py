@@ -211,7 +211,7 @@ def set_mise_version(lines, version):
 def require_scope(tool, args):
     """Refuse an unrestricted mise entry before anything is installed."""
     if not (args.hosts or args.groups or "hosts" in tool or "groups" in tool):
-        raise ToolError("mise entries need --groups or --hosts, e.g. --groups dev")
+        raise ToolError("mise entries need --groups or --hosts, e.g. --groups stem")
 
 
 def scope_lines(args):

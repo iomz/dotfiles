@@ -16,7 +16,7 @@ test-integration:
 install-hooks:
     git config core.hooksPath .githooks
 
-# Usage: just tool-add yq mise [version] --groups dev|--hosts oxalis
+# Usage: just tool-add yq mise [version] --groups stem|--hosts oxalis
 #        just tool-add mtr brew|apt|linux-brew [package]
 # Add a tool entry, or an OS package to an existing entry, then chezmoi apply.
 [positional-arguments]

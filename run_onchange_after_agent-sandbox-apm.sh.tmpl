@@ -53,7 +53,7 @@ PY
 
 validate_settings
 
-# The same APM version as dev hosts, bumped with the tool inventory.
+# The same APM version as stem hosts, bumped with the tool inventory.
 apm_version={{ (index .tools "apm-cli").mise }}
 apm_env="$HOME/.local/share/agent-sandbox/apm"
 if [ ! -x "$apm_env/bin/python" ]; then

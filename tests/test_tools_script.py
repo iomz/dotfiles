@@ -24,22 +24,22 @@ FIXTURE = """\
 # Fixture inventory.
 
 [hosts.oxalis]
-groups = ["dev"]
+groups = ["stem"]
 
 # --- mise ---------------------------------------------------------------
 
 [tools.ansible]
 mise_id = "pipx:ansible"
 mise = { version = "14.2.0", uvx = false, pipx_args = "--include-deps" }
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.bat]
 mise = "latest"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.gh]
 mise = "2.95.0"
-groups = ["dev"]
+groups = ["stem"]
 
 # --- macOS and Linux packages -------------------------------------------
 
@@ -96,22 +96,22 @@ class ToolsScriptTest(unittest.TestCase):
         self.assertEqual(self.inventory.read_text(), self.original)
 
     def test_add_mise_pins_latest_before_guard_section(self):
-        self.tools("add", "yq", "mise", "--groups", "dev")
-        self.assertEqual(self.data()["yq"], {"mise": "9.9.9", "groups": ["dev"]})
+        self.tools("add", "yq", "mise", "--groups", "stem")
+        self.assertEqual(self.data()["yq"], {"mise": "9.9.9", "groups": ["stem"]})
         text = self.inventory.read_text()
         self.assertLess(text.index("[tools.yq]"), text.index("[homebrew_guard]"))
         self.assertTrue(text.startswith(self.original[:text.index("[tools.yq]") - 1]))
 
     def test_scratch_inventory_is_never_applied(self):
         # Only edits to the real inventory run chezmoi apply.
-        self.assertIn("not applied", self.tools("add", "yq", "mise", "1.0.0", "--groups", "dev").stdout)
+        self.assertIn("not applied", self.tools("add", "yq", "mise", "1.0.0", "--groups", "stem").stdout)
         self.assertIn("not applied", self.tools("bump", "--no-apply").stdout)
 
     def test_add_explicit_version_and_mise_id(self):
         self.tools("add", "prettier", "mise", "3.0.0", "--mise-id", "npm:prettier",
-                   "--groups", "dev")
+                   "--groups", "stem")
         self.assertEqual(self.data()["prettier"], {"mise_id": "npm:prettier", "mise": "3.0.0",
-                                                   "groups": ["dev"]})
+                                                   "groups": ["stem"]})
 
     def sections(self):
         """Map each section title to the entry names under it, in file order."""
@@ -128,7 +128,7 @@ class ToolsScriptTest(unittest.TestCase):
         self.assertEqual(load_tools_module().normalize(FIXTURE), FIXTURE)
 
     def test_new_entries_land_sorted_in_their_section(self):
-        self.tools("add", "aaa", "mise", "1.0.0", "--groups", "dev")
+        self.tools("add", "aaa", "mise", "1.0.0", "--groups", "stem")
         self.tools("add", "fd", "apt")
         self.tools("add", "zstd", "brew")
         sections = self.sections()

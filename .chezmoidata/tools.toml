@@ -17,140 +17,140 @@
 # Edit this file, not the rendered output.
 
 [hosts.helianthus]
-groups = ["dev"]
+groups = ["stem"]
 
 [hosts.oxalis]
-groups = ["dev"]
+groups = ["stem"]
 
 [hosts.sazanka]
-groups = ["dev"]
+groups = ["stem"]
 
 [hosts.nasatya]
-groups = ["dev"]
+groups = ["stem"]
 
 # --- mise ---------------------------------------------------------------
 
 [tools.ansible]
 mise_id = "pipx:ansible"
 mise = { version = "15.0.0", uvx = false, pipx_args = "--include-deps" }
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.apm-cli]
 mise_id = "pipx:apm-cli"
 mise = "0.38.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.bat]
 mise = "0.26.1"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.bitwarden-cli]
 mise_id = "npm:@bitwarden/cli"
 mise = "2026.11.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.bun]
 mise = "1.4.5"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.deno]
 mise = "2.9.8"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.direnv]
 mise = "2.38.2"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.eza]
 mise = "0.23.5"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.fd]
 mise = "10.5.2"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.fzf]
 mise = "0.75.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.gh]
 mise = "2.105.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.ghq]
 mise = "1.12.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.glab]
 mise = "1.131.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.go]
 mise = "1.27.4"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.golangci-lint]
 mise = "2.15.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.just]
 mise = "1.59.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.lua]
 mise = "5.5.1"
 # Homebrew nmap depends on Homebrew lua; guarding it blocks nmap upgrades.
 homebrew_guard = false
-# Built from source by mise, which needs the dev-only C toolchain on Linux.
-groups = ["dev"]
+# Built from source by mise, which needs the stem-only C toolchain on Linux.
+groups = ["stem"]
 
 [tools.neovim]
 mise = "0.12.6"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.node]
 mise = "26.13.1"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.pipx]
 mise = "1.18.19"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.pnpm]
 mise = "12.21.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.python]
 mise = "3.15.2"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.rclone]
 mise = "1.76.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.restic]
 mise = "0.20.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.ripgrep]
 mise = "15.2.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.starship]
 mise = "1.27.0"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.tree-sitter]
 mise = "0.27.2"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.uv]
 mise = "0.13.9"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.zellij]
 mise = "0.46.0"
-groups = ["dev"]
+groups = ["stem"]
 
 # --- macOS and Linux packages -------------------------------------------
 
@@ -166,7 +166,7 @@ linux.arch = ["amd64"]
 [tools.code-minimap]
 darwin.brew = "code-minimap"
 linux.apt = "code-minimap"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.gawk]
 darwin.brew = "gawk"
@@ -233,7 +233,7 @@ darwin.brew = "jq"
 
 [tools.mise]
 darwin.brew = "mise"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.trash]
 darwin.brew = "trash"
@@ -249,7 +249,7 @@ darwin.brew = "wget"
 [tools.build-essential]
 # C toolchain: nvim-treesitter compiles parsers and mise builds lua from source.
 linux.apt = "build-essential"
-groups = ["dev"]
+groups = ["stem"]
 
 [tools.curl]
 linux.apt = "curl"
