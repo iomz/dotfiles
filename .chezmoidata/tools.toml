@@ -506,6 +506,10 @@ groups = ["stem"]
 linux.apt = "extrepo"
 groups = ["stem"]
 
+[tools.locales]
+# Generates en_US.UTF-8, which the package script makes the system locale.
+linux.apt = "locales"
+
 [tools.lsof]
 linux.apt = "lsof"
 

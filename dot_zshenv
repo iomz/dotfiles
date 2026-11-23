@@ -2,6 +2,11 @@
 
 skip_global_compinit=1
 
+# en_US.UTF-8 for every zsh, whatever the terminal or ssh client sends.
+# LANGUAGE would still pick message translations over LC_ALL.
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+unset LANGUAGE
+
 # uncomment to analyze init time
 #ENABLE_ZPROFTIME=true
 

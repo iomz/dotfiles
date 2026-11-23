@@ -161,6 +161,32 @@ class LinuxPackageScriptTest(PackageScriptCase):
         self.assertIn("skipped (unknown to the package manager): pkg-b", stderr)
         self.assertIn("skipped (no usable package manager): brew-c mise", stderr)
 
+    def test_generates_and_sets_en_us_locale_when_missing(self):
+        self.stub_common()
+        self.stub("apt-get")
+        self.stub("locale-gen")
+        self.stub("update-locale")
+        self.stub("locale", "printf 'C\\nC.utf8\\nPOSIX\\n'")
+        self.run_script()
+        self.assertIn("sudo locale-gen en_US.UTF-8", self.calls.read_text())
+
+    def test_existing_en_us_locale_is_not_regenerated(self):
+        self.stub_common()
+        self.stub("apt-get")
+        self.stub("locale-gen")
+        self.stub("update-locale")
+        self.stub("locale", "printf 'C\\nen_US.utf8\\n'")
+        self.run_script()
+        self.assertNotIn("locale-gen", self.calls.read_text())
+
+    def test_missing_locale_without_root_is_reported(self):
+        self.stub("dpkg-query", 'echo "ii pkg-have"')
+        self.stub("apt-get")
+        self.stub("locale-gen")
+        _, stderr = self.run_script()
+        self.assertIn("en_US.UTF-8", stderr)
+        self.assertNotIn("locale-gen", self.calls.read_text())
+
     def test_unknown_names_are_skipped_and_reported(self):
         self.stub_common()
         self.stub("apt-get")

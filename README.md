@@ -359,6 +359,7 @@ On helm hosts, `run_once_install-packages.sh.tmpl` installs bootstrap and system
   sudo can only ask for a password when `chezmoi apply` runs in a terminal.
 - Linux installs mise through apt where possible, and only on hosts with mise entries.
 - Names apt or Homebrew does not know, such as a package missing from an older release, are skipped and reported instead of failing the install.
+- Linux generates `en_US.UTF-8` and makes it the system locale; zsh exports it as `LANG` and `LC_ALL` everywhere and drops `LANGUAGE`.
 
 ### Mise Runtimes and CLIs
 
