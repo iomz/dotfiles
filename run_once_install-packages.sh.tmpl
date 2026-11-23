@@ -120,17 +120,22 @@ set -eu
 {{ includeTemplate "brew-path" . }}
 # Homebrew formulae and casks selected for this host from .chezmoidata/tools.toml.
 {{- $formulae := list }}
+{{- $casks := list }}
 {{- range $name, $tool := .tools }}
-{{-   if and (hasKey $tool "darwin") (hasKey $tool.darwin "brew") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" "darwin")) "true") }}
-{{-     $formulae = append $formulae $tool.darwin.brew }}
+{{-   if and (hasKey $tool "darwin") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" "darwin")) "true") }}
+{{-     if hasKey $tool.darwin "brew" }}{{ $formulae = append $formulae $tool.darwin.brew }}{{ end }}
+{{-     if hasKey $tool.darwin "cask" }}{{ $casks = append $casks $tool.darwin.cask }}{{ end }}
 {{-   end }}
 {{- end }}
-wanted="
+formulae="
   {{ join "\n  " $formulae }}
+"
+casks="
+  {{ join "\n  " $casks }}
 "
 
 # shellcheck disable=SC2086 # word splitting is intended
-set -- $wanted
+set -- $formulae $casks
 if ! command -v brew >/dev/null 2>&1; then
   if [ $# -gt 0 ]; then
     printf 'install-packages: skipped (no usable package manager):%s\n' "$(printf ' %s' "$@")" >&2
@@ -141,24 +146,41 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 
 # Call brew only for missing names (canonical names, not aliases), so nothing
-# already installed is checked, warned about or upgraded.
-installed=$(brew list -1 --formula 2>/dev/null; brew list -1 --cask 2>/dev/null)
+# already installed is checked, warned about or upgraded. A tap-qualified name
+# such as owner/tap/name is listed under its last part.
+installed_formulae=$(brew list -1 --formula 2>/dev/null || true)
+installed_casks=$(brew list -1 --cask 2>/dev/null || true)
 missing=
 unknown=
-for formula in $wanted; do
-  printf '%s\n' "$installed" | grep -qx "$formula" && continue
-  # One unknown name fails the whole brew install.
-  if brew info "$formula" >/dev/null 2>&1; then
-    missing="$missing $formula"
-  else
-    unknown="$unknown $formula"
-  fi
+for formula in $formulae; do
+  printf '%s\n' "$installed_formulae" | grep -qx "${formula##*/}" && continue
+  # One unknown name fails the whole brew install; brew install taps a
+  # tap-qualified name itself, so only plain names are checked.
+  case $formula in
+    */*) missing="$missing $formula" ;;
+    *) if brew info --formula "$formula" >/dev/null 2>&1; then missing="$missing $formula"; else unknown="$unknown $formula"; fi ;;
+  esac
 done
 if [ -n "$missing" ]; then
   # shellcheck disable=SC2086 # word splitting is intended
-  HOMEBREW_NO_INSTALL_UPGRADE=1 brew install $missing
+  HOMEBREW_NO_INSTALL_UPGRADE=1 brew install --formula $missing
 fi
+# Apps install one by one: some run installers that ask for the password, and
+# one failure must not stop the rest.
+failed=
+for cask in $casks; do
+  printf '%s\n' "$installed_casks" | grep -qx "${cask##*/}" && continue
+  if ! brew info --cask "$cask" >/dev/null 2>&1; then
+    unknown="$unknown $cask"
+  elif ! HOMEBREW_NO_INSTALL_UPGRADE=1 brew install --cask "$cask"; then
+    failed="$failed $cask"
+  fi
+done
 if [ -n "$unknown" ]; then
   printf 'install-packages: skipped (unknown to Homebrew):%s\n' "$unknown" >&2
+fi
+if [ -n "$failed" ]; then
+  printf 'install-packages: failed:%s\n' "$failed" >&2
+  printf '%s\n' 'install-packages: to retry later: sh -c "$(chezmoi cat ~/install-packages.sh)"' >&2
 fi
 {{ end -}}

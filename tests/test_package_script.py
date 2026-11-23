@@ -66,11 +66,11 @@ class PackageScriptCase(unittest.TestCase):
         path.write_text(f'#!/bin/sh\necho "{name} $*" >> "{self.calls}"\n{body}\n')
         path.chmod(0o755)
 
-    def run_script(self, unknown=""):
+    def run_script(self, unknown="", **env):
         self.calls.write_text("")
         result = subprocess.run([shutil.which("sh"), str(self.script)], text=True, capture_output=True,
                                 stdin=subprocess.DEVNULL,
-                                env=dict(os.environ, PATH=str(self.bin), UNKNOWN=unknown))
+                                env=dict(os.environ, PATH=str(self.bin), UNKNOWN=unknown, **env))
         self.assertEqual(result.returncode, 0, result.stderr)
         installs = [line for line in self.calls.read_text().splitlines() if " install " in line]
         return installs, result.stderr
@@ -174,24 +174,49 @@ class DarwinPackageScriptTest(PackageScriptCase):
         "tools": {
             "have": {"darwin": {"brew": "f-have"}},
             "want": {"darwin": {"brew": "f-want"}},
+            "tapped": {"darwin": {"brew": "owner/tap/f-tap"}},
+            "app": {"darwin": {"cask": "c-have"}},
+            "app2": {"darwin": {"cask": "c-want"}},
+            "app3": {"darwin": {"cask": "c-more"}},
         },
     }
 
-    def test_installs_only_missing_formulae(self):
-        self.stub("brew", '[ "$1" != list ] || echo f-have')
-        installs, _ = self.run_script()
-        self.assertEqual(installs, ["brew install f-want"])
+    def setUp(self):
+        super().setUp()
+        # Names in $UNKNOWN are unknown to brew info; casks in $FAIL fail to install.
+        self.stub("brew", '''case "$1" in
+  list) case "$3" in --formula) echo f-have; echo f-tap ;; --cask) echo c-have ;; esac ;;
+  info) case " $UNKNOWN " in *" $3 "*) exit 1 ;; esac ;;
+  install) case " ${FAIL:-} " in *" $3 "*) exit 1 ;; esac ;;
+esac''')
 
-    def test_unknown_formulae_are_skipped_and_reported(self):
-        self.stub("brew", 'case "$1 $2" in "info f-want") exit 1 ;; list*) echo f-have ;; esac')
-        installs, stderr = self.run_script()
-        self.assertEqual(installs, [])
-        self.assertIn("skipped (unknown to Homebrew): f-want", stderr)
+    def test_installs_only_missing_formulae_and_casks(self):
+        installs, _ = self.run_script()
+        self.assertEqual(installs, ["brew install --formula f-want",
+                                    "brew install --cask c-want", "brew install --cask c-more"])
+
+    def test_tap_qualified_formulae_match_by_name_and_skip_the_info_check(self):
+        self.stub("brew", 'case "$1 $3" in "list --formula") echo f-have; echo f-want ;; info*) exit 1 ;; esac')
+        installs, _ = self.run_script()
+        self.assertEqual(installs[0], "brew install --formula owner/tap/f-tap")
+        self.assertNotIn("info --formula owner/tap/f-tap", self.calls.read_text())
+
+    def test_unknown_names_are_skipped_and_reported(self):
+        installs, stderr = self.run_script(unknown="f-want c-want")
+        self.assertEqual(installs, ["brew install --cask c-more"])
+        self.assertIn("skipped (unknown to Homebrew): f-want c-want", stderr)
+
+    def test_a_failed_cask_does_not_stop_the_others(self):
+        installs, stderr = self.run_script(FAIL="c-more")
+        self.assertIn("brew install --cask c-want", installs)
+        self.assertIn("install-packages: failed: c-more", stderr)
+        self.assertIn("to retry later", stderr)
 
     def test_missing_homebrew_skips_without_failing(self):
+        (self.bin / "brew").unlink()
         installs, stderr = self.run_script()
         self.assertEqual(installs, [])
-        self.assertIn("skipped (no usable package manager): f-have f-want\n", stderr)
+        self.assertIn("skipped (no usable package manager): f-have owner/tap/f-tap f-want c-have c-want c-more\n", stderr)
         self.assertIn("to retry later", stderr)
 
 

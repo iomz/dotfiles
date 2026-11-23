@@ -263,7 +263,7 @@ The repository root `AGENTS.md` contains dotfiles-maintenance rules only and is 
 | zinit    | Zsh plugins, prompt fallback, completion snippets, and shell integrations                                                                                      | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
 | chezmoi  | Reproducible dotfiles, templates, and public helper scripts                                                                                                    | Managed files in this repository            |
 
-Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
+Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE` for mise-owned tools, generated from the mise entries in `.chezmoidata/tools.toml` plus its `[homebrew_guard]` extra names, which also keep Homebrew's `zsh` out so the login shell stays the system one. Homebrew refuses direct installs of listed formula names and packages depending on them. Versioned or differently named formulae still require review.
 
 ## Public Dotfiles Safety
 
@@ -349,7 +349,9 @@ Use `starship timings` in a slow directory to identify modules to disable rather
 
 On helm hosts, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
-- macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
+- macOS uses Homebrew: formulae (`darwin.brew`) and apps (`darwin.cask`) come from `.chezmoidata/tools.toml`.
+  Apps install one at a time, since some ask for the password, and a failed one does not stop the rest.
+  Mac App Store apps and unnotarized apps stay manual.
   Without Homebrew, `run_before_10-install-homebrew.sh.tmpl` first runs its official installer, which needs an administrator account and a terminal for the password; otherwise it says why and retries on the next apply.
   Scripts find `brew` in its standard locations even when it is not on `PATH` yet.
 - Debian and Ubuntu use apt; packages come from `.chezmoidata/tools.toml`.
