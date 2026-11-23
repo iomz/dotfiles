@@ -62,11 +62,14 @@ if [ "$variant" != helm ]; then
   echo "host-slim: nothing to slim on an $variant host"
   exit 0
 fi
-host=$("$chezmoi" execute-template '{{ get . "host" | default "" }}')
-if [ -z "$host" ]; then
-  echo 'host-slim: the chezmoi config sets no host; run chezmoi init first' >&2
-  exit 1
-fi
+# "=" plus the host when the config has the key: chezmoi init adds a missing
+# key, but keeps an empty one.
+host=$("$chezmoi" execute-template '{{ if hasKey . "host" }}={{ .host }}{{ end }}')
+case $host in
+  '') echo 'host-slim: the chezmoi config sets no host; run chezmoi init first' >&2; exit 1 ;;
+  =) echo 'host-slim: host is empty in the chezmoi config; set it in ~/.config/chezmoi/chezmoi.toml' >&2; exit 1 ;;
+esac
+host=${host#=}
 if [ "$("$chezmoi" execute-template '{{ includeTemplate "is-stem" . }}')" = true ]; then
   echo "host-slim: $host is a stem host; nothing to slim"
   exit 0

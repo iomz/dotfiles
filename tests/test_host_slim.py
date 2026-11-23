@@ -25,7 +25,7 @@ class HostSlimTest(unittest.TestCase):
     def configure(self, host, variant="helm"):
         config = self.home / ".config/chezmoi/chezmoi.toml"
         config.parent.mkdir(parents=True, exist_ok=True)
-        host_line = f'host = "{host}"\n' if host else ""
+        host_line = f'host = "{host}"\n' if host is not None else ""
         config.write_text(f'sourceDir = "{SOURCE}"\n[data]\nvariant = "{variant}"\n{host_line}'
                           'git_name = "Test"\ngit_email = "test@example.org"\n')
 
@@ -69,6 +69,10 @@ class HostSlimTest(unittest.TestCase):
         result = subprocess.run(["sh", str(SCRIPT)], env=self.env, text=True, capture_output=True)
         self.assertEqual(result.returncode, 1)
         self.assertIn("run chezmoi init first", result.stderr)
+        self.configure("")
+        result = subprocess.run(["sh", str(SCRIPT)], env=self.env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("host is empty", result.stderr)
 
     def test_dry_run_lists_and_moves_nothing(self):
         self.leaf_home()
