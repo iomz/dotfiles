@@ -67,7 +67,7 @@ class ClaudeCloudTest(unittest.TestCase):
         manifest = self.chezmoi("cat", str(self.home / ".apm/apm.yml")).stdout
         self.assertNotIn("brain-vault", manifest)
         self.assertNotIn("iomz/skills", manifest)
-        self.assertIn("JuliusBrussee/caveman#70f4f34", manifest)
+        self.assertIn("JuliusBrussee/caveman#367fdb7", manifest)
         public_sources = {line.strip()[2:].split("#")[0] for line in manifest.splitlines()
                           if line.startswith("    - ")}
         self.assertEqual(public_sources, {
