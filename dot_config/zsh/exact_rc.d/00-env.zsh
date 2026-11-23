@@ -37,6 +37,9 @@ elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
 fi
 if [[ -n "${BREW_LOCATION}" ]]; then
     eval "$("$BREW_LOCATION" shellenv)"
+    # brew shellenv exports FPATH, so long-running programs (zellij, tmux, agents)
+    # would hand a stale list to new shells after zsh moves; each zsh builds its own.
+    typeset +x FPATH
     unset BREW_LOCATION
     path=( ${HOMEBREW_PREFIX}/(s|)bin $path )
     fpath=( $HOMEBREW_PREFIX/share/zsh/site-functions(/N) $fpath )
