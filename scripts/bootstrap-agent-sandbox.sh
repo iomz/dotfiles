@@ -1,10 +1,10 @@
 #!/bin/sh
-# Run from Cloud's environment setup script, before Claude starts.
+# Run from an agent sandbox's environment setup, such as Claude Cloud's, before the agent starts.
 set -eu
 
-# Cloud's observed platform. No workstation bootstrap or profile machinery.
+# Claude Cloud's observed platform. No helm bootstrap or profile machinery.
 if [ "$(uname -s)" != Linux ] || [ "$(uname -m)" != x86_64 ]; then
-  echo 'claude-cloud bootstrap requires Linux x86_64' >&2
+  echo 'agent-sandbox bootstrap requires Linux x86_64' >&2
   exit 1
 fi
 
@@ -20,7 +20,7 @@ installed_version=$("$bin_dir/chezmoi" --version 2>/dev/null || true)
 case "$installed_version" in
   "chezmoi version v${version},"*) ;;
   *)
-    work=$(mktemp -d "${TMPDIR:-/tmp}/chezmoi-cloud.XXXXXX")
+    work=$(mktemp -d "${TMPDIR:-/tmp}/chezmoi-sandbox.XXXXXX")
     # Only remove known files created by this bootstrap, never a broad tree.
     trap 'rm -f "$work/$asset" "$work/$checksums" "$work/selected-checksum" "$work/chezmoi"; rmdir "$work"' 0
     trap 'exit 1' 1 2 15
@@ -40,5 +40,5 @@ esac
 
 # Explicit source and selector work even when setup cwd is outside HOME.
 # Defaults keep initialization noninteractive with stdin closed.
-CHEZMOI_VARIANT=claude-cloud "$bin_dir/chezmoi" --source "$source_dir" \
+CHEZMOI_VARIANT=agent-sandbox "$bin_dir/chezmoi" --source "$source_dir" \
   init --apply --no-tty --promptDefaults

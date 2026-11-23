@@ -10,7 +10,7 @@ dependencies:
     - yusukebe/ax#8abbca2fc400c2ff4866248ba1ec9309b948812f
     - vercel-labs/skills/skills/find-skills#7407f3893ad4dceab546ac002c3ef806e4000c73
     - typesafe-ai/skills/skills/typesafe-ai#65a39f393687675ce170e6094757de20370365b9
-{{ if ne (get . "variant" | default "workstation") "claude-cloud" }}
+{{ if ne (includeTemplate "variant" .) "agent-sandbox" }}
     - iomz/brain-vault/Skills/Common/brain-vault#ffafd45d85fb88bcc22274bb11d873527026114c
 {{ end }}
     - JuliusBrussee/caveman#70f4f34e834893ea9af9f4fc6022266bd56d18b1

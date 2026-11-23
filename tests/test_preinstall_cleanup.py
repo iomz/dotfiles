@@ -35,7 +35,7 @@ MANAGED = {
 # Inventory data and partials rendered by managed templates.
 SUPPORT = (".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected",
            ".chezmoitemplates/mise-config.toml", ".chezmoitemplates/selects-mise",
-           ".chezmoitemplates/is-dev")
+           ".chezmoitemplates/is-dev", ".chezmoitemplates/variant")
 
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
@@ -61,7 +61,7 @@ class PreinstallCleanupTest(unittest.TestCase):
         )
         self.config = self.root / "config.toml"
         # A dev profile, so every managed file renders with content.
-        self.config.write_text('[data]\nvariant = "workstation"\nhost = "oxalis"\n')
+        self.config.write_text('[data]\nvariant = "helm"\nhost = "oxalis"\n')
         self.env = dict(os.environ, HOME=str(self.home))
         self.command = [
             "chezmoi", "--source", str(self.source), "--destination", str(self.home),
@@ -269,7 +269,7 @@ class PreinstallCleanupTest(unittest.TestCase):
         self.assertFalse(config["follow_symlinks"])
 
     def test_cloud_script_is_empty(self):
-        self.config.write_text('[data]\nvariant = "claude-cloud"\n')
+        self.config.write_text('[data]\nvariant = "agent-sandbox"\n')
         script = self.chezmoi("cat", str(self.home / "00-cleanup-legacy-config.sh")).stdout
         self.assertEqual(script.strip(), "")
 

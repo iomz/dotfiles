@@ -30,7 +30,7 @@ class HostProfileTest(unittest.TestCase):
 
     def chezmoi(self, host, *args):
         config = self.root / "config.toml"
-        config.write_text(f'[data]\nvariant = "workstation"\nhost = "{host}"\n'
+        config.write_text(f'[data]\nvariant = "helm"\nhost = "{host}"\n'
                           'git_name = "Test"\ngit_email = "test@example.org"\n')
         return subprocess.run(
             ["chezmoi", "--source", str(SOURCE), "--destination", str(self.home),

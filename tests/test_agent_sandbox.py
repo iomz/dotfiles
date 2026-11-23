@@ -51,17 +51,17 @@ class ClaudeCloudTest(unittest.TestCase):
                               capture_output=True, check=check)
 
     def init_cloud(self):
-        self.env["CHEZMOI_VARIANT"] = "claude-cloud"
+        self.env["CHEZMOI_VARIANT"] = "agent-sandbox"
         self.chezmoi("init", "--promptDefaults")
         self.env.pop("CHEZMOI_VARIANT")
 
     def test_cloud_allowlist_and_persistence(self):
         self.init_cloud()
         self.chezmoi("init", "--promptDefaults")
-        self.assertIn('variant = "claude-cloud"', self.config.read_text())
+        self.assertIn('variant = "agent-sandbox"', self.config.read_text())
         self.assertNotIn("git_email", self.config.read_text())
         self.assertEqual(set(self.chezmoi("managed").stdout.splitlines()), {
-            ".apm", ".apm/apm.yml", ".claude", ".claude/CLAUDE.md", "claude-cloud-apm.sh",
+            ".apm", ".apm/apm.yml", ".claude", ".claude/CLAUDE.md", "agent-sandbox-apm.sh",
         })
         managed = self.chezmoi("managed").stdout.splitlines()
         for cloud_owned in (".gitconfig", ".claude.json", ".claude/AGENTS.md"):
@@ -87,17 +87,17 @@ class ClaudeCloudTest(unittest.TestCase):
             self.assertEqual(self.chezmoi("--override-data", override, "managed").stdout,
                              self.chezmoi("managed").stdout)
 
-    def test_workstation_os_rendering(self):
+    def test_helm_os_rendering(self):
         for os_name in ("darwin", "linux"):
             with self.subTest(os=os_name):
-                self.env["CHEZMOI_VARIANT"] = "workstation"
+                self.env["CHEZMOI_VARIANT"] = "helm"
                 self.chezmoi("init", "--promptDefaults")
                 override = json.dumps({"chezmoi": {"os": os_name}})
                 managed = self.chezmoi("--override-data", override, "managed").stdout
                 self.assertIn(".config/mise/config.toml", managed)
                 self.assertIn(".config/zsh/.zshrc", managed)
-                self.assertNotIn("claude-cloud-apm.sh", managed)
-                self.assertNotIn("scripts/bootstrap-claude-cloud.sh", managed)
+                self.assertNotIn("agent-sandbox-apm.sh", managed)
+                self.assertNotIn("scripts/bootstrap-agent-sandbox.sh", managed)
                 self.assertIn(".claude/CLAUDE.md", managed)
                 self.assertNotIn(".claude/AGENTS.md", managed)
                 self.assertIn(".gitconfig", managed)
@@ -119,22 +119,35 @@ class ClaudeCloudTest(unittest.TestCase):
                 self.assertNotIn("iomz/skills", manifest)
                 self.chezmoi("--override-data", override, "apply", "--dry-run")
 
-    def test_legacy_config_defaults_to_workstation(self):
+    def test_config_without_variant_defaults_to_helm(self):
         self.config.write_text('[data]\ngit_name = "Test"\ngit_email = "test@example.org"\n')
         managed = self.chezmoi("managed").stdout
         self.assertIn(".config/mise/config.toml", managed)
-        self.assertNotIn("claude-cloud-apm.sh", managed)
+        self.assertNotIn("agent-sandbox-apm.sh", managed)
+
+    def test_legacy_variant_names_keep_working_until_init_renames_them(self):
+        for legacy, current, sandbox in (("workstation", "helm", False),
+                                         ("claude-cloud", "agent-sandbox", True)):
+            with self.subTest(legacy=legacy):
+                self.config.write_text(f'[data]\nvariant = "{legacy}"\nhost = "sazanka"\n'
+                                       'git_name = "Test"\ngit_email = "test@example.org"\n')
+                managed = self.chezmoi("managed").stdout
+                self.assertEqual("agent-sandbox-apm.sh" in managed, sandbox)
+                self.assertEqual(".config/mise/config.toml" in managed, not sandbox)
+                self.env.pop("CHEZMOI_VARIANT", None)
+                self.chezmoi("init", "--promptDefaults")
+                self.assertIn(f'variant = "{current}"', self.config.read_text())
 
     def test_invalid_variant_fails(self):
         self.env["CHEZMOI_VARIANT"] = "claude-cluod"
         result = self.chezmoi("init", check=False)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("must be workstation or claude-cloud", result.stderr)
+        self.assertIn("must be helm or agent-sandbox", result.stderr)
 
     def stub_apm(self):
         # Stub only APM's environment, leaving chezmoi and instruction deployment real.
         # No Python package install or GitHub download is performed by this test.
-        bin_dir = self.home / ".local/share/claude-cloud/apm/bin"
+        bin_dir = self.home / ".local/share/agent-sandbox/apm/bin"
         bin_dir.mkdir(parents=True)
         python = bin_dir / "python"
         python.write_text("#!/bin/sh\nexit 99\n")
@@ -190,12 +203,12 @@ fi
 
     def test_missing_cloud_dependency_fails_clearly(self):
         self.init_cloud()
-        script = self.chezmoi("cat", str(self.home / "claude-cloud-apm.sh")).stdout
+        script = self.chezmoi("cat", str(self.home / "agent-sandbox-apm.sh")).stdout
         result = subprocess.run(["/bin/sh"], input=script,
                                 env=dict(self.env, PATH=str(self.root / "empty-path")),
                                 text=True, capture_output=True)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("claude-cloud requires python3 on PATH", result.stderr)
+        self.assertIn("agent-sandbox requires python3 on PATH", result.stderr)
 
     def test_malformed_settings_fail_closed_and_retry(self):
         self.init_cloud()
@@ -301,7 +314,7 @@ fi
 
     def test_bootstrap_creates_pinned_apm_environment(self):
         self.init_cloud()
-        script = self.chezmoi("cat", str(self.home / "claude-cloud-apm.sh")).stdout
+        script = self.chezmoi("cat", str(self.home / "agent-sandbox-apm.sh")).stdout
         fixtures = self.root / "fixtures"
         fixtures.mkdir()
         fake_python = fixtures / "python3"
@@ -411,7 +424,7 @@ for line in pathlib.Path(sys.argv[2]).read_text().splitlines():
         return env, checksums
 
     def setup_bootstrap(self, env):
-        return subprocess.run(["/bin/sh", str(SOURCE / "scripts/bootstrap-claude-cloud.sh")],
+        return subprocess.run(["/bin/sh", str(SOURCE / "scripts/bootstrap-agent-sandbox.sh")],
                               cwd=self.project, env=env, stdin=subprocess.DEVNULL,
                               text=True, capture_output=True)
 
@@ -427,13 +440,13 @@ for line in pathlib.Path(sys.argv[2]).read_text().splitlines():
             result = self.setup_bootstrap(env)
             self.assertEqual(result.returncode, 0, result.stderr)
         calls = (self.home / "bootstrap-calls").read_text().splitlines()
-        expected = f"claude-cloud|--source {SOURCE} init --apply --no-tty --promptDefaults"
+        expected = f"agent-sandbox|--source {SOURCE} init --apply --no-tty --promptDefaults"
         self.assertEqual(calls, [expected, expected])
         self.assertEqual(len((self.home / "downloads").read_text().splitlines()), 2)
         self.assertEqual((self.home / "apm-calls").read_text().splitlines(), [
             "install -g --target agent-skills,claude --https",
         ])
-        self.assertIn('variant = "claude-cloud"', self.config.read_text())
+        self.assertIn('variant = "agent-sandbox"', self.config.read_text())
         self.assertTrue((self.home / ".claude/CLAUDE.md").is_file())
         self.assertFalse((self.home / ".claude/AGENTS.md").exists())
         self.assertEqual(self.chezmoi("diff").stdout, "")
@@ -471,9 +484,9 @@ for line in pathlib.Path(sys.argv[2]).read_text().splitlines():
 
     def test_cloud_scripts_posix_shell_syntax(self):
         self.init_cloud()
-        rendered = self.chezmoi("cat", str(self.home / "claude-cloud-apm.sh")).stdout
+        rendered = self.chezmoi("cat", str(self.home / "agent-sandbox-apm.sh")).stdout
         subprocess.run(["/bin/sh", "-n"], input=rendered, text=True, check=True)
-        subprocess.run(["/bin/sh", "-n", str(SOURCE / "scripts/bootstrap-claude-cloud.sh")],
+        subprocess.run(["/bin/sh", "-n", str(SOURCE / "scripts/bootstrap-agent-sandbox.sh")],
                        check=True)
 
 

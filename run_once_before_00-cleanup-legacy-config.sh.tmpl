@@ -1,4 +1,4 @@
-{{ if ne (get . "variant" | default "workstation") "claude-cloud" -}}
+{{ if ne (includeTemplate "variant" .) "agent-sandbox" -}}
 #!/bin/sh
 set -eu
 umask 077

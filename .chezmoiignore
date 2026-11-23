@@ -72,7 +72,7 @@ package.json
 .claude/*
 !.claude/CLAUDE.md
 # Links into the iomz/skills clone, for hosts that run Claude Code and OpenCode
-{{ if and (ne (get . "variant" | default "workstation") "claude-cloud") (eq (includeTemplate "is-dev" .) "true") }}
+{{ if and (ne (includeTemplate "variant" .) "agent-sandbox") (eq (includeTemplate "is-dev" .) "true") }}
 !.claude/skills
 {{ end }}
 
@@ -95,14 +95,14 @@ Library/**
 .local/bin/opencode-codex-resume-wake
 {{ end }}
 
-{{ if eq (get . "variant" | default "workstation") "claude-cloud" }}
-# Agent environment, not a workstation. Allow parents explicitly as well.
+{{ if eq (includeTemplate "variant" .) "agent-sandbox" }}
+# An agent sandbox, not a helm host. Allow parents explicitly as well.
 **
 !.claude/
 !.claude/CLAUDE.md
 !.apm/
 !.apm/apm.yml
-!claude-cloud-apm.sh
+!agent-sandbox-apm.sh
 {{ else }}
-claude-cloud-apm.sh
+agent-sandbox-apm.sh
 {{ end }}

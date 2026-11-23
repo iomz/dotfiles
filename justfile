@@ -4,13 +4,13 @@ set shell := ["sh", "-cu"]
 secretlint:
     npm run lint:secrets
 
-# Render both workstation OS variants and apply Cloud into an isolated home.
+# Render both helm OS variants and apply the agent sandbox into an isolated home.
 test:
     python3 -m unittest discover -s tests -v
 
 # Opt-in real Ubuntu/dash/chezmoi/APM integration; requires Docker and network.
 test-integration:
-    sh tests/integration/run-claude-cloud.sh
+    sh tests/integration/run-agent-sandbox.sh
 
 # Point this checkout at its versioned Git hooks.
 install-hooks:

@@ -1,0 +1,6 @@
+{{- /* The host's variant: "helm" (a machine you operate) or "agent-sandbox".
+       Configs written before the rename say "workstation" or "claude-cloud". */ -}}
+{{- $variant := get . "variant" | default "helm" -}}
+{{- if eq $variant "workstation" }}helm
+{{- else if eq $variant "claude-cloud" }}agent-sandbox
+{{- else }}{{ $variant }}{{ end -}}
