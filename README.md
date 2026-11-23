@@ -48,8 +48,16 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
 The prompt asks for the host name, which picks the tier.
 The apply installs packages, and on a host whose login shell is not zsh it runs `chsh`; both may ask for your password.
 
-On a fresh Mac, `/usr/bin/git` only offers to install the Xcode Command Line Tools, so add `--use-builtin-git true` before `iomz`.
-The Homebrew installer, which the apply runs when Homebrew is missing, adds them later.
+On a fresh Mac, set the host name, then run the install with chezmoi's built-in Git:
+
+```sh
+sudo scutil --set HostName <host>
+cd ~ && sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --use-builtin-git true iomz
+```
+
+- Do not install Homebrew or the Xcode Command Line Tools first: `/usr/bin/git` only offers to install the tools, and the apply runs the Homebrew installer, which adds them.
+- The full Xcode from the App Store is independent; install it whenever a project needs it.
+- The install script leaves chezmoi in `~/bin`; once `command -v chezmoi` shows Homebrew's copy, `~/bin/chezmoi` can go.
 
 A new stem host then needs one GitHub login, the only credential private sources use:
 
