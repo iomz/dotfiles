@@ -8,7 +8,7 @@ cursor-style-blink = false
 window-theme = dark
 shell-integration = detect
 # iTerm2 rows/columns were 40x100. Ghostty window size is usually managed by OS/window state.
-command = /opt/homebrew/bin/zsh -l -i
+# No command: Ghostty starts the account's login shell, the system zsh.
 
 # Set the default starting directory to Home
 working-directory = home
