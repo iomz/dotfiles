@@ -158,11 +158,6 @@ groups = ["stem"]
 darwin.brew = "ca-certificates"
 linux.apt = "ca-certificates"
 
-[tools.chafa]
-darwin.brew = "chafa"
-linux.apt = "chafa"
-linux.arch = ["amd64"]
-
 [tools.code-minimap]
 darwin.brew = "code-minimap"
 linux.apt = "code-minimap"
@@ -196,13 +191,13 @@ linux.apt = "mtr-tiny"
 darwin.brew = "ncdu"
 linux.apt = "ncdu"
 
+[tools.smartmontools]
+darwin.brew = "smartmontools"
+linux.apt = "smartmontools"
+
 [tools.tmux]
 darwin.brew = "tmux"
 linux.apt = "tmux"
-
-[tools.tree]
-darwin.brew = "tree"
-linux.apt = "tree"
 
 [tools.xz]
 darwin.brew = "xz"
@@ -213,9 +208,6 @@ linux.apt = "xz-utils"
 [tools.act]
 darwin.brew = "act"
 hosts = ["oxalis"]
-
-[tools.antigravity-cli]
-darwin.brew = "antigravity-cli"
 
 [tools.bat-extras]
 darwin.brew = "bat-extras"
@@ -238,9 +230,6 @@ darwin.brew = "duf"
 
 [tools.dust]
 darwin.brew = "dust"
-
-[tools.glow]
-darwin.brew = "glow"
 
 [tools.gnu-getopt]
 darwin.brew = "gnu-getopt"
