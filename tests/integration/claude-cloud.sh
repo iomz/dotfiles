@@ -61,7 +61,7 @@ assert not (second.stdout + second.stderr).strip(), "second setup reran installe
 command = [str(home / ".local/bin/chezmoi"), "--source", "/dotfiles"]
 assert "v2.65.0," in run(command + ["--version"]).stdout
 apm = home / ".local/share/claude-cloud/apm/bin/apm"
-assert run([str(apm), "--version"]).stdout.strip() == "Agent Package Manager (APM) CLI version 0.28.0"
+assert run([str(apm), "--version"]).stdout.strip() == "Agent Package Manager (APM) CLI version 0.38.0"
 assert not run(command + ["diff"]).stdout
 assert set(run(command + ["managed"]).stdout.splitlines()) == {
     ".apm", ".apm/apm.yml", ".claude", ".claude/CLAUDE.md", "claude-cloud-apm.sh",

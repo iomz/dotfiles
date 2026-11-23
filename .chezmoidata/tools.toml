@@ -37,7 +37,7 @@ groups = ["dev"]
 
 [tools.apm-cli]
 mise_id = "pipx:apm-cli"
-mise = "0.36.1"
+mise = "0.38.0"
 groups = ["dev"]
 
 [tools.bat]

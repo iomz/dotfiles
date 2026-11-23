@@ -67,7 +67,7 @@ class ClaudeCloudTest(unittest.TestCase):
         manifest = self.chezmoi("cat", str(self.home / ".apm/apm.yml")).stdout
         self.assertNotIn("brain-vault", manifest)
         self.assertNotIn("iomz/skills", manifest)
-        self.assertIn("JuliusBrussee/caveman#367fdb7", manifest)
+        self.assertIn("JuliusBrussee/caveman#70f4f34", manifest)
         public_sources = {line.strip()[2:].split("#")[0] for line in manifest.splitlines()
                           if line.startswith("    - ")}
         self.assertEqual(public_sources, {
@@ -140,7 +140,7 @@ class ClaudeCloudTest(unittest.TestCase):
         apm = bin_dir / "apm"
         apm.write_text('''#!/bin/sh
 if [ "$1" = "--version" ]; then
-  echo 'Agent Package Manager (APM) CLI version 0.28.0'
+  echo 'Agent Package Manager (APM) CLI version 0.38.0'
   exit 0
 fi
 printf '%s\\n' "$*" >> "$HOME/apm-calls"
@@ -319,7 +319,7 @@ cp "$FIXTURES/apm" "$(dirname "$0")/apm"
         fake_apm = fixtures / "apm"
         fake_apm.write_text('''#!/bin/sh
 if [ "$1" = '--version' ]; then
-  echo 'Agent Package Manager (APM) CLI version 0.28.0'
+  echo 'Agent Package Manager (APM) CLI version 0.38.0'
 else
   printf '%s\\n' "$*" >> "$HOME/apm-calls"
 fi
@@ -333,7 +333,7 @@ fi
                                     text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.home / "pip-calls").read_text().splitlines(), [
-            "-m pip install --no-input --disable-pip-version-check apm-cli==0.28.0",
+            "-m pip install --no-input --disable-pip-version-check apm-cli==0.38.0",
         ])
         self.assertEqual((self.home / "apm-calls").read_text().splitlines(), [
             "install -g --target agent-skills,claude --https",
