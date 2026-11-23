@@ -602,6 +602,8 @@ git diff -- dot_apm/apm.yml.tmpl
 ```
 
 Verify changed skill frontmatter and any associated CLI before committing.
+For Caveman, also check that `~/.claude/hooks/caveman/src/hooks/` holds the scripts `~/.claude/settings.json` runs: from upstream `6ca113d` on, its hook commands build their path indirectly, so APM 0.36.1 deploys no scripts, and it refuses v4.2.0 outright.
+The pin therefore stays at `367fdb7`, the last commit whose hooks APM can deploy.
 Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
 
 Caveman activation for Codex requires a local `~/.codex/hooks.json` SessionStart hook.
