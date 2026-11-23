@@ -15,6 +15,7 @@ One tool inventory decides what each host gets, so a laptop, a home server and a
 - [Agents and skills](#agents-and-skills)
 - [Agent sandbox](#agent-sandbox)
 - [First apply on an existing host](#first-apply-on-an-existing-host)
+- [Slimming a former stem host](#slimming-a-former-stem-host)
 - [Public repository rules](#public-repository-rules)
 - [Testing](#testing)
 - [More](#more)
@@ -221,6 +222,22 @@ It runs once (`run_once_before_00-cleanup-legacy-config.sh.tmpl`); nothing is de
 - After sweeping a running OpenCode, wait for its tasks, run `opencode service restart`, then reopen the TUI.
 - A failed move stops the apply and retries next time; on `Permission denied`, fix the reported path's ownership, never with `sudo chezmoi apply`.
 - To skip the cleanup on a host, create `~/.chezmoi-backups/.pre-install-complete` before applying.
+
+## Slimming a former stem host
+
+A host that leaves the `stem` group keeps what the stem setup left behind: an apply never deletes tool data.
+`scripts/host-slim.sh` lists it, and moves it only when asked:
+
+```sh
+sh ~/.local/share/chezmoi/scripts/host-slim.sh           # dry run: what would move
+sh ~/.local/share/chezmoi/scripts/host-slim.sh --apply   # move into ~/.chezmoi-backups/slim-<timestamp>
+chezmoi apply
+```
+
+- It compares what a stem host manages with what this host manages, and adds the stem-only tool data: mise, zinit, Neovim and the personal skills clone.
+- It also catches the old one-line `~/.profile` (`export TINY_CHEZMOI=1`), which hid `~/.bashrc` from bash logins; the next apply creates the current one.
+- It never deletes, never touches apt or snap packages, and does nothing on stem hosts or in the agent sandbox.
+- `--apply` prints the command that restores everything from the backup.
 
 ## Public repository rules
 
