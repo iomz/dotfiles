@@ -48,6 +48,9 @@ usermod -s "$(command -v zsh)" "$user"
 check "the login shell script disappears once zsh is the login shell" as_user sh -c \
     'status=$(chezmoi status) && ! printf "%s\n" "$status" | grep -q login-shell'
 check "zsh starts without errors" as_user zsh -ic 'exit 0'
+check "zsh uses en_US.UTF-8 and the locale exists" as_user zsh -ic \
+    '[[ $LANG == en_US.UTF-8 && $LC_ALL == en_US.UTF-8 && -z ${LANGUAGE-} ]] && test -z "$(locale 2>&1 >/dev/null)"'
+check "en_US.UTF-8 is the system locale" grep -Eq '^LANG="?en_US\.UTF-8"?$' /etc/default/locale
 check "zsh startup prints nothing to stderr" \
     as_user sh -c 'test -z "$(zsh -ic "exit 0" 2>&1 >/dev/null)"'
 # Capture first so a failing command cannot pass as empty output.
