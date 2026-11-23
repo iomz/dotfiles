@@ -1,11 +1,11 @@
-{{- $variant := env "CHEZMOI_VARIANT" | default (get . "variant" | default "workstation") -}}
-{{- if not (has $variant (list "workstation" "claude-cloud")) -}}
-{{- fail "CHEZMOI_VARIANT must be workstation or claude-cloud" -}}
+{{- $variant := includeTemplate "variant" (dict "variant" (env "CHEZMOI_VARIANT" | default (get . "variant"))) -}}
+{{- if not (has $variant (list "helm" "agent-sandbox")) -}}
+{{- fail "CHEZMOI_VARIANT must be helm or agent-sandbox" -}}
 {{- end -}}
 {{- $host := env "CHEZMOI_HOST" | default .chezmoi.hostname -}}
-{{- if eq $variant "claude-cloud" }}
+{{- if eq $variant "agent-sandbox" }}
 [data]
-variant = "claude-cloud"
+variant = "agent-sandbox"
 host = {{ $host | quote }}
 {{- else -}}
 {{- $host = promptStringOnce . "host" "Host profile" $host -}}
@@ -13,7 +13,7 @@ host = {{ $host | quote }}
 {{- $gitEmail := promptStringOnce . "git_email" "Git author email" "iomz@sazanka.io" -}}
 
 [data]
-variant = "workstation"
+variant = "helm"
 host = {{ $host | quote }}
 git_name = {{ $gitName | quote }}
 git_email = {{ $gitEmail | quote }}

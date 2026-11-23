@@ -28,14 +28,14 @@ class NvimPluginSyncTest(unittest.TestCase):
         self.source = root / "source"
         (self.source / "dot_config/nvim/lua").mkdir(parents=True)
         (self.source / ".chezmoitemplates").mkdir()
-        for name in ("is-dev", "tool-selected", "brew-path"):
+        for name in ("is-dev", "tool-selected", "brew-path", "variant"):
             shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
                             self.source / ".chezmoitemplates" / name)
         shutil.copyfile(SOURCE / SCRIPT, self.source / SCRIPT)
         (self.source / "dot_config/nvim/init.lua").write_text("require('config')\n")
         (self.source / "dot_config/nvim/lua/config.lua").write_text("return {}\n")
         self.config = root / "config.toml"
-        self.config.write_text(DATA.format(variant="workstation", host="devbox"))
+        self.config.write_text(DATA.format(variant="helm", host="devbox"))
         (root / "home").mkdir()  # glob runs relative to the destination
         self.command = ["chezmoi", "--source", str(self.source), "--destination",
                         str(root / "home"), "--config", str(root / "config.toml"),
@@ -63,11 +63,11 @@ class NvimPluginSyncTest(unittest.TestCase):
 
     def test_cloud_variant_renders_nothing(self):
         # Config data rather than --override-data, which needs chezmoi >= 2.66.
-        self.config.write_text(DATA.format(variant="claude-cloud", host="devbox"))
+        self.config.write_text(DATA.format(variant="agent-sandbox", host="devbox"))
         self.assertEqual(self.render().strip(), "")
 
     def test_non_dev_host_renders_nothing(self):
-        self.config.write_text(DATA.format(variant="workstation", host="tinybox"))
+        self.config.write_text(DATA.format(variant="helm", host="tinybox"))
         self.assertEqual(self.render().strip(), "")
 
 

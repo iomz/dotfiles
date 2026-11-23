@@ -1,5 +1,5 @@
 #!/bin/sh
-# Runs only in the disposable container created by run-claude-cloud.sh.
+# Runs only in the disposable container created by run-agent-sandbox.sh.
 set -eu
 test "$(readlink /bin/sh)" = dash
 apt-get update -qq
@@ -52,7 +52,7 @@ def run(command, **kwargs):
         result.check_returncode()
     return result
 
-bootstrap = ["/bin/sh", "/dotfiles/scripts/bootstrap-claude-cloud.sh"]
+bootstrap = ["/bin/sh", "/dotfiles/scripts/bootstrap-agent-sandbox.sh"]
 first = run(bootstrap, stdin=subprocess.DEVNULL)
 (home / "bootstrap-first.log").write_text(first.stdout + first.stderr)
 second = run(bootstrap, stdin=subprocess.DEVNULL)
@@ -60,11 +60,11 @@ assert not (second.stdout + second.stderr).strip(), "second setup reran installe
 
 command = [str(home / ".local/bin/chezmoi"), "--source", "/dotfiles"]
 assert "v2.65.0," in run(command + ["--version"]).stdout
-apm = home / ".local/share/claude-cloud/apm/bin/apm"
+apm = home / ".local/share/agent-sandbox/apm/bin/apm"
 assert run([str(apm), "--version"]).stdout.startswith("Agent Package Manager (APM) CLI version ")
 assert not run(command + ["diff"]).stdout
 assert set(run(command + ["managed"]).stdout.splitlines()) == {
-    ".apm", ".apm/apm.yml", ".claude", ".claude/CLAUDE.md", "claude-cloud-apm.sh",
+    ".apm", ".apm/apm.yml", ".claude", ".claude/CLAUDE.md", "agent-sandbox-apm.sh",
 }
 assert (home / ".claude/CLAUDE.md").read_text().strip() == Path("/dotfiles/.chezmoitemplates/AGENTS.md").read_text().strip()
 assert not (home / ".claude/AGENTS.md").exists()
@@ -84,7 +84,7 @@ for event in ("SessionStart", "UserPromptSubmit"):
                 assert "CAVEMAN MODE ACTIVE" in result.stdout
 
 # Replay the actual rendered deployment script to cover settings checks on reruns.
-deployment = run(command + ["cat", str(home / "claude-cloud-apm.sh")]).stdout
+deployment = run(command + ["cat", str(home / "agent-sandbox-apm.sh")]).stdout
 settings_path.unlink()  # Remove only this container's test-owned settings fixture.
 run(["/bin/sh"], input=deployment)
 rebuilt = json.loads(settings_path.read_text())

@@ -5,12 +5,12 @@
 
 # dotfiles
 
-Personal Linux and macOS dotfiles, plus a minimal Claude Cloud agent environment, managed by [chezmoi](https://www.chezmoi.io/).
+Personal Linux and macOS dotfiles, plus a minimal agent sandbox (used on Claude Cloud), managed by [chezmoi](https://www.chezmoi.io/).
 
 ## Contents
 
 - [Quick Start](#quick-start)
-- [Claude Cloud](#claude-cloud)
+- [Agent Sandbox](#agent-sandbox)
 - [Responsibility Split](#responsibility-split)
 - [Public Dotfiles Safety](#public-dotfiles-safety)
 - [Common Operations](#common-operations)
@@ -118,7 +118,7 @@ Run scheduler and quota-reader checks with `node --test tests/opencode-codex-res
 
 ## Quick Start
 
-For macOS/Linux workstations:
+For macOS/Linux hosts you operate (the `helm` variant):
 
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply iomz
@@ -144,9 +144,10 @@ chezmoi init
 chezmoi apply
 ```
 
-## Claude Cloud
+## Agent Sandbox
 
-`claude-cloud` provisions agent instructions, skills, agents, and hooks without deploying the workstation shell or tooling configuration.
+The `agent-sandbox` variant provisions agent instructions, skills, agents, and hooks for a disposable agent workspace, without deploying the helm shell or tooling configuration.
+Claude Cloud is its current target.
 
 ### Claude Cloud Environment setup
 
@@ -166,23 +167,24 @@ else
   git -C "$source" fetch origin main
   git -C "$source" checkout --detach FETCH_HEAD
 fi
-sh "$source/scripts/bootstrap-claude-cloud.sh"
+sh "$source/scripts/bootstrap-agent-sandbox.sh"
 ```
 
-The script installs chezmoi **2.65.0** from its GitHub release asset, verifies SHA-256 before extraction, and initializes the Cloud variant with `--no-tty --promptDefaults`.
+The script installs chezmoi **2.65.0** from its GitHub release asset, verifies SHA-256 before extraction, and initializes the `agent-sandbox` variant with `--no-tty --promptDefaults`.
 A matching installed binary is reused.
 
-Each setup run refreshes this dedicated checkout from `main` and reapplies the Cloud variant; keep it free of local edits.
+Each setup run refreshes this dedicated checkout from `main` and reapplies the `agent-sandbox` variant; keep it free of local edits.
 Cloud may reuse the provisioned filesystem without rerunning setup; rerun setup or invalidate the environment cache to pick up changes on `main`.
-To use another checkout, run `sh /path/to/dotfiles/scripts/bootstrap-claude-cloud.sh` during setup.
+To use another checkout, run `sh /path/to/dotfiles/scripts/bootstrap-agent-sandbox.sh` during setup.
 For a non-default source path, retain `chezmoi --source /path/to/dotfiles` on later commands.
 
-With the pinned chezmoi already installed, use `CHEZMOI_VARIANT=claude-cloud chezmoi init --apply --no-tty --promptDefaults iomz`.
-For an existing checkout, run `CHEZMOI_VARIANT=claude-cloud chezmoi --source "$PWD" init --apply --no-tty --promptDefaults` from its source directory.
+With the pinned chezmoi already installed, use `CHEZMOI_VARIANT=agent-sandbox chezmoi init --apply --no-tty --promptDefaults iomz`.
+For an existing checkout, run `CHEZMOI_VARIANT=agent-sandbox chezmoi --source "$PWD" init --apply --no-tty --promptDefaults` from its source directory.
 The selector is saved in machine-local chezmoi `[data].variant`; later `chezmoi apply` and `chezmoi init` retain it without the environment variable.
-The default variant is `workstation`; unknown selectors fail initialization.
-Switching back requires `CHEZMOI_VARIANT=workstation chezmoi init`, but switching variants does not remove previously deployed files.
-Use a separate Cloud home rather than converting an existing workstation.
+The default variant is `helm`; unknown selectors fail initialization.
+The old names `workstation` and `claude-cloud` keep working until the next `chezmoi init` rewrites them.
+Switching back requires `CHEZMOI_VARIANT=helm chezmoi init`, but switching variants does not remove previously deployed files.
+Use a separate sandbox home rather than converting a helm host.
 
 ### Deployment scope
 
@@ -190,7 +192,7 @@ Chezmoi deploys only:
 
 - `~/.claude/CLAUDE.md`, generated from `.chezmoitemplates/AGENTS.md` for user-global instructions.
 - `~/.apm/apm.yml`, containing SHA-pinned public dependencies.
-- An after-apply script that installs the `apm-cli` version pinned in `.chezmoidata/tools.toml` in `~/.local/share/claude-cloud/apm` and runs `apm install -g --target agent-skills,claude --https`.
+- An after-apply script that installs the `apm-cli` version pinned in `.chezmoidata/tools.toml` in `~/.local/share/agent-sandbox/apm` and runs `apm install -g --target agent-skills,claude --https`.
 
 APM deploys `ax`, `find-skills`, `typesafe-ai`, and the Caveman and `yomiyasu` native Claude Code plugins with their skills, agents, and hooks.
 It merges hooks into local Claude settings and owns its generated skill directories, cache, and lockfile.
@@ -198,7 +200,7 @@ Existing Claude settings must be readable JSON objects; invalid or unusable sett
 `CLAUDE_CONFIG_DIR`, if set, must resolve to `~/.claude`; redirected APM deployment is rejected.
 Cloud gets neither the private `iomz/skills` clone nor its links, and excludes the vault-only `brain-vault` skill; no GitHub credentials are required.
 
-No workstation shell/editor/mise configuration, Git configuration, credentials, or native plugin registration is deployed.
+No helm shell/editor/mise configuration, Git configuration, credentials, or native plugin registration is deployed.
 Cloud has no `/plugin` interface; use the deployed skills, agents, and hooks.
 Skill-associated optional tools such as `ax`, `gh`, or `npx` are not installed by this variant; supply them in the Cloud image when needed.
 
@@ -217,7 +219,7 @@ For an explicit reinstall without a manifest change:
   set -e
   script=$(mktemp)
   trap 'rm -f "$script"' 0
-  chezmoi cat "$HOME/claude-cloud-apm.sh" > "$script"
+  chezmoi cat "$HOME/agent-sandbox-apm.sh" > "$script"
   sh "$script"
 )
 ```
@@ -238,7 +240,7 @@ For real Ubuntu 24.04 x86_64/dash, pinned chezmoi/APM, settings merge/preservati
 ```sh
 just test-integration
 # Or, without just:
-sh tests/integration/run-claude-cloud.sh
+sh tests/integration/run-agent-sandbox.sh
 ```
 
 This opt-in test requires Docker with Linux amd64 execution/emulation and network access to Ubuntu packages, GitHub releases/repositories, and PyPI.
@@ -301,9 +303,9 @@ Use `chezmoi add` for new managed files when possible. Keep repo-only files such
 
 ### Pre-installation Cleanup
 
-On the first workstation apply, `run_once_before_00-cleanup-legacy-config.sh.tmpl` moves repo-owned application configuration into a timestamped `~/.chezmoi-backups/pre-install.<UTC timestamp>.<random suffix>` before installing packages or writing managed files.
+On the first helm apply, `run_once_before_00-cleanup-legacy-config.sh.tmpl` moves repo-owned application configuration into a timestamped `~/.chezmoi-backups/pre-install.<UTC timestamp>.<random suffix>` before installing packages or writing managed files.
 The backup directory is private (mode `0700`); nothing is deleted or added to Git.
-This noninteractive migration also runs once on existing workstations when they first receive the script.
+This noninteractive migration also runs once on existing helm hosts when they first receive the script.
 
 The application allowlist covers:
 
@@ -345,7 +347,7 @@ Use `starship timings` in a slow directory to identify modules to disable rather
 
 ### System Dependencies
 
-For workstations, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
+On helm hosts, `run_once_install-packages.sh.tmpl` installs bootstrap and system dependencies during `chezmoi apply`:
 
 - macOS uses Homebrew; formulae come from `.chezmoidata/tools.toml`.
   Without Homebrew, `run_before_10-install-homebrew.sh.tmpl` first runs its official installer, which needs an administrator account and a terminal for the password; otherwise it says why and retries on the next apply.
@@ -561,7 +563,7 @@ APM deploys to `~/.agents/skills` and `~/.claude/skills` (`agent-skills` and `cl
 It also owns Caveman and `yomiyasu`: APM deploys them as native Claude Code plugins under `~/.agents/plugins` and enables them in `~/.claude/settings.json`, alongside their skills in `~/.agents/skills`.
 APM manages third-party skills such as `ax`, `find-skills`, and `typesafe-ai` from pinned upstream commits.
 The vault-specific `brain-vault` skill is owned by `iomz/brain-vault` (`Skills/Common/brain-vault`) and deployed the same way.
-Workstation installs read private `iomz/brain-vault` with the `gh` login; Cloud installs use public dependencies only.
+Helm installs read private `iomz/brain-vault` with the `gh` login; agent-sandbox installs use public dependencies only.
 OpenCode reads both `~/.agents/skills` and `~/.claude/skills` and prefers the `~/.agents` copy of a skill, so keep names unique across the two.
 Do not infer skill ownership from a same-named binary installer; verify skill provenance separately before updates.
 
