@@ -45,10 +45,10 @@ check "zsh starts without errors" as_user zsh -ic 'exit 0'
 check "zsh startup prints nothing to stderr" \
     as_user sh -c 'test -z "$(zsh -ic "exit 0" 2>&1 >/dev/null)"'
 # Capture first so a failing command cannot pass as empty output.
-dev=$(as_user chezmoi execute-template \
-    '{{ if hasKey .hosts .host }}{{ if has "dev" (index .hosts .host).groups }}yes{{ end }}{{ end }}')
-echo "== dev profile: ${dev:-no}"
-if [ "$dev" = yes ]; then
+stem=$(as_user chezmoi execute-template \
+    '{{ if hasKey .hosts .host }}{{ if has "stem" (index .hosts .host).groups }}yes{{ end }}{{ end }}')
+echo "== stem profile: ${stem:-no}"
+if [ "$stem" = yes ]; then
 check "mise has no missing tools" as_user sh -c 'missing=$(mise ls --missing) && test -z "$missing"'
 # First start clones plugins and compiles parsers; let that finish first.
 as_user zsh -ic 'nvim --headless "+Lazy! sync" "+sleep 60" +qa' >/dev/null 2>&1 || true
@@ -62,10 +62,10 @@ echo 'Enabled: no' >> "$mise_source"
 check "package script re-enables a disabled mise source" as_user sh -c \
     'chezmoi cat ~/install-packages.sh | sh >/dev/null 2>&1 && ! grep -qi "^Enabled: no" /etc/apt/sources.list.d/extrepo_mise.sources'
 else
-check "non-dev host has no mise" as_user sh -c \
+check "leaf host has no mise" as_user sh -c \
     '! test -e ~/.config/mise/config.toml && ! command -v mise >/dev/null && ! test -e /etc/apt/sources.list.d/extrepo_mise.sources'
-check "non-dev host has no Neovim config" as_user sh -c '! test -e ~/.config/nvim'
-check "non-dev host has no C toolchain" sh -c '! command -v cc >/dev/null'
+check "leaf host has no Neovim config" as_user sh -c '! test -e ~/.config/nvim'
+check "leaf host has no C toolchain" sh -c '! command -v cc >/dev/null'
 fi
 check "bash login shell reads .bashrc and ~/.local/bin" as_user bash -lic \
     'alias ll >/dev/null && case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) exit 1 ;; esac'
@@ -73,7 +73,7 @@ check "bash login shell reads .bashrc and ~/.local/bin" as_user bash -lic \
 tty_zsh() {
     as_user env TERM=xterm-256color script -qec "zsh -ilc '$1' 2>$home/zsh.err" /dev/null
 }
-if [ "$dev" = yes ]; then
+if [ "$stem" = yes ]; then
     tty_zsh exit >/dev/null 2>&1 || true # the first start clones plugins
 fi
 check "zsh on a terminal loads the interactive rc.d" tty_zsh '(( ${+widgets[insert-line-break]} ))'
@@ -86,10 +86,10 @@ check "zsh login compiles each startup file on its own" as_user zsh -fc '
     for z in ~/.zshenv.zwc ~/.config/zsh/{,rc.d/}*.zwc(DN); do
         [[ "$(zcompile -t $z | sed -n 2p)" == ${z%.zwc} ]] || { print -- "$z"; exit 1; }
     done'
-if [ "$dev" != yes ]; then
-    check "non-dev zsh downloads no plugins" as_user sh -c '! test -e ~/.local/share/zinit'
+if [ "$stem" != yes ]; then
+    check "leaf zsh downloads no plugins" as_user sh -c '! test -e ~/.local/share/zinit'
 fi
-if [ "$dev" = yes ]; then editor=nvim; else editor=vim; fi
+if [ "$stem" = yes ]; then editor=nvim; else editor=vim; fi
 check "zsh sets EDITOR, VISUAL and an absolute SUDO_EDITOR" as_user zsh -ic \
     "[[ \$EDITOR == $editor && \$VISUAL == $editor && \$SUDO_EDITOR == /*/$editor' -i NONE' && -x \${SUDO_EDITOR% -i NONE} ]]"
 # A real sudoedit of a root-owned file, as the user would run it.

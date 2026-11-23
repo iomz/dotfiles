@@ -72,7 +72,7 @@ package.json
 .claude/*
 !.claude/CLAUDE.md
 # Links into the iomz/skills clone, for hosts that run Claude Code and OpenCode
-{{ if and (ne (includeTemplate "variant" .) "agent-sandbox") (eq (includeTemplate "is-dev" .) "true") }}
+{{ if and (ne (includeTemplate "variant" .) "agent-sandbox") (eq (includeTemplate "is-stem" .) "true") }}
 !.claude/skills
 {{ end }}
 
@@ -83,8 +83,8 @@ package.json
 .apm/apm_modules/
 .apm/apm_modules/**
 
-# Neovim is for dev hosts; others use plain vim
-{{ if ne (includeTemplate "is-dev" .) "true" }}
+# Neovim is for stem hosts; others use plain vim
+{{ if ne (includeTemplate "is-stem" .) "true" }}
 .config/nvim
 .config/nvim/**
 {{ end }}

@@ -14,7 +14,7 @@ DATA = '''[data]
 variant = "{variant}"
 host = "{host}"
 [data.hosts.devbox]
-groups = ["dev"]
+groups = ["stem"]
 '''
 SCRIPT = "run_onchange_after_nvim-plugin-sync.sh.tmpl"
 
@@ -28,7 +28,7 @@ class NvimPluginSyncTest(unittest.TestCase):
         self.source = root / "source"
         (self.source / "dot_config/nvim/lua").mkdir(parents=True)
         (self.source / ".chezmoitemplates").mkdir()
-        for name in ("is-dev", "tool-selected", "brew-path", "variant"):
+        for name in ("is-stem", "tool-selected", "brew-path", "variant"):
             shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
                             self.source / ".chezmoitemplates" / name)
         shutil.copyfile(SOURCE / SCRIPT, self.source / SCRIPT)
