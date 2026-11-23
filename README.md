@@ -602,7 +602,7 @@ git diff -- dot_apm/apm.yml.tmpl
 ```
 
 Verify changed skill frontmatter and any associated CLI before committing.
-Older APM releases cannot deploy Caveman's plugin hooks, so bump APM with `just tool-bump` before Caveman when needed. After a bump, check that a new Claude Code session shows `Loading caveman mode...`.
+Older APM releases cannot deploy Caveman's plugin hooks, so bump APM with `just tool-bump` before Caveman when needed. After a bump, ask a new Claude Code session whether Caveman is active; its session-start hook reports the mode.
 Keep generated skill directories under `~/.agents/skills` out of chezmoi, and never commit or push update changes automatically.
 
 Caveman activation for Codex requires a local `~/.codex/hooks.json` SessionStart hook.
