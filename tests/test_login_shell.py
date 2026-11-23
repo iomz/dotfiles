@@ -16,7 +16,7 @@ SCRIPT = "run_after_30-login-shell.sh.tmpl"
 
 def system_zsh():
     for line in Path("/etc/shells").read_text().splitlines():
-        if line.startswith("/") and line.endswith("/zsh") and os.access(line, os.X_OK):
+        if line in ("/bin/zsh", "/usr/bin/zsh") and os.access(line, os.X_OK):
             return line
     return None
 

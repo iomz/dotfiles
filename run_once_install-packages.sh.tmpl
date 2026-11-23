@@ -68,7 +68,8 @@ if [ -n "$apt_missing" ]; then
   as_root apt update
   known=
   for name in $apt_missing; do
-    if apt-cache policy "$name" 2>/dev/null | grep -q '^ *Candidate: [^(]'; then
+    # apt translates its labels, so read them in the C locale.
+    if LC_ALL=C apt-cache policy "$name" 2>/dev/null | grep -q '^ *Candidate: [^(]'; then
       known="$known $name"
     else
       unknown="$unknown $name"
@@ -90,13 +91,15 @@ fi
 if [ -n "$has_apt" ]; then
   mise_source=/etc/apt/sources.list.d/extrepo_mise.sources
   if [ ! -f "$mise_source" ] || grep -qi '^Enabled: *no' "$mise_source"; then
-    if can_root; then as_root extrepo enable mise; fi
+    if command -v extrepo >/dev/null 2>&1 && can_root; then
+      as_root extrepo enable mise || echo 'install-packages: could not enable the mise apt source' >&2
+    fi
   fi
 fi
 if ! command -v mise >/dev/null 2>&1; then
-  if [ -n "$has_apt" ] && can_root; then
-    as_root apt update
-    as_root apt install -y mise
+  # Falls through to Homebrew or the report when apt cannot provide mise.
+  if [ -n "$has_apt" ] && can_root && as_root apt update && as_root apt install -y mise; then
+    :
   elif [ -n "$has_brew" ]; then
     HOMEBREW_NO_INSTALL_UPGRADE=1 brew install mise
   else
@@ -161,12 +164,9 @@ for formula in $formulae; do
     *) if brew info --formula "$formula" >/dev/null 2>&1; then missing="$missing $formula"; else unknown="$unknown $formula"; fi ;;
   esac
 done
-if [ -n "$missing" ]; then
-  # shellcheck disable=SC2086 # word splitting is intended
-  HOMEBREW_NO_INSTALL_UPGRADE=1 brew install --formula $missing
-fi
-# Apps install one by one: some run installers that ask for the password, and
-# one failure must not stop the rest.
+# Apps install first, since a formula may need one (sshfs-mac needs macfuse),
+# and one by one: some installers ask for the password, and one failure must
+# not stop the rest.
 failed=
 for cask in $casks; do
   printf '%s\n' "$installed_casks" | grep -qx "${cask##*/}" && continue
@@ -176,6 +176,10 @@ for cask in $casks; do
     failed="$failed $cask"
   fi
 done
+if [ -n "$missing" ]; then
+  # shellcheck disable=SC2086 # word splitting is intended
+  HOMEBREW_NO_INSTALL_UPGRADE=1 brew install --formula $missing
+fi
 if [ -n "$unknown" ]; then
   printf 'install-packages: skipped (unknown to Homebrew):%s\n' "$unknown" >&2
 fi

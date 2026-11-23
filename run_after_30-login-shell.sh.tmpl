@@ -11,7 +11,7 @@ set -eu
 zsh=
 while IFS= read -r line; do
   case $line in
-    /*/zsh) if [ -x "$line" ]; then zsh=$line; break; fi ;;
+    /bin/zsh | /usr/bin/zsh) if [ -x "$line" ]; then zsh=$line; break; fi ;;
   esac
 done < /etc/shells
 if [ -z "$zsh" ]; then
