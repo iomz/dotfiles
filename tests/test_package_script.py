@@ -48,8 +48,10 @@ class PackageScriptCase(unittest.TestCase):
         # PATH holds only stubs and the utilities the script needs, so a real
         # apt-get or brew on the test machine cannot leak in.
         self.stub("id", "echo 1000")
-        # Every package is known unless named in $UNKNOWN.
-        self.stub("apt-cache", 'case " $UNKNOWN " in *" $2 "*) echo "  Candidate: (none)" ;; *) echo "  Candidate: 1.0" ;; esac')
+        # Every package is known unless named in $UNKNOWN. Labels are translated
+        # outside the C locale, as apt does.
+        self.stub("apt-cache", 'label=Candidate; [ "${LC_ALL:-}" = C ] || label=候補\n'
+                               'case " $UNKNOWN " in *" $2 "*) echo "  $label: (none)" ;; *) echo "  $label: 1.0" ;; esac')
         for tool in ("awk", "grep"):
             (self.bin / tool).symlink_to(shutil.which(tool))
 
@@ -150,6 +152,15 @@ class LinuxPackageScriptTest(PackageScriptCase):
         installs, _ = self.run_script()
         self.assertEqual(installs, ["brew install brew-b brew-c"])
 
+    def test_missing_extrepo_or_mise_package_still_reports(self):
+        self.stub("id", "echo 0")
+        self.stub("dpkg-query", 'echo "ii pkg-have"')
+        self.stub("apt-get")
+        self.stub("apt", '[ "$*" != "install -y mise" ]')
+        _, stderr = self.run_script(unknown="pkg-b")
+        self.assertIn("skipped (unknown to the package manager): pkg-b", stderr)
+        self.assertIn("skipped (no usable package manager): brew-c mise", stderr)
+
     def test_unknown_names_are_skipped_and_reported(self):
         self.stub_common()
         self.stub("apt-get")
@@ -192,13 +203,14 @@ esac''')
 
     def test_installs_only_missing_formulae_and_casks(self):
         installs, _ = self.run_script()
-        self.assertEqual(installs, ["brew install --formula f-want",
-                                    "brew install --cask c-want", "brew install --cask c-more"])
+        # Apps first: a formula may need one, as sshfs-mac needs macfuse.
+        self.assertEqual(installs, ["brew install --cask c-want", "brew install --cask c-more",
+                                    "brew install --formula f-want"])
 
     def test_tap_qualified_formulae_match_by_name_and_skip_the_info_check(self):
         self.stub("brew", 'case "$1 $3" in "list --formula") echo f-have; echo f-want ;; info*) exit 1 ;; esac')
         installs, _ = self.run_script()
-        self.assertEqual(installs[0], "brew install --formula owner/tap/f-tap")
+        self.assertIn("brew install --formula owner/tap/f-tap", installs)
         self.assertNotIn("info --formula owner/tap/f-tap", self.calls.read_text())
 
     def test_unknown_names_are_skipped_and_reported(self):
@@ -207,9 +219,9 @@ esac''')
         self.assertIn("skipped (unknown to Homebrew): f-want c-want", stderr)
 
     def test_a_failed_cask_does_not_stop_the_others(self):
-        installs, stderr = self.run_script(FAIL="c-more")
-        self.assertIn("brew install --cask c-want", installs)
-        self.assertIn("install-packages: failed: c-more", stderr)
+        installs, stderr = self.run_script(FAIL="c-want")
+        self.assertIn("brew install --cask c-more", installs)
+        self.assertIn("install-packages: failed: c-want", stderr)
         self.assertIn("to retry later", stderr)
 
     def test_missing_homebrew_skips_without_failing(self):
