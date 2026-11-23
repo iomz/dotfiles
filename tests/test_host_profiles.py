@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -49,6 +50,15 @@ class HostProfileTest(unittest.TestCase):
             self.assertTrue((self.home / name).is_file(), name)
         for name in MISE_SCRIPTS:
             self.assertTrue(self.chezmoi("sazanka", "cat", str(self.home / name)).strip(), name)
+
+    def test_leaf_prompt_uses_the_starship_host_color(self):
+        self.apply("tinybox")
+        starship = (self.home / ".config/starship.toml").read_text()
+        style = (self.home / ".config/zsh/rc.d/07-style.zsh").read_text()
+        color = re.search(r'\[hostname\]\n.*?\nstyle = "bold fg:([^"]+)"', starship, re.S).group(1)
+        prompt = re.search(r"PROMPT='%B%F\{red\}%n%f%b@%B%F\{([^}]+)\}%m", style).group(1)
+        self.assertEqual(prompt, "12" if color == "bright-blue" else color)
+        self.assertNotIn("<%", style)
 
     def test_leaving_dev_removes_mise_and_plugins(self):
         self.apply("sazanka")

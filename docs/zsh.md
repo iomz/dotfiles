@@ -20,7 +20,7 @@
 | | stem | leaf |
 | --- | --- | --- |
 | options, history, completion, key bindings, aliases | ✓ | ✓ |
-| prompt | Starship, else Pure | plain |
+| prompt | Starship, else Pure | colored, with the host in its Starship color |
 | zinit plugins, zeno, mise activation | ✓ | – |
 
 On helm hosts whose login shell is not zsh, an apply runs `chsh -s` with `/bin/zsh` or `/usr/bin/zsh`, never a mise or Homebrew zsh whose path can change.

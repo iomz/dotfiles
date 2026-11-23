@@ -1,0 +1,7 @@
+{{- /* Host name color shared by the Starship and plain zsh prompts: on Linux a
+       hash of the host name picks one of 16 colors; empty on macOS, where each
+       prompt falls back to its bright blue. */ -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{-   $colors := list "#ff9e64" "#b8cc52" "#73daca" "#2ac3de" "#56b6c2" "#5ccfe6" "#4fd6be" "#79c2ff" "#74c7ec" "#c099ff" "#b4befe" "#d3869b" "#b48ead" "#b7c5d3" "#d5c4a1" "#d8dee9" -}}
+{{-   index $colors (mod (atoi (adler32sum .chezmoi.hostname)) (len $colors)) -}}
+{{- end -}}

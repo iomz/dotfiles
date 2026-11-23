@@ -231,9 +231,6 @@ hosts = ["oxalis"]
 [tools.cheat]
 darwin.brew = "cheat"
 
-[tools.chezmoi]
-darwin.brew = "chezmoi"
-
 [tools.cloc]
 darwin.brew = "cloc"
 
@@ -529,8 +526,8 @@ linux.apt = "zsh"
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.
 # Entries with `homebrew_guard = false` are left out.
 # These extra names have no mise entry of their own: python3 and ruby are carried
-# over from the previous hand-written list, and zsh must stay the system one,
-# which is the login shell.
+# over from the previous hand-written list, zsh must stay the system one,
+# which is the login shell, and chezmoi lives in ~/bin on every host.
 
 [homebrew_guard]
-extra = ["python3", "ruby", "zsh"]
+extra = ["chezmoi", "python3", "ruby", "zsh"]
