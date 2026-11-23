@@ -47,14 +47,35 @@ tool-check:
 test-linux-host host="sazanka" platform="":
     sh tests/integration/run-linux-host.sh {{host}} {{platform}}
 
+# GitHub access for private sources goes through gh only: run gh auth login once.
+[private]
+gh-login:
+    @gh auth status >/dev/null 2>&1 || { echo "Not logged in to GitHub: run gh auth login first" >&2; exit 1; }
+
+# Install the APM skills and plugins pinned in ~/.apm/apm.yml.
+apm-install: gh-login
+    #!/bin/sh
+    set -eu
+    # APM reads private sources such as iomz/brain-vault with this token.
+    GITHUB_APM_PAT=$(gh auth token)
+    export GITHUB_APM_PAT
+    exec apm install -g
+
 # Stops on local changes or another branch; never resets, stashes or forces.
 # Clone iomz/skills for the ~/.claude/skills links, or fast-forward it to main.
-skills-pull:
+skills-pull: gh-login
     #!/bin/sh
     set -eu
     dir="$HOME/.local/share/agent-skills"
+    url=https://github.com/iomz/skills.git
+    # HTTPS through gh's credentials, so no SSH key is needed.
+    git_gh() { git -c credential.helper= -c 'credential.helper=!gh auth git-credential' "$@"; }
     if [ ! -e "$dir" ]; then
-        exec git clone --branch main git@github.com:iomz/skills.git "$dir"
+        git_gh clone --branch main "$url" "$dir"
+        exit
+    fi
+    if [ "$(git -C "$dir" config --get remote.origin.url)" = git@github.com:iomz/skills.git ]; then
+        git -C "$dir" remote set-url origin "$url"
     fi
     branch=$(git -C "$dir" symbolic-ref --quiet --short HEAD || echo "detached HEAD")
     if [ "$branch" != main ]; then
@@ -67,4 +88,4 @@ skills-pull:
         echo "skills-pull: $dir has local changes; edit skills in a separate checkout" >&2
         exit 1
     fi
-    git -C "$dir" pull --ff-only origin main
+    git_gh -C "$dir" pull --ff-only origin main
