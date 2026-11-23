@@ -248,6 +248,7 @@ esac''')
         installs, stderr = self.run_script(FAIL="c-want")
         self.assertIn("brew install --cask c-more", installs)
         self.assertIn("install-packages: failed: c-want", stderr)
+        self.assertIn("brew install --cask --adopt c-want\n", stderr)
         self.assertIn("to retry later", stderr)
 
     def test_missing_homebrew_skips_without_failing(self):

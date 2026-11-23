@@ -201,6 +201,8 @@ if [ -n "$unknown" ]; then
 fi
 if [ -n "$failed" ]; then
   printf 'install-packages: failed:%s\n' "$failed" >&2
+  # The usual cause is an app installed outside Homebrew; --adopt takes it over.
+  printf 'install-packages: if the app already exists, let Homebrew adopt it: brew install --cask --adopt%s\n' "$failed" >&2
   printf '%s\n' 'install-packages: to retry later: sh -c "$(chezmoi cat ~/install-packages.sh)"' >&2
 fi
 {{ end -}}
