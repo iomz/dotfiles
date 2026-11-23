@@ -1,0 +1,32 @@
+{{- /* Renders only on helm hosts whose login shell is not zsh, so it stops once chsh succeeds. */ -}}
+{{- if eq (includeTemplate "variant" .) "helm" -}}
+{{-   $shell := output "sh" "-c" "u=$(id -un); if command -v dscl >/dev/null 2>&1; then dscl . -read \"/Users/$u\" UserShell 2>/dev/null | sed -n 's/^UserShell: //p'; else getent passwd \"$u\" 2>/dev/null | cut -d: -f7; fi; true" | trim -}}
+{{-   if ne (base $shell) "zsh" -}}
+#!/bin/sh
+# Make the system zsh the login shell; the current one is {{ $shell | default "unknown" }}.
+set -eu
+
+# chsh accepts only shells listed in /etc/shells; never a mise or Homebrew zsh,
+# whose path can change.
+zsh=
+while IFS= read -r line; do
+  case $line in
+    /*/zsh) if [ -x "$line" ]; then zsh=$line; break; fi ;;
+  esac
+done < /etc/shells
+if [ -z "$zsh" ]; then
+  echo 'login-shell: no zsh in /etc/shells yet; install zsh, then run chezmoi apply again' >&2
+  exit 0
+fi
+# chsh asks for the account password.
+if [ ! -t 0 ]; then
+  echo "login-shell: to make zsh the login shell, run chsh -s $zsh in an interactive shell" >&2
+  exit 0
+fi
+if chsh -s "$zsh"; then
+  echo "login-shell: $zsh is the login shell from the next login"
+else
+  echo "login-shell: chsh failed; accounts managed by LDAP or similar need their administrator" >&2
+fi
+{{    end -}}
+{{- end -}}
