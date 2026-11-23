@@ -10,10 +10,12 @@ ZDOTDIR=$zdir
 rehash
 
 _zsh_compile_if_writable() {
-    local target=$1
+    local target=$1 tmp=$1.$$.zwc
     # Avoid noisy zcompile failures in readonly or sandboxed startup contexts.
     [[ -s $target && -w ${target:h} ]] || return
-    zcompile $target
+    # Rename a finished digest into place: zcompile writes in place, and a
+    # shell starting meanwhile could read a partial one.
+    zcompile $tmp $target && mv -f $tmp $target.zwc || rm -f $tmp
 }
 
 # zsh reads file.zwc in place of a startup or sourced file only when it is
@@ -25,4 +27,4 @@ done
 
 # Compile the completion dump
 zcd=$zdir/.zcompdump
-if [[ -s $zcd && -w ${zcd:h} && (! -s ${zcd}.zwc || $zcd -nt ${zcd}.zwc) ]]; then zcompile $zcd; fi
+if [[ ! -s ${zcd}.zwc || $zcd -nt ${zcd}.zwc ]]; then _zsh_compile_if_writable $zcd; fi
