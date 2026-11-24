@@ -27,7 +27,7 @@ It must not contain credentials, local state, history, caches, or machine-specif
 - In the `agent-sandbox` variant, Claude Cloud creates `~/.gitconfig` (commit signing), `~/.claude.json` (login and session state) and its synced skills before chezmoi runs.
   Deploy none of these and no `exact_` Claude directory there, so chezmoi does not replace or delete Cloud's copies.
 - On other variants, `~/.claude.json` holds login, IDs and per-project state, so never track the file.
-  A run script may set its `mcpServers` entries through `claude mcp`, the same way the `statusLine` keys are set in `settings.json`.
+  Set its `mcpServers` entries only through `claude mcp`, from a run script if needed; never edit the file directly.
 - Treat `~/.agents/skills` as a shared deployment surface.
   Track nothing there: personal skills are linked from `~/.claude/skills`, and a same-named copy here shadows the link in OpenCode.
   Keep third-party skills, installer lock files, and package-manager output outside chezmoi.
