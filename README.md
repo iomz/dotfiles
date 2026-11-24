@@ -147,7 +147,7 @@ To change the layout, edit the wrapper here; `SL_*` variables set in the `status
 | Skills | Source | Deployed by |
 | --- | --- | --- |
 | personal | private [`iomz/skills`](https://github.com/iomz/skills), cloned to `~/.local/share/agent-skills` | chezmoi links, one per skill, in `~/.claude/skills` |
-| third-party (`ax`, `find-skills`, `typesafe-ai`) and `brain-vault` | upstream repositories, pinned by commit in `dot_apm/apm.yml.tmpl` | APM, into `~/.agents/skills` and `~/.claude/skills` |
+| third-party (`ax`, `find-skills`, `typesafe-ai`, and `playwright-cli` on macOS stem hosts) and `brain-vault` | upstream repositories, pinned by commit in `dot_apm/apm.yml.tmpl` | APM, into `~/.agents/skills` and `~/.claude/skills` |
 | Caveman and `yomiyasu` | upstream, pinned the same way | APM, as native Claude Code plugins under `~/.agents/plugins` |
 
 chezmoi never tracks skill contents, APM output or its lockfile.

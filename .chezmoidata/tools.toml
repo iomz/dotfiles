@@ -112,6 +112,11 @@ groups = ["stem"]
 mise = "1.18.19"
 groups = ["stem"]
 
+[tools.playwright-cli]
+mise_id = "npm:@playwright/cli"
+mise = { version = "0.1.25", os = ["macos"] }
+groups = ["stem"]
+
 [tools.pnpm]
 mise = "12.21.0"
 groups = ["stem"]
