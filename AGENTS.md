@@ -22,6 +22,7 @@ It must not contain credentials, local state, history, caches, or machine-specif
 - For Claude Code, track only `~/.claude/CLAUDE.md`, generated from the canonical shared source.
   `~/.claude/AGENTS.md` is not a user-global instruction location.
   Do not track `~/.claude/settings.json`, skill contents, agents, hooks, plugins, sessions, or caches; APM deploys third-party skills, agents, and hooks there.
+  The only write to `settings.json` is a run script that sets the `statusLine` keys to the managed wrapper.
   Personal skills are chezmoi-managed links in `~/.claude/skills` into the `~/.local/share/agent-skills` clone of `iomz/skills`; never link to an editing checkout.
 - Claude Cloud owns its Git signing configuration and launcher/session/synced-skill state.
   Never deploy `.gitconfig`, `.claude.json`, or an `exact_` Claude directory in the `agent-sandbox` variant.

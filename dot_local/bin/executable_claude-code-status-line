@@ -6,6 +6,11 @@ STATUSLINE="$HOME/.local/bin/claude-code-status-line.py"
 CAVEMAN_DIR="$HOME/.agents/plugins/caveman"
 CAVEMAN="$CAVEMAN_DIR/src/hooks/caveman-statusline.sh"
 input=$(cat)
+# The layout on every host, so settings.json only names this wrapper. Each
+# SL_* variable already set in the environment still wins.
+: "${SL_SEGMENTS=update model:colon=0:effort=full percentage usage_5hour:gauge=none usage_weekly:gauge=none directory:basename_only=1 worktree git_branch git_status added_dirs}"
+export SL_SEGMENT_GAP=${SL_SEGMENT_GAP-  }
+export SL_SHOW_STATUSLINE_UPDATE=${SL_SHOW_STATUSLINE_UPDATE-0}
 # Renders the given segments; an empty list keeps the script's defaults.
 render() {
   if [[ -n $1 ]]; then
@@ -36,8 +41,8 @@ fi
 
 # Split SL_SEGMENTS after the model segment (with or without options), which
 # the badge follows; without a model segment the badge leads the row.
-segments=${SL_SEGMENTS:-}
-gap=${SL_SEGMENT_GAP-   }
+segments=$SL_SEGMENTS
+gap=$SL_SEGMENT_GAP
 before= after= found=
 for segment in $segments; do
   if [[ -n $found ]]; then

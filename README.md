@@ -138,6 +138,12 @@ Interactive zsh exports `HOMEBREW_FORBIDDEN_FORMULAE`, so Homebrew refuses formu
 It renders to `~/.claude/CLAUDE.md`, and to `~/.codex/AGENTS.md` with a Codex appendix.
 The repository's own `AGENTS.md` holds maintenance rules for this repository and is not deployed.
 
+### Claude Code status line
+
+`~/.local/bin/claude-code-status-line` holds the layout: segments, gap and the Caveman badge.
+On stem hosts a run script points `statusLine` in `~/.claude/settings.json` at it and changes no other key, since APM and Claude Code own that file.
+To change the layout, edit the wrapper here; `SL_*` variables set in the `statusLine` command still override it on one host.
+
 ### Who owns which skills
 
 | Skills | Source | Deployed by |
