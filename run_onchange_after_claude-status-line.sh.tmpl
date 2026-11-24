@@ -1,4 +1,6 @@
-{{ if eq (includeTemplate "is-stem" .) "true" -}}
+{{- /* Without jq the script renders empty, so the apply goes on and a later
+     apply runs it once the package install has added jq. */ -}}
+{{ if and (eq (includeTemplate "is-stem" .) "true") (lookPath "jq") -}}
 #!/bin/sh
 # Points Claude Code's status line at the managed wrapper, which holds the
 # layout. Only the statusLine keys are written: APM and Claude Code own the
@@ -8,18 +10,22 @@ set -eu
 
 settings="$HOME/.claude/settings.json"
 command="$HOME/.local/bin/claude-code-status-line"
-if ! command -v jq >/dev/null 2>&1; then
-    echo "claude-status-line: jq is required to edit $settings" >&2
-    exit 1
-fi
 
 mkdir -p "$HOME/.claude"
-[ -s "$settings" ] || printf '{}\n' > "$settings"
+if [ ! -s "$settings" ]; then
+    (umask 077 && printf '{}\n' > "$settings")
+fi
+# Replace the file a link points to, not the link.
+if [ -L "$settings" ]; then
+    settings=$(realpath "$settings")
+fi
 tmp=$(mktemp "$settings.XXXXXX")
 trap 'rm -f "$tmp"' EXIT
+# Start from a copy so the new file keeps the old one's mode, then rename it
+# over the old file: an interrupted run leaves settings.json unchanged.
+cp -p "$settings" "$tmp"
 jq --arg command "$command" \
     '.statusLine.type = "command" | .statusLine.command = $command' "$settings" > "$tmp"
-# Copy back instead of moving, so the file keeps its mode.
-cat "$tmp" > "$settings"
+mv "$tmp" "$settings"
 echo "claude-status-line: $settings uses $command"
 {{ end -}}

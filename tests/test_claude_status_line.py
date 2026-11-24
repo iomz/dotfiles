@@ -20,7 +20,7 @@ class ClaudeStatusLineTest(unittest.TestCase):
         self.home = self.root / "home"
         self.home.mkdir()
 
-    def render(self, host, variant="helm"):
+    def render(self, host, variant="helm", path=None):
         config = self.root / "config.toml"
         config.write_text(f'[data]\nvariant = "{variant}"\nhost = "{host}"\n'
                           'git_name = "Test"\ngit_email = "test@example.org"\n')
@@ -28,8 +28,8 @@ class ClaudeStatusLineTest(unittest.TestCase):
             ["chezmoi", "--source", str(SOURCE), "--destination", str(self.home),
              "--config", str(config), "--persistent-state", str(self.root / "state"),
              "--cache", str(self.root / "cache"), "--no-tty", "cat", str(self.home / SCRIPT)],
-            env=dict(os.environ, HOME=str(self.home)), stdin=subprocess.DEVNULL,
-            text=True, capture_output=True, check=True).stdout
+            env=dict(os.environ, HOME=str(self.home), PATH=path or os.environ["PATH"]),
+            stdin=subprocess.DEVNULL, text=True, capture_output=True, check=True).stdout
 
     def run_script(self):
         script = self.root / SCRIPT
@@ -67,6 +67,26 @@ class ClaudeStatusLineTest(unittest.TestCase):
 
     def test_creates_settings_when_missing(self):
         self.assertEqual(self.run_script()["statusLine"]["type"], "command")
+        self.assertEqual((self.home / ".claude/settings.json").stat().st_mode & 0o777, 0o600)
+
+    def test_keeps_a_linked_settings_file_linked(self):
+        target = self.root / "dotfiles/settings.json"
+        target.parent.mkdir()
+        target.write_text('{"model": "opus"}')
+        link = self.home / ".claude/settings.json"
+        link.parent.mkdir()
+        link.symlink_to(target)
+        self.assertEqual(self.run_script()["model"], "opus")
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(json.loads(target.read_text())["statusLine"]["type"], "command")
+        self.assertEqual(sorted(p.name for p in target.parent.iterdir()), ["settings.json"])
+
+    def test_renders_empty_without_jq(self):
+        # A host whose package install could not add jq skips the script.
+        tools = self.root / "tools"
+        tools.mkdir()
+        (tools / "chezmoi").symlink_to(shutil.which("chezmoi"))
+        self.assertEqual(self.render("sazanka", path=str(tools)).strip(), "")
 
 
 class WrapperDefaultsTest(unittest.TestCase):
