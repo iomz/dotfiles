@@ -61,10 +61,6 @@ groups = ["stem"]
 mise = "2.38.2"
 groups = ["stem"]
 
-[tools.eza]
-mise = "0.23.5"
-groups = ["stem"]
-
 [tools.fd]
 mise = "10.5.2"
 groups = ["stem"]
@@ -162,6 +158,10 @@ linux.apt = "ca-certificates"
 darwin.brew = "code-minimap"
 linux.apt = "code-minimap"
 groups = ["stem"]
+
+[tools.eza]
+darwin.brew = "eza"
+linux.apt = "eza"
 
 [tools.gawk]
 darwin.brew = "gawk"
