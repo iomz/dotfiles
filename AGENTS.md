@@ -24,8 +24,10 @@ It must not contain credentials, local state, history, caches, or machine-specif
   Do not track `~/.claude/settings.json`, skill contents, agents, hooks, plugins, sessions, or caches; APM deploys third-party skills, agents, and hooks there.
   The only write to `settings.json` is a run script that sets the `statusLine` keys to the managed wrapper.
   Personal skills are chezmoi-managed links in `~/.claude/skills` into the `~/.local/share/agent-skills` clone of `iomz/skills`; never link to an editing checkout.
-- Claude Cloud owns its Git signing configuration and launcher/session/synced-skill state.
-  Never deploy `.gitconfig`, `.claude.json`, or an `exact_` Claude directory in the `agent-sandbox` variant.
+- In the `agent-sandbox` variant, Claude Cloud creates `~/.gitconfig` (commit signing), `~/.claude.json` (login and session state) and its synced skills before chezmoi runs.
+  Deploy none of these and no `exact_` Claude directory there, so chezmoi does not replace or delete Cloud's copies.
+- On other variants, `~/.claude.json` holds login, IDs and per-project state, so never track the file.
+  A run script may set its `mcpServers` entries through `claude mcp`, the same way the `statusLine` keys are set in `settings.json`.
 - Treat `~/.agents/skills` as a shared deployment surface.
   Track nothing there: personal skills are linked from `~/.claude/skills`, and a same-named copy here shadows the link in OpenCode.
   Keep third-party skills, installer lock files, and package-manager output outside chezmoi.
