@@ -1,16 +1,13 @@
 """Render and run the login shell script against stub account lookups."""
 
-import json
 import os
 from pathlib import Path
-import pty
 import shutil
 import subprocess
-import tempfile
 import unittest
 
+from chezmoi_home import CHEZMOI, SOURCE, ChezmoiHome, run_on_terminal, stub
 
-SOURCE = Path(__file__).resolve().parents[1]
 SCRIPT = "run_after_30-login-shell.sh.tmpl"
 
 
@@ -21,17 +18,12 @@ def system_zsh():
     return None
 
 
-@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
+@unittest.skipUnless(CHEZMOI, "chezmoi required")
 class LoginShellTest(unittest.TestCase):
     def setUp(self):
-        temp = tempfile.TemporaryDirectory(prefix="login-shell-")
-        self.addCleanup(temp.cleanup)
-        self.root = Path(temp.name)
-        source = self.root / "source"
-        (source / ".chezmoitemplates").mkdir(parents=True)
-        shutil.copyfile(SOURCE / ".chezmoitemplates/variant", source / ".chezmoitemplates/variant")
-        (self.root / "home").mkdir()
-        (self.root / "config.toml").write_text("")
+        self.h = ChezmoiHome(self)
+        self.h.copy(".chezmoitemplates/variant")
+        self.root = self.h.root
         self.calls = self.root / "calls"
         self.calls.write_text("")
         # Only stubs and plain utilities: no real dscl or getent answers.
@@ -43,18 +35,12 @@ class LoginShellTest(unittest.TestCase):
         self.stub("chsh", 'echo "chsh $*" >> "$CALLS"; exit "${CHSH_STATUS:-0}"')
 
     def stub(self, name, body):
-        path = self.bin / name
-        path.write_text(f"#!/bin/sh\n{body}\n")
-        path.chmod(0o755)
+        stub(self.bin, name, body)
 
     def render(self, login_shell, variant="helm"):
         self.stub("getent", f'echo "tester:x:1000:1000::/home/tester:{login_shell}"')
-        return subprocess.run(
-            [shutil.which("chezmoi"), "--source", str(self.root / "source"), "--destination", str(self.root / "home"),
-             "--config", str(self.root / "config.toml"),
-             "--override-data", json.dumps({"variant": variant}),
-             "execute-template", (SOURCE / SCRIPT).read_text()],
-            env=dict(os.environ, PATH=str(self.bin)), text=True, capture_output=True, check=True).stdout
+        self.h.env["PATH"] = str(self.bin)
+        return self.h.render((SOURCE / SCRIPT).read_text(), {"variant": variant})
 
     def run_script(self, terminal, **env):
         script = self.root / "login-shell.sh"
@@ -64,16 +50,7 @@ class LoginShellTest(unittest.TestCase):
             result = subprocess.run([shutil.which("sh"), str(script)], env=env, text=True,
                                     capture_output=True, stdin=subprocess.DEVNULL)
             return result.returncode, result.stderr
-        pid, fd = pty.fork()
-        if pid == 0:
-            os.execve(shutil.which("sh"), ["sh", str(script)], env)
-        output = b""
-        try:
-            while chunk := os.read(fd, 4096):
-                output += chunk
-        except OSError:  # EIO at end of output on Linux
-            pass
-        return os.waitstatus_to_exitcode(os.waitpid(pid, 0)[1]), output.decode()
+        return run_on_terminal(script, env)
 
     def test_renders_only_while_the_login_shell_is_not_zsh(self):
         self.assertIn("#!/bin/sh", self.render("/bin/bash"))
