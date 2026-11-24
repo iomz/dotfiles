@@ -25,7 +25,6 @@ set laststatus=2
 set scrolloff=10
 set ignorecase
 set smartcase
-silent! set ambiwidth=double
 silent! set cursorline
 silent! set hlsearch
 silent! set matchtime=1
