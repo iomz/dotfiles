@@ -7,17 +7,28 @@ CAVEMAN_DIR="$HOME/.agents/plugins/caveman"
 CAVEMAN="$CAVEMAN_DIR/src/hooks/caveman-statusline.sh"
 input=$(cat)
 line=$(printf '%s' "$input" | "$STATUSLINE")
-printf '%s' "$line"
 
-# Caveman's own badge for this session's mode, then the deployed version.
+# Caveman's mode for this session, as row 2: [Caveman v4.2.0].
+row=
 if [[ -r $CAVEMAN ]]; then
-  # The badge script reads the session id from the same JSON.
-  caveman=$(printf '%s' "$input" | bash "$CAVEMAN" || true)
-  if [[ -n $caveman ]]; then
-    printf '  %s' "$caveman"
+  # The badge script reads the session id from the same JSON and prints a
+  # colored [CAVEMAN], [ULTRACAVE], [CAVEMAN:COMMIT] and so on.
+  badge=$(printf '%s' "$input" | bash "$CAVEMAN" 2>/dev/null || true)
+  badge=$(printf '%s' "$badge" | sed -e $'s/\033\\[[0-9;]*m//g' -e 's/^\[//' -e 's/\]$//')
+  if [[ $badge =~ ^[A-Z][A-Z:]{0,31}$ ]]; then
+    # Capitalized like the project name: Caveman, Ultracave, Caveman:commit.
+    name=${badge:0:1}$(printf '%s' "${badge:1}" | tr '[:upper:]' '[:lower:]')
     version=$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
       "$CAVEMAN_DIR/.claude-plugin/plugin.json" 2>/dev/null | head -n 1 || true)
-    [[ ! $version =~ ^[0-9A-Za-z.+-]{1,32}$ ]] || printf ' \033[2mv%s\033[0m' "$version"
+    [[ $version =~ ^[0-9A-Za-z.+-]{1,32}$ ]] || version=
+    row=$(printf '\033[38;5;172m[%s%s]\033[0m' "$name" "${version:+ v$version}")
   fi
 fi
-printf '\n'
+
+if [[ -z $row ]]; then
+  printf '%s\n' "$line"
+elif [[ $line == *$'\n'* ]]; then
+  printf '%s\n%s\n%s\n' "${line%%$'\n'*}" "$row" "${line#*$'\n'}"
+else
+  printf '%s\n%s\n' "$line" "$row"
+fi

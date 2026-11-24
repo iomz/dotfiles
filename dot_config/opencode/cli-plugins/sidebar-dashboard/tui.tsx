@@ -46,7 +46,7 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
         <box height={5} flexShrink={0} overflow="hidden">
           <text fg={heading}><b>Session</b></text>
           <text height={1} wrapMode="none" truncate fg={context.data.session.status(props.sessionID) === "running" ? positive : muted}>
-            {context.data.session.status(props.sessionID) === "running" ? "● working" : "○ idle"} · {session()?.agent ?? "build"}
+            {context.data.session.status(props.sessionID) === "running" ? "● working" : "○ idle"} │ {session()?.agent ?? "build"}
           </text>
           <text height={1} fg={muted} wrapMode="none" truncate>{modelName()}</text>
           <text height={1} fg={muted} wrapMode="none" truncate>{session()?.model?.variant ?? "Default variant"}</text>
@@ -57,14 +57,14 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
         <box height={2} flexShrink={0} overflow="hidden">
           <text fg={heading}><b>Caveman</b></text>
           <text height={1} wrapMode="none" truncate fg={caveman.active ? positive : critical}>
-            {caveman.active ? `● caveman${caveman.version ? ` · v${caveman.version}` : ""}` : "○ skill missing · just apm-install"}
+            {caveman.active ? `● caveman${caveman.version ? ` │ v${caveman.version}` : ""}` : "○ skill missing │ just apm-install"}
           </text>
         </box>
       </Show>
       <Show when={enabled("tokens")}>
         <box height={5} flexShrink={0} overflow="hidden">
-          <text fg={heading}><b>Tokens · session total</b></text>
-          <text fg={muted}>In {compact(tokens()?.input ?? 0)} · Out {compact(tokens()?.output ?? 0)}</text>
+          <text fg={heading}><b>Tokens │ session total</b></text>
+          <text fg={muted}>In {compact(tokens()?.input ?? 0)} │ Out {compact(tokens()?.output ?? 0)}</text>
           <text fg={muted}>Reasoning {compact(tokens()?.reasoning ?? 0)}</text>
           <text fg={muted}>Cache read {compact(tokens()?.cache.read ?? 0)}</text>
           <text fg={muted}>Cache write {compact(tokens()?.cache.write ?? 0)}</text>
@@ -72,15 +72,15 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
       </Show>
       <Show when={enabled("activity")}>
         <box height={3} flexShrink={0} overflow="hidden">
-          <text fg={heading}><b>Activity · loaded transcript</b></text>
-          <text height={1} wrapMode="none" truncate fg={muted}>{work().prompts} prompts · {work().completed} tools done</text>
+          <text fg={heading}><b>Activity │ loaded transcript</b></text>
+          <text height={1} wrapMode="none" truncate fg={muted}>{work().prompts} prompts │ {work().completed} tools done</text>
           <text fg={work().running > 0 ? positive : muted}>{work().running} tools active</text>
         </box>
       </Show>
       <Show when={enabled("workers")}>
         <box height={2} flexShrink={0} overflow="hidden">
           <text fg={heading}><b>Workers</b></text>
-          <text height={1} wrapMode="none" truncate fg={muted}>{children().filter(child => context.data.session.status(child.id) === "running").length} subagents · {shells().length} shells active</text>
+          <text height={1} wrapMode="none" truncate fg={muted}>{children().filter(child => context.data.session.status(child.id) === "running").length} subagents │ {shells().length} shells active</text>
         </box>
       </Show>
     </box>
