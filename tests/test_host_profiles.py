@@ -15,7 +15,7 @@ MISE_FILES = (".config/mise/config.toml", ".config/zsh/rc.d/04-mise.zsh",
 DEV_SHELL_FILES = (".config/zsh/rc.d/02-plugin-manager.zsh", ".config/zsh/rc.d/05-zeno.zsh")
 MISE_SCRIPTS = ("mise-install.sh", "install-opencode-codex-quota-sidebar.sh",
                 "install-opencode-dir-tree-bottom.sh")
-SKILLS = ("cognitive-rhythm-writing", "evolve-skill", "gh-coderabbit-resolve",
+SKILLS = ("cognitive-rhythm-writing", "evolve-skill", "gh-pr-flow",
           "japanese-tech-writing", "say-what-it-is")
 GUARD = SOURCE / "run_before_20-guard-agent-skill-links.sh.tmpl"
 
