@@ -1,52 +1,28 @@
 """The Neovim plugin sync script must change whenever the nvim config changes."""
 
-import os
-from pathlib import Path
 import re
-import shutil
-import subprocess
-import tempfile
 import unittest
 
+from chezmoi_home import CHEZMOI, SOURCE, ChezmoiHome
 
-SOURCE = Path(__file__).resolve().parents[1]
-DATA = '''[data]
-variant = "{variant}"
-host = "{host}"
-[data.hosts.devbox]
-groups = ["stem"]
-'''
+EXTRA = '[data.hosts.devbox]\ngroups = ["stem"]\n'
 SCRIPT = "run_onchange_after_nvim-plugin-sync.sh.tmpl"
 
 
-@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
+@unittest.skipUnless(CHEZMOI, "chezmoi required")
 class NvimPluginSyncTest(unittest.TestCase):
     def setUp(self):
-        temp = tempfile.TemporaryDirectory(prefix="chezmoi-nvim-sync-")
-        self.addCleanup(temp.cleanup)
-        root = Path(temp.name)
-        self.source = root / "source"
-        (self.source / "dot_config/nvim/lua").mkdir(parents=True)
-        (self.source / ".chezmoitemplates").mkdir()
-        for name in ("is-stem", "tool-selected", "brew-path", "variant"):
-            shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
-                            self.source / ".chezmoitemplates" / name)
-        shutil.copyfile(SOURCE / SCRIPT, self.source / SCRIPT)
-        (self.source / "dot_config/nvim/init.lua").write_text("require('config')\n")
-        (self.source / "dot_config/nvim/lua/config.lua").write_text("return {}\n")
-        self.config = root / "config.toml"
-        self.config.write_text(DATA.format(variant="helm", host="devbox"))
-        (root / "home").mkdir()  # glob runs relative to the destination
-        self.command = ["chezmoi", "--source", str(self.source), "--destination",
-                        str(root / "home"), "--config", str(root / "config.toml"),
-                        "--persistent-state", str(root / "state")]
-        self.env = dict(os.environ, HOME=str(root))
+        self.h = ChezmoiHome(self)
+        self.h.copy(*(f".chezmoitemplates/{name}"
+                      for name in ("is-stem", "tool-selected", "brew-path", "variant")))
+        nvim = self.h.source / "dot_config/nvim"
+        (nvim / "lua").mkdir(parents=True)
+        (nvim / "init.lua").write_text("require('config')\n")
+        (nvim / "lua/config.lua").write_text("return {}\n")
+        self.h.configure("devbox", extra=EXTRA)
 
-    def render(self, *extra):
-        script = (self.source / SCRIPT).read_text()
-        result = subprocess.run(self.command + [*extra, "execute-template", script],
-                                env=self.env, text=True, capture_output=True, check=True)
-        return result.stdout
+    def render(self):
+        return self.h.render((SOURCE / SCRIPT).read_text())
 
     def trigger(self):
         return re.search(r"chezmoi trigger: ([0-9a-f]{64})", self.render()).group(1)
@@ -54,21 +30,18 @@ class NvimPluginSyncTest(unittest.TestCase):
     def test_trigger_follows_content_and_names(self):
         before = self.trigger()
         self.assertEqual(self.trigger(), before)
-        config = self.source / "dot_config/nvim/lua/config.lua"
+        config = self.h.source / "dot_config/nvim/lua/config.lua"
         config.write_text("return { changed = true }\n")
         changed = self.trigger()
         self.assertNotEqual(changed, before)
         config.rename(config.with_name("renamed.lua"))
         self.assertNotEqual(self.trigger(), changed)
 
-    def test_cloud_variant_renders_nothing(self):
-        # Config data rather than --override-data, which needs chezmoi >= 2.66.
-        self.config.write_text(DATA.format(variant="agent-sandbox", host="devbox"))
-        self.assertEqual(self.render().strip(), "")
-
-    def test_non_dev_host_renders_nothing(self):
-        self.config.write_text(DATA.format(variant="helm", host="tinybox"))
-        self.assertEqual(self.render().strip(), "")
+    def test_renders_nothing_off_stem_or_in_a_sandbox(self):
+        for host, variant in (("tinybox", "helm"), ("devbox", "agent-sandbox")):
+            with self.subTest(host=host, variant=variant):
+                self.h.configure(host, variant, extra=EXTRA)
+                self.assertEqual(self.render().strip(), "")
 
 
 if __name__ == "__main__":

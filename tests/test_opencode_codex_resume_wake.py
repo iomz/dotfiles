@@ -1,6 +1,5 @@
 """Wake script checks with an isolated state directory and a fake opencode CLI."""
 
-import os
 from pathlib import Path
 import subprocess
 import tempfile

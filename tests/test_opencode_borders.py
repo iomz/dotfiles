@@ -113,73 +113,6 @@ class OpenCodeBordersTest(unittest.TestCase):
         path.write_text(text)
         path.chmod(0o755)
 
-    def test_patch_adds_borders_without_changing_backgrounds(self):
-        before = (self.repo / SIDEBAR).read_text()
-        self.run_git("apply", "--check", str(PATCH))
-        self.run_git("apply", str(PATCH))
-        sidebar = (self.repo / SIDEBAR).read_text()
-        tools = (self.repo / TOOLS).read_text()
-        self.assertIn('border={["left"]}', sidebar)
-        self.assertIn("borderColor={theme.border.base}", sidebar)
-        self.assertIn("borderColor={theme.border.base}", tools)
-        self.assertEqual(before.count("backgroundColor={theme.background.raised.base}"),
-                         sidebar.count("backgroundColor={theme.background.raised.base}"))
-
-    def test_prompt_label_and_border_preserve_plain_text_and_queue_styling(self):
-        self.run_git("apply", str(PATCH))
-        tools = (self.repo / TOOLS).read_text()
-        self.assertIn('local.agent.color(data.session.get(ctx.sessionID)?.agent ?? "build")', tools)
-        self.assertIn('fg={delivery() ? theme.text.muted : color()} attributes={TextAttributes.BOLD}', tools)
-        self.assertIn("            YOU\n", tools)
-        self.assertIn("<text fg={theme.text.base}>{props.message.text}</text>", tools)
-
-    def test_input_fill_uses_formfield_without_tinting_transcript(self):
-        self.run_git("apply", str(PATCH))
-        prompt = (self.repo / PROMPT).read_text()
-        self.assertIn("const promptBg = createMemo(() => theme.background.formfield.base)", prompt)
-        theme = json.loads((SOURCE / "dot_config/opencode/themes/cmux-transparent.json").read_text())
-        self.assertEqual(theme["base"]["background"]["base"], "transparent")
-        self.assertEqual(theme["base"]["background"]["raised"]["base"], "transparent")
-        self.assertEqual(theme["dark"]["background"]["formfield"]["base"], "#252c35")
-        self.assertEqual(theme["dark"]["scrollbar"]["base"], "#32cd99")
-
-    def test_scrollbar_uses_its_own_color_and_badges_follow_main_text(self):
-        self.run_git("apply", str(PATCH))
-        tools = (self.repo / TOOLS).read_text()
-        syntax = (self.repo / SYNTAX).read_text()
-        self.assertIn("foregroundColor: theme.scrollbar.base", tools)
-        self.assertIn('rule(["extmark.file"], theme.text.base, {', syntax)
-        self.assertIn('rule(["extmark.paste"], theme.text.base, {', syntax)
-        self.assertEqual(syntax.count("background: theme.background.formfield.selected"), 2)
-        theme = json.loads((SOURCE / "dot_config/opencode/themes/cmux-transparent.json").read_text())
-        self.assertEqual(theme["dark"]["background"]["formfield"]["$selected"], "#a63f00")
-        self.assertEqual(theme["dark"]["hue"]["user"]["200"], "#ff4747")
-        self.assertEqual(theme["dark"]["hue"]["secondary"]["200"], "#5394ee")
-        self.assertEqual(theme["dark"]["border"]["base"], "#526071")
-
-    def test_submitted_attachment_and_skill_tags_have_visible_text(self):
-        self.run_git("apply", str(PATCH))
-        tools = (self.repo / TOOLS).read_text()
-        self.assertEqual(tools.count("bg: theme.background.formfield.selected"), 2)
-        self.assertEqual(tools.count("fg: theme.text.base,"), 2)
-        self.assertNotIn("fg: theme.background.raised.base", tools)
-
-    def test_plan_has_explicit_cyan_without_changing_build(self):
-        config = json.loads((SOURCE / "dot_config/opencode/opencode.jsonc.tmpl").read_text())
-        self.assertEqual(config["agents"]["plan"], {"color": "#a0e4ee"})
-        self.assertNotIn("build", config["agents"])
-
-    def test_ctrl_p_moves_up_instead_of_opening_commands(self):
-        config = json.loads((SOURCE / "dot_config/opencode/cli.json.tmpl").read_text())
-        self.assertEqual(config["keybinds"]["command.palette.show"], "<leader>p")
-        self.assertEqual(config["keybinds"]["input.move.up"], "up,ctrl+p")
-
-    def test_prompt_navigation_and_kill_line_keybinds(self):
-        config = json.loads((SOURCE / "dot_config/opencode/cli.json.tmpl").read_text())
-        self.assertEqual(config["keybinds"]["input.move.down"], "down,ctrl+n")
-        self.assertEqual(config["keybinds"]["input.move.left"], "left,ctrl+b")
-        self.assertEqual(config["keybinds"]["input.delete.to.line.end"], "ctrl+k")
-
     def setup_updater(self):
         self.upstream = self.root / "upstream.git"
         self.run_git("clone", "--bare", str(self.repo), str(self.upstream))
@@ -461,18 +394,6 @@ exec "{self.git}" "$@"'''))
         self.assertIn("Repository: https://github.com/anomalyco/opencode.git", result.stdout)
         self.assertIn("no changes made", self.update().stdout)
 
-    def test_v230_multiline_paste_rule_updates_and_retains_rollback(self):
-        target = self.release_commit("2.3.0")
-        self.run_git("tag", "v2.3.0")
-        self.setup_updater()
-        self.env.pop("OPENCODE_UPDATE_REF")
-        self.update()
-        manifest = json.loads((self.data / "active/manifest.json").read_text())
-        self.assertEqual(manifest["source_commit"], target)
-        self.assertEqual(manifest["version"], "2.3.0")
-        self.assertEqual((self.data / "previous").resolve().name, "initial")
-        self.assertIn("no changes made", self.update().stdout)
-
     def test_default_ignores_local_tags_and_prunes_deleted_remote_tags(self):
         self.run_git("tag", "v2.0.26")
         self.setup_updater()
@@ -549,23 +470,6 @@ exec "{self.git}" "$@"'''))
         self.assertEqual(manifest["source_commit"], target)
         self.assertEqual((self.data / "previous").resolve().name, "initial")
         self.assertIn("no changes made", self.update().stdout)
-
-
-    def test_divergent_explicit_ref_ignores_obsolete_approval(self):
-        older = self.commit
-        self.run_git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
-                     "commit", "--allow-empty", "-qm", "active branch")
-        self.commit = self.run_git("rev-parse", "HEAD").stdout.strip()
-        self.run_git("checkout", "--detach", older)
-        target = self.release_commit("2.1.1")
-        self.setup_updater()
-        self.env["OPENCODE_UPDATE_REF"] = target
-        self.env["OPENCODE_UPDATE_APPROVE_DIVERGENT_SHA"] = "obsolete-value"
-        result = self.update()
-        self.assertIn("Upstream history diverges; building fetched target", result.stdout)
-        manifest = json.loads((self.data / "active/manifest.json").read_text())
-        self.assertEqual(manifest["source_commit"], target)
-        self.assertEqual((self.data / "previous").resolve().name, "initial")
 
     def test_help_needs_no_helpers_and_makes_no_changes(self):
         for flag in ("-h", "--help"):

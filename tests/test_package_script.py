@@ -1,16 +1,12 @@
 """Run the rendered Linux package script against stub package managers."""
 
-import json
 import os
-from pathlib import Path
-import pty
 import shutil
 import subprocess
-import tempfile
 import unittest
 
+from chezmoi_home import CHEZMOI, SOURCE, ChezmoiHome, run_on_terminal, stub
 
-SOURCE = Path(__file__).resolve().parents[1]
 SCRIPT = "run_once_install-packages.sh.tmpl"
 DATA = {
     "chezmoi": {"os": "linux", "arch": "amd64"},
@@ -30,16 +26,10 @@ class PackageScriptCase(unittest.TestCase):
     data = DATA
 
     def setUp(self):
-        temp = tempfile.TemporaryDirectory(prefix="package-script-")
-        self.addCleanup(temp.cleanup)
-        self.root = Path(temp.name)
-        source = self.root / "source"
-        (source / ".chezmoitemplates").mkdir(parents=True)
-        for name in ("tool-selected", "selects-mise", "brew-path"):
-            shutil.copyfile(SOURCE / ".chezmoitemplates" / name,
-                            source / ".chezmoitemplates" / name)
-        (self.root / "home").mkdir()
-        (self.root / "config.toml").write_text("")
+        self.h = ChezmoiHome(self)
+        self.h.copy(*(f".chezmoitemplates/{name}"
+                      for name in ("tool-selected", "selects-mise", "brew-path")))
+        self.root = self.h.root
         self.script = self.root / "install-packages.sh"
         self.render(self.data)
         self.calls = self.root / "calls"
@@ -56,17 +46,10 @@ class PackageScriptCase(unittest.TestCase):
             (self.bin / tool).symlink_to(shutil.which(tool))
 
     def render(self, data):
-        rendered = subprocess.run(
-            ["chezmoi", "--source", str(self.root / "source"), "--destination", str(self.root / "home"),
-             "--config", str(self.root / "config.toml"), "--override-data", json.dumps(data),
-             "execute-template", (SOURCE / SCRIPT).read_text()],
-            env=dict(os.environ, HOME=str(self.root)), text=True, capture_output=True, check=True)
-        self.script.write_text(rendered.stdout)
+        self.script.write_text(self.h.render((SOURCE / SCRIPT).read_text(), data))
 
     def stub(self, name, body="exit 0", directory=None):
-        path = (directory or self.bin) / name
-        path.write_text(f'#!/bin/sh\necho "{name} $*" >> "{self.calls}"\n{body}\n')
-        path.chmod(0o755)
+        stub(directory or self.bin, name, body, self.calls)
 
     def run_script(self, unknown="", **env):
         self.calls.write_text("")
@@ -78,7 +61,7 @@ class PackageScriptCase(unittest.TestCase):
         return installs, result.stderr
 
 
-@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
+@unittest.skipUnless(CHEZMOI, "chezmoi required")
 class LinuxPackageScriptTest(PackageScriptCase):
     def stub_common(self):
         self.stub("sudo")
@@ -132,15 +115,8 @@ class LinuxPackageScriptTest(PackageScriptCase):
         self.stub("sudo", '[ "$1" != -n ]')
         self.stub("apt-get")
         self.calls.write_text("")
-        pid, fd = pty.fork()
-        if pid == 0:
-            os.execve(shutil.which("sh"), ["sh", str(self.script)], dict(os.environ, PATH=str(self.bin)))
-        try:
-            while os.read(fd, 4096):
-                pass
-        except OSError:  # EIO at end of output on Linux
-            pass
-        self.assertEqual(os.waitpid(pid, 0)[1], 0)
+        status, output = run_on_terminal(self.script, dict(os.environ, PATH=str(self.bin)))
+        self.assertEqual(status, 0, output)
         self.assertIn("sudo apt install -y pkg-a pkg-b", self.calls.read_text())
 
     def test_brew_outside_path_is_found(self):
@@ -202,7 +178,7 @@ class LinuxPackageScriptTest(PackageScriptCase):
         self.assertIn("pkg-a pkg-b brew-c pkg-have", stderr)
 
 
-@unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
+@unittest.skipUnless(CHEZMOI, "chezmoi required")
 class DarwinPackageScriptTest(PackageScriptCase):
     data = {
         "chezmoi": {"os": "darwin", "arch": "arm64"},

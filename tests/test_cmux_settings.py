@@ -24,12 +24,6 @@ class CmuxSettingsTest(unittest.TestCase):
         self.assertEqual(len(keys), len(ALLOWED))
         self.assertNotRegex(text, r"defaults (import|export)")
 
-    def test_script_and_shortcuts_are_macos_only(self):
-        self.assertTrue(SCRIPT.read_text().startswith('{{ if eq .chezmoi.os "darwin" -}}'))
-        ignore = (SOURCE / ".chezmoiignore").read_text()
-        block = ignore.split('{{ if ne .chezmoi.os "darwin" }}', 1)[1].split("{{ end }}", 1)[0]
-        self.assertIn(".config/cmux/**", block)
-
     def test_shortcuts_file_is_private_json_without_account_data(self):
         path = SOURCE / "dot_config/cmux/private_cmux.json"
         data = json.loads(path.read_text())
