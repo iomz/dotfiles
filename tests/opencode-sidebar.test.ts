@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import type { ModelInfo, SessionMessageInfo } from "@opencode/client"
-import { activity, colorOption, compact, contextUsage, meter } from "../dot_config/opencode/cli-plugins/sidebar-dashboard/metrics"
+import { activity, cavemanStatus, colorOption, compact, contextUsage, meter } from "../dot_config/opencode/cli-plugins/sidebar-dashboard/metrics"
 import { quotaBar, quotaBand, styleColor } from "../dot_config/opencode/cli-plugins/codex-quota-sidebar/style"
 import { treeContext } from "../dot_config/opencode/cli-plugins/dir-tree-bottom/context.js"
 
@@ -71,5 +71,21 @@ describe("sidebar metrics", () => {
     expect(quotaBand(11)).toBe("warning")
     expect(quotaBand(25)).toBe("warning")
     expect(quotaBand(26)).toBe("positive")
+  })
+
+  test("caveman status needs the skill and shows only a well-formed plugin version", () => {
+    const files: Record<string, string> = {
+      "/h/.agents/skills/caveman/SKILL.md": "---\nname: caveman\n---\nTerse.\n",
+      "/h/.agents/plugins/caveman/.claude-plugin/plugin.json": '{"name":"caveman","version":"4.2.0"}',
+    }
+    const read = (file: string) => {
+      if (!(file in files)) throw new Error("ENOENT")
+      return files[file]
+    }
+    expect(cavemanStatus("/h", read)).toEqual({ active: true, version: "4.2.0" })
+    files["/h/.agents/plugins/caveman/.claude-plugin/plugin.json"] = '{"version":"\\u001b[31m"}'
+    expect(cavemanStatus("/h", read)).toEqual({ active: true, version: undefined })
+    delete files["/h/.agents/skills/caveman/SKILL.md"]
+    expect(cavemanStatus("/h", read).active).toBe(false)
   })
 })

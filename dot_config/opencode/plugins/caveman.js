@@ -20,7 +20,7 @@ export default {
     const hook = await ctx.session.hook("context", (event) => {
       event.system.push({
         type: "text",
-        text: `CAVEMAN MODE ACTIVE — level: full\n\n${body}`,
+        text: `CAVEMAN MODE ACTIVE — mode: caveman\n\n${body}`,
       })
     })
     return () => hook.dispose()

@@ -61,12 +61,12 @@ Build keeps a red accent and Plan a cyan one.
 
 | Panel | Shows |
 | --- | --- |
-| Dashboard (personal) | context meter, agent and model, estimated cost, tokens, activity, running subagents and background shells |
+| Dashboard (personal) | context meter, agent and model, estimated cost, Caveman state and version, tokens, activity, running subagents and background shells |
 | Usage | Codex plan and quota bars, amber below 26 % and red below 11 % remaining |
 | `opencode-git-plugin@0.3.0` | changed files and diff preview, refreshed every 8 s; `Ctrl+X`, `Shift+G` focuses it, arrows stage, `c` commits |
 | `opencode-dir-tree-tui@1.0.6` | project tree with Git badges, last and collapsed at startup; `/dirtree-sidebar` configures it |
 
-- Dashboard panels (`context`, `usage`, `session`, `tokens`, `activity`, `workers`) and colors are set in the plugin's `cli.json` options.
+- Dashboard panels (`context`, `usage`, `session`, `caveman`, `tokens`, `activity`, `workers`) and colors are set in the plugin's `cli.json` options.
   The dashboard replaces the stock context section; when disabling it, also remove `-opencode.sidebar.context`.
 - The dashboard reads OpenCode's cached data: no model calls, telemetry or extra login.
   Its footer shows the running TUI's version, so restart the TUI after an update.
@@ -78,7 +78,7 @@ With the standard **Sign in with ChatGPT** login it shows **Using ChatGPT plan**
 For percentages and quota recovery, choose **Codex device code (legacy)** or **Codex browser (legacy)** under `/connect` → OpenAI; nothing switches the login for you.
 
 The Caveman server plugin reads `~/.agents/skills/caveman/SKILL.md`, so a new host needs `just apm-install` (and `just skills-pull`) and a `/reload`.
-A missing Caveman skill shows as a plugin error.
+A missing Caveman skill shows as a plugin error and as `skill missing` in the dashboard's Caveman panel.
 
 ## Codex quota recovery
 

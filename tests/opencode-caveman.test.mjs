@@ -15,7 +15,7 @@ test("caveman injects full-mode instructions without frontmatter and disposes ho
   const event = { system: [] }
   listener(event)
   assert.equal(event.system.length, 1)
-  assert.equal(event.system[0].text, "CAVEMAN MODE ACTIVE — level: full\n\nKeep technical terms exact.\n")
+  assert.equal(event.system[0].text, "CAVEMAN MODE ACTIVE — mode: caveman\n\nKeep technical terms exact.\n")
   cleanup()
   assert.equal(disposed, true)
 })
