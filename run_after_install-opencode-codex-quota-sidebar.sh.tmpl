@@ -1,17 +1,16 @@
-{{ if eq (includeTemplate "tool-selected" (dict "tool" .tools.node "data" .)) "true" -}}
+{{- $lockHash := include "dot_config/opencode/cli-plugins/codex-quota-sidebar/package-lock.json" | sha256sum -}}
+{{- $pluginDir := joinPath .chezmoi.destDir ".config/opencode/cli-plugins/codex-quota-sidebar" -}}
+{{- $stamp := joinPath $pluginDir "node_modules/.chezmoi-lock-sha256" -}}
+{{- /* Installed and matching the lock: render nothing, so chezmoi neither runs
+     the script nor lists it. A later loss of node_modules renders it again. */ -}}
+{{- $current := and (stat $stamp) (stat (joinPath $pluginDir "node_modules/zod/package.json")) (eq (include $stamp | trim) $lockHash) -}}
+{{ if and (eq (includeTemplate "tool-selected" (dict "tool" .tools.node "data" .)) "true") (not $current) -}}
 #!/bin/sh
 set -eu
 
-# Check every apply: cleanup can remove dependencies without changing this script.
-lock_hash="{{ include "dot_config/opencode/cli-plugins/codex-quota-sidebar/package-lock.json" | sha256sum }}"
-
-plugin_dir="{{ .chezmoi.destDir }}/.config/opencode/cli-plugins/codex-quota-sidebar"
+lock_hash="{{ $lockHash }}"
+plugin_dir="{{ $pluginDir }}"
 stamp="$plugin_dir/node_modules/.chezmoi-lock-sha256"
-if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$lock_hash" ] && \
-    [ -f "$plugin_dir/node_modules/zod/package.json" ]; then
-    exit 0
-fi
-
 if ! command -v mise >/dev/null 2>&1; then
     echo "mise is required to install codex-quota-sidebar dependencies" >&2
     exit 1

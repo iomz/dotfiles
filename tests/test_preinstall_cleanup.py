@@ -331,6 +331,8 @@ esac
         self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 2)
         self.chezmoi("apply")
         self.assertEqual(len((self.home / "npm-calls").read_text().splitlines()), 2)
+        # Current dependencies render the installers empty, so status lists nothing.
+        self.assertNotIn("install-opencode", self.chezmoi("status").stdout)
         quota = self.home / ".config/opencode/cli-plugins/codex-quota-sidebar"
         shutil.move(quota / "node_modules", self.root / "lost-node-modules")
         self.put("fail-npm")
