@@ -35,6 +35,8 @@ silent! set smarttab
 silent! set title
 silent! syntax on
 silent! filetype plugin indent on
+" habamax ships with Vim 9; older Vims keep the default colors.
+silent! colorscheme habamax
 
 " Keys
 nnoremap Y y$
