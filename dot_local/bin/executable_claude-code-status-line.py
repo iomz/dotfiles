@@ -25,7 +25,9 @@ Latest version: https://github.com/benabraham/claude-code-status-line
 
 # Local adaptation of upstream v5.6.1 at 7888bbe7d368fb150a3b46f48610c9cae135cc49:
 # preserve native rate_limits without OAuth fallback, skip update polling when
-# its segment is disabled, and label pacing gauges separately from quota left.
+# its segment is disabled, label pacing gauges separately from quota left, and
+# make the gap between segments (SL_SEGMENT_GAP) and the model's colon
+# (model:colon=0) configurable.
 
 import json
 import os
@@ -70,6 +72,8 @@ STATUSLINE_CACHE_DURATION = _env_int("STATUSLINE_CACHE_DURATION", 86400)  # 24 h
 SHOW_STATUSLINE_UPDATE = _env_str("SHOW_STATUSLINE_UPDATE", "1") == "1"
 THEME_FILE = _env_str("THEME_FILE", os.path.expanduser("~/.claude/claude-code-theme.toml"))
 DUMP = _env_str("DUMP", "")
+# Whitespace in front of each segment after the first.
+SEGMENT_GAP = _env_str("SEGMENT_GAP", "   ")
 DUMP_PATH = "/tmp/claude-statusline-dump.jsonl"
 
 
@@ -106,6 +110,7 @@ USAGE_GAUGE_SEGMENTS = ("usage_5hour", "usage_weekly", "usage_fable")
 CONTEXT_SEGMENTS = frozenset(("progress_bar", "percentage", "tokens"))
 
 SEGMENT_DEFAULTS = {
+    "model": {"colon": "1"},
     "progress_bar": {"width": "12"},
     "directory": {"basename_only": "0"},
     "added_dirs": {"basename_only": "0", "separator": " • "},
@@ -1388,7 +1393,7 @@ def _format_burndown(seconds_to_depletion, seconds_early, seconds_until_end, ver
 def format_usage_indicators(usage_data):
     """Format usage indicators, returning dict of {segment_name: rendered_string}."""
     if usage_data is None:
-        na_text = f"   {text_color('na')}usage: N/A"
+        na_text = f"{SEGMENT_GAP}{text_color('na')}usage: N/A"
         return {"usage_5hour": na_text, "usage_weekly": "", "usage_fable": ""}
     if not usage_data:
         return {"usage_5hour": "", "usage_weekly": "", "usage_fable": ""}
@@ -1549,7 +1554,7 @@ def format_usage_indicators(usage_data):
             window_label = ""
         quota_color = text_color("percent")
         reset_color = text_color("numbers")
-        results[segment_name] = f"   {window_label} {label_part}{quota_color}{remaining_pct}%{RESET} {reset_color}→ {reset_label}"
+        results[segment_name] = f"{SEGMENT_GAP}{window_label} {label_part}{quota_color}{remaining_pct}%{RESET} {reset_color}→ {reset_label}"
 
     for seg in USAGE_GAUGE_SEGMENTS:
         if seg not in results:
@@ -1578,7 +1583,8 @@ def _render_model(ctx, opts):
             label = f"{label} {SHORT_EFFORT.get(level, level[0].upper())}"
         else:
             label = f"{label} {level}"
-    return f"{text_color('percent')}{label}:{RESET}"
+    colon = ":" if opts.get("colon", "1") == "1" else ""
+    return f"{text_color('percent')}{label}{colon}{RESET}"
 
 
 def _render_progress_bar(ctx, opts):
@@ -1605,7 +1611,7 @@ def _render_directory(ctx, opts):
             cwd_short = "~" + cwd[len(home) :]
         else:
             cwd_short = cwd
-    return f"   {text_color('cwd')}{cwd_short}"
+    return f"{SEGMENT_GAP}{text_color('cwd')}{cwd_short}"
 
 
 def _render_added_dirs(ctx, opts):
@@ -1624,7 +1630,7 @@ def _render_added_dirs(ctx, opts):
             shortened.append(d)
     separator = opts.get("separator", " • ")
     joined = separator.join(shortened)
-    return f"   {text_color('added_dirs')}{joined}"
+    return f"{SEGMENT_GAP}{text_color('added_dirs')}{joined}"
 
 
 def _render_worktree(ctx, opts):
@@ -1646,7 +1652,7 @@ def _render_worktree(ctx, opts):
     if not parts:
         return ""
     display = " ".join(parts)
-    return f"   {BOLD}{text_color('worktree')}{{{display}}}"
+    return f"{SEGMENT_GAP}{BOLD}{text_color('worktree')}{{{display}}}"
 
 
 def _render_git_branch(ctx, opts):
@@ -1658,7 +1664,7 @@ def _render_git_branch(ctx, opts):
         return ""
     if opts.get("hide_default") == "1" and git_branch in ("main", "master"):
         return ""
-    return f"   {BOLD}{text_color('git')}[{git_branch}]"
+    return f"{SEGMENT_GAP}{BOLD}{text_color('git')}[{git_branch}]"
 
 
 def _render_git_status(ctx, opts):
@@ -1728,7 +1734,7 @@ def _render_usage_burndown(ctx, opts):
         return ""
     color = ctx.get("usage_weekly_burndown_color", "")
     reset = RESET
-    return f"   {color}{burndown}{reset}"
+    return f"{SEGMENT_GAP}{color}{burndown}{reset}"
 
 
 def _render_update(ctx, opts):
@@ -1742,15 +1748,15 @@ def _render_update(ctx, opts):
 
     if source == "npm":
         # Standard npm source - simple message
-        return f"   {BOLD}{color}{latest} available! "
+        return f"{SEGMENT_GAP}{BOLD}{color}{latest} available! "
     if source == "custom":
         # Custom command succeeded - show custom source label
-        return f"   {BOLD}{color}{latest} available ({UPDATE_VERSION_SOURCE})! "
+        return f"{SEGMENT_GAP}{BOLD}{color}{latest} available ({UPDATE_VERSION_SOURCE})! "
     if source == "npm_fallback":
         # Custom command failed, fell back to npm
-        return f"   {BOLD}{color}{latest} available from NPM! Custom source failed. "
+        return f"{SEGMENT_GAP}{BOLD}{color}{latest} available from NPM! Custom source failed. "
     # Unknown source - fallback to simple message
-    return f"   {BOLD}{color}{latest} available! "
+    return f"{SEGMENT_GAP}{BOLD}{color}{latest} available! "
 
 
 def _render_new_line(ctx, opts):

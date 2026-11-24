@@ -34,15 +34,25 @@ if [[ -r $CAVEMAN ]]; then
   fi
 fi
 
-# Split SL_SEGMENTS after `model`, the segment the badge follows; without a
-# model segment the badge leads the row.
+# Split SL_SEGMENTS after the model segment (with or without options), which
+# the badge follows; without a model segment the badge leads the row.
 segments=${SL_SEGMENTS:-}
+gap=${SL_SEGMENT_GAP-   }
+before= after= found=
+for segment in $segments; do
+  if [[ -n $found ]]; then
+    after+="${after:+ }$segment"
+  else
+    before+="${before:+ }$segment"
+    [[ $segment != model && $segment != model:* ]] || found=1
+  fi
+done
+# Drop the whitespace a segment renders in front of itself, after any colors.
+trim() { printf '%s' "$1" | sed -E $'1s/^((\033\\[[0-9;]*m)*)[[:space:]]+/\\1/'; }
+
 if [[ -z $row ]]; then
   render "$segments"
-elif [[ " $segments " == *" model "* ]]; then
-  before=${segments%%model*}model
-  after=${segments#*model}
-  after=${after# }
+elif [[ -n $found ]]; then
   first=$(render "$before")
   # Extra rows such as the update notice stay below the status row.
   extra=
@@ -53,11 +63,9 @@ elif [[ " $segments " == *" model "* ]]; then
   rest=
   # The first call already printed any update notice.
   [[ -z $after ]] || rest=$(SL_SHOW_STATUSLINE_UPDATE=0 render "$after")
-  rest=${rest%%$'\n'*}
-  rest=${rest#"${rest%%[! ]*}"}
-  printf '%s %s%s\n' "$first" "$row" "${rest:+  $rest}"
+  rest=$(trim "${rest%%$'\n'*}")
+  printf '%s%s%s%s\n' "$first" "$gap" "$row" "${rest:+$gap$rest}"
   [[ -z $extra ]] || printf '%s\n' "$extra"
 else
-  line=$(render "$segments")
-  printf '%s  %s\n' "$row" "${line#"${line%%[! ]*}"}"
+  printf '%s%s%s\n' "$row" "$gap" "$(trim "$(render "$segments")")"
 fi
