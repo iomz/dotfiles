@@ -1,7 +1,6 @@
 {{ if eq .chezmoi.os "linux" -}}
 # Created by chezmoi when missing, then left to this host.
-# The pre-install sweep moves the distribution's copy away, and bash login
-# shells reach ~/.bashrc only through this file.
+# Bash login shells reach ~/.bashrc only through this file.
 if [ -n "${BASH_VERSION-}" ] && [ -f "$HOME/.bashrc" ]; then
     . "$HOME/.bashrc"
 fi
