@@ -73,6 +73,8 @@ class ClaudeStatusLineTest(unittest.TestCase):
         self.settings.symlink_to(target)
         self.assertEqual(self.run_script()["model"], "opus")
         self.assertTrue(self.settings.is_symlink())
+        self.assertEqual(json.loads(target.read_text())["statusLine"]["command"],
+                         f"{self.home}/.local/bin/claude-code-status-line")
         self.assertEqual(sorted(p.name for p in target.parent.iterdir()), ["settings.json"])
 
 
