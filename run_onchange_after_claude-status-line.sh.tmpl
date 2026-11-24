@@ -1,0 +1,25 @@
+{{ if eq (includeTemplate "is-stem" .) "true" -}}
+#!/bin/sh
+# Points Claude Code's status line at the managed wrapper, which holds the
+# layout. Only the statusLine keys are written: APM and Claude Code own the
+# rest of settings.json, so the file itself stays out of chezmoi.
+# Runs again whenever this script changes.
+set -eu
+
+settings="$HOME/.claude/settings.json"
+command="$HOME/.local/bin/claude-code-status-line"
+if ! command -v jq >/dev/null 2>&1; then
+    echo "claude-status-line: jq is required to edit $settings" >&2
+    exit 1
+fi
+
+mkdir -p "$HOME/.claude"
+[ -s "$settings" ] || printf '{}\n' > "$settings"
+tmp=$(mktemp "$settings.XXXXXX")
+trap 'rm -f "$tmp"' EXIT
+jq --arg command "$command" \
+    '.statusLine.type = "command" | .statusLine.command = $command' "$settings" > "$tmp"
+# Copy back instead of moving, so the file keeps its mode.
+cat "$tmp" > "$settings"
+echo "claude-status-line: $settings uses $command"
+{{ end -}}
