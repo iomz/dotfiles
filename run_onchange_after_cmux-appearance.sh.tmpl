@@ -1,0 +1,27 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+# cmux appearance on every Mac: an allowlist of keys from the com.cmuxterm.app
+# preferences. The domain also holds analytics, auth, telemetry and browser
+# profile entries, so never export it whole.
+# Runs again whenever this list changes. Writing through defaults works whether
+# or not cmux is installed or running; an open cmux window may need a restart.
+set -eu
+
+domain=com.cmuxterm.app
+defaults write "$domain" appearanceMode -string dark
+defaults write "$domain" appIconMode -string dark
+# cmux stores this version alongside the sidebar settings below.
+defaults write "$domain" sidebarAppearanceDefaultsVersion -int 1
+defaults write "$domain" sidebarPreset -string nativeSidebar
+defaults write "$domain" sidebarMaterial -string sidebar
+defaults write "$domain" sidebarBlendMode -string withinWindow
+defaults write "$domain" sidebarState -string followWindow
+defaults write "$domain" sidebarTintHex -string '#000000'
+defaults write "$domain" sidebarTintOpacity -float 0.18
+defaults write "$domain" sidebarBlurOpacity -float 1
+defaults write "$domain" sidebarCornerRadius -float 0
+defaults write "$domain" rightSidebar.mode -string files
+defaults write "$domain" confirmQuit -string never
+defaults write "$domain" warnBeforeQuitShortcut -bool false
+echo "cmux-appearance: settings written"
+{{ end -}}

@@ -277,5 +277,6 @@ Use `chezmoi add` for new files.
 - [Neovim and Vim](docs/neovim.md): editor selection, layout, plugin sync
 - [OpenCode](docs/opencode.md): build and updates, theme, sidebar, quota recovery
 
-Not managed here: WakaTime's API key (`wakatime --api-key` per host) and terminal font selection.
-On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF once.
+Not managed here: WakaTime's API key (`wakatime --api-key` per host).
+On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF once, and the Ghostty config, which cmux also reads, selects it.
+cmux's own appearance comes from an allowlist in `run_onchange_after_cmux-appearance.sh.tmpl` and its shortcuts from `~/.config/cmux/cmux.json`; its other preferences hold analytics and account entries and stay local.
