@@ -6,10 +6,18 @@ STATUSLINE="$HOME/.local/bin/claude-code-status-line.py"
 CAVEMAN_DIR="$HOME/.agents/plugins/caveman"
 CAVEMAN="$CAVEMAN_DIR/src/hooks/caveman-statusline.sh"
 input=$(cat)
-line=$(printf '%s' "$input" | "$STATUSLINE")
+# Renders the given segments; an empty list keeps the script's defaults.
+render() {
+  if [[ -n $1 ]]; then
+    printf '%s' "$input" | SL_SEGMENTS=$1 "$STATUSLINE"
+  else
+    printf '%s' "$input" | "$STATUSLINE"
+  fi
+}
 
-# Caveman's mode for this session, first on the line so Claude Code never cuts
-# it off: [Caveman v4.2.0]. The row below belongs to Claude Code itself.
+# Caveman's mode for this session, right after the model segment so Claude
+# Code does not cut it off: [Caveman v4.2.0]. The row below belongs to Claude
+# Code itself, so everything stays on one row.
 row=
 if [[ -r $CAVEMAN ]]; then
   # The badge script reads the session id from the same JSON and prints a
@@ -26,4 +34,30 @@ if [[ -r $CAVEMAN ]]; then
   fi
 fi
 
-printf '%s%s\n' "${row:+$row  }" "$line"
+# Split SL_SEGMENTS after `model`, the segment the badge follows; without a
+# model segment the badge leads the row.
+segments=${SL_SEGMENTS:-}
+if [[ -z $row ]]; then
+  render "$segments"
+elif [[ " $segments " == *" model "* ]]; then
+  before=${segments%%model*}model
+  after=${segments#*model}
+  after=${after# }
+  first=$(render "$before")
+  # Extra rows such as the update notice stay below the status row.
+  extra=
+  if [[ $first == *$'\n'* ]]; then
+    extra=${first#*$'\n'}
+    first=${first%%$'\n'*}
+  fi
+  rest=
+  # The first call already printed any update notice.
+  [[ -z $after ]] || rest=$(SL_SHOW_STATUSLINE_UPDATE=0 render "$after")
+  rest=${rest%%$'\n'*}
+  rest=${rest#"${rest%%[! ]*}"}
+  printf '%s %s%s\n' "$first" "$row" "${rest:+  $rest}"
+  [[ -z $extra ]] || printf '%s\n' "$extra"
+else
+  line=$(render "$segments")
+  printf '%s  %s\n' "$row" "${line#"${line%%[! ]*}"}"
+fi
