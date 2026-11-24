@@ -2,7 +2,7 @@
 import { Plugin } from "@opencode/plugin/tui"
 import type { Context } from "@opencode/plugin/tui/context"
 import { createMemo, Show } from "solid-js"
-import { activity, colorOption, compact, contextUsage, meter } from "./metrics"
+import { activity, cavemanStatus, colorOption, compact, contextUsage, meter } from "./metrics"
 import { SidebarQuota } from "../codex-quota-sidebar/tui"
 
 export function SidebarDashboard(props: { context: Context; sessionID: string }) {
@@ -26,6 +26,7 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
   const usageColor = () => (usage()?.percent ?? 0) >= 85 ? critical : (usage()?.percent ?? 0) >= 65 ? warning : positive
   const enabled = (panel: string) => context.options[panel] !== false
   const quotaContext = { ...context, options: { heading, positive, warning, critical } }
+  const caveman = cavemanStatus(process.env.HOME ?? "")
 
   return (
     <box gap={1} flexShrink={0}>
@@ -50,6 +51,14 @@ export function SidebarDashboard(props: { context: Context; sessionID: string })
           <text height={1} fg={muted} wrapMode="none" truncate>{modelName()}</text>
           <text height={1} fg={muted} wrapMode="none" truncate>{session()?.model?.variant ?? "Default variant"}</text>
           <text fg={muted}>API estimate ${context.data.session.cost(props.sessionID).toFixed(3)}</text>
+        </box>
+      </Show>
+      <Show when={enabled("caveman")}>
+        <box height={2} flexShrink={0} overflow="hidden">
+          <text fg={heading}><b>Caveman</b></text>
+          <text height={1} wrapMode="none" truncate fg={caveman.active ? positive : critical}>
+            {caveman.active ? `● caveman${caveman.version ? ` · v${caveman.version}` : ""}` : "○ skill missing · just apm-install"}
+          </text>
         </box>
       </Show>
       <Show when={enabled("tokens")}>

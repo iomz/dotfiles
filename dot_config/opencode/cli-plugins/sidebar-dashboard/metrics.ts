@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import type { ModelInfo, SessionMessageInfo } from "@opencode/client"
 
 export function meter(percent: number, width = 12) {
@@ -33,4 +35,19 @@ export function activity(messages: readonly SessionMessageInfo[]) {
 
 export function colorOption(value: unknown, fallback: string) {
   return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback
+}
+
+// Caveman as the server plugin sees it: active while the APM-deployed skill is
+// readable; the version comes from the native plugin APM deploys beside it.
+export function cavemanStatus(home: string, read = (file: string) => readFileSync(file, "utf8")) {
+  let active = false
+  try {
+    active = read(join(home, ".agents/skills/caveman/SKILL.md")).trim().length > 0
+  } catch {}
+  let version: string | undefined
+  try {
+    const value = JSON.parse(read(join(home, ".agents/plugins/caveman/.claude-plugin/plugin.json"))).version
+    if (typeof value === "string" && /^[0-9A-Za-z.+-]{1,32}$/.test(value)) version = value
+  } catch {}
+  return { active, version }
 }

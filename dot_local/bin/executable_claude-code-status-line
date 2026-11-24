@@ -2,14 +2,22 @@
 set -Eeuo pipefail
 
 STATUSLINE="$HOME/.local/bin/claude-code-status-line.py"
-CAVEMAN="$HOME/.claude/hooks/caveman/src/hooks/caveman-statusline.sh"
+# APM deploys Caveman as a native Claude Code plugin.
+CAVEMAN_DIR="$HOME/.agents/plugins/caveman"
+CAVEMAN="$CAVEMAN_DIR/src/hooks/caveman-statusline.sh"
 input=$(cat)
 line=$(printf '%s' "$input" | "$STATUSLINE")
 printf '%s' "$line"
 
-# Keep the existing Caveman mode/savings indicator alongside upstream output.
+# Caveman's own badge for this session's mode, then the deployed version.
 if [[ -r $CAVEMAN ]]; then
-  caveman=$(bash "$CAVEMAN" || true)
-  [[ -z $caveman ]] || printf '  %s' "$caveman"
+  # The badge script reads the session id from the same JSON.
+  caveman=$(printf '%s' "$input" | bash "$CAVEMAN" || true)
+  if [[ -n $caveman ]]; then
+    printf '  %s' "$caveman"
+    version=$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+      "$CAVEMAN_DIR/.claude-plugin/plugin.json" 2>/dev/null | head -n 1 || true)
+    [[ ! $version =~ ^[0-9A-Za-z.+-]{1,32}$ ]] || printf ' \033[2mv%s\033[0m' "$version"
+  fi
 fi
 printf '\n'
