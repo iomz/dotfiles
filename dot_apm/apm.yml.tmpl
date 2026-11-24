@@ -15,3 +15,6 @@ dependencies:
 {{ end }}
     - JuliusBrussee/caveman#70f4f34e834893ea9af9f4fc6022266bd56d18b1
     - nanaism/yomiyasu#8d5abeebe2dd20c2db005deaddcc50be43c59c0a
+{{ if and (eq (includeTemplate "variant" .) "helm") (eq (includeTemplate "is-stem" .) "true") (eq .chezmoi.os "darwin") }}
+    - microsoft/playwright-cli/skills/playwright-cli#c872a33cec77fa03c28fa7c6d1ad99d15d04ce42
+{{ end }}
