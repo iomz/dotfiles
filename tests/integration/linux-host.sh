@@ -135,7 +135,7 @@ as_user sh -c 'touch ~/.config/zsh/rc.d/99-leftover.zsh ~/.config/zsh/functions/
 check "apply removes unmanaged zsh files" as_user sh -c \
     'chezmoi apply --force --no-tty --exclude scripts && ! test -e ~/.config/zsh/rc.d/99-leftover.zsh && ! test -e ~/.config/zsh/functions/leftover'
 check "chezmoi reports nothing left to apply" as_user sh -c \
-    'status=$(chezmoi status) && test -z "$(printf "%s\n" "$status" | grep -v "^ R install-opencode-")"'
+    'test -z "$(chezmoi status)"'
 
 echo "== installed apt packages: $(dpkg-query -f '.\n' -W | wc -l)"
 exit $status
