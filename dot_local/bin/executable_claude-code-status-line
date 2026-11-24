@@ -8,7 +8,8 @@ CAVEMAN="$CAVEMAN_DIR/src/hooks/caveman-statusline.sh"
 input=$(cat)
 line=$(printf '%s' "$input" | "$STATUSLINE")
 
-# Caveman's mode for this session, as row 2: [Caveman v4.2.0].
+# Caveman's mode for this session, first on the line so Claude Code never cuts
+# it off: [Caveman v4.2.0]. The row below belongs to Claude Code itself.
 row=
 if [[ -r $CAVEMAN ]]; then
   # The badge script reads the session id from the same JSON and prints a
@@ -25,10 +26,4 @@ if [[ -r $CAVEMAN ]]; then
   fi
 fi
 
-if [[ -z $row ]]; then
-  printf '%s\n' "$line"
-elif [[ $line == *$'\n'* ]]; then
-  printf '%s\n%s\n%s\n' "${line%%$'\n'*}" "$row" "${line#*$'\n'}"
-else
-  printf '%s\n%s\n' "$line" "$row"
-fi
+printf '%s%s\n' "${row:+$row  }" "$line"
