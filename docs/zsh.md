@@ -20,7 +20,7 @@
 | | stem | leaf |
 | --- | --- | --- |
 | options, history, completion, key bindings, aliases | ✓ | ✓ |
-| prompt | Starship, else Pure | colored, with the host in its Starship color |
+| prompt | Starship, else Pure | colored, with the time and the host in its Starship color |
 | zinit plugins, zeno, mise activation | ✓ | – |
 | `Ctrl+R` history search | zeno | fzf, else pattern search |
 
