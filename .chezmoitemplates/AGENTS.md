@@ -19,8 +19,9 @@ Do not make external tools implement repository-specific interfaces without a do
 
 # Git and GitHub
 
-Use Conventional Commits unless repository history requires another strict format: lowercase type and scope, imperative subject, no trailing period.
-Use Conventional Commit-style PR titles with lowercase type and optional scope.
+Use Conventional Commits for Git commit messages unless repository history requires another strict format: lowercase type and scope, imperative subject, no trailing period.
+Write GitHub issue titles in plain language that describes the problem or request; do not add Conventional Commit prefixes such as `fix:` or `feat(scope):`.
+Follow the repository's pull request title convention; use a Conventional Commit-style pull request title only if the repository requires it.
 Keep commits small and reviewable; for non-trivial changes, explain what changed, why, architectural impact, and any migration requirements in the body.
 Prefer branch prefixes such as `fix/`, `feat/`, or `chore/`, following user or repository conventions.
 
