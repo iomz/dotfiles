@@ -65,10 +65,6 @@ groups = ["stem"]
 mise = "10.5.2"
 groups = ["stem"]
 
-[tools.fzf]
-mise = "0.75.0"
-groups = ["stem"]
-
 [tools.gh]
 mise = "2.105.0"
 groups = ["stem"]
@@ -167,6 +163,10 @@ groups = ["stem"]
 [tools.eza]
 darwin.brew = "eza"
 linux.apt = "eza"
+
+[tools.fzf]
+darwin.brew = "fzf"
+linux.apt = "fzf"
 
 [tools.gawk]
 darwin.brew = "gawk"
