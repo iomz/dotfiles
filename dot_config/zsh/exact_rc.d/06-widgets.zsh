@@ -162,6 +162,48 @@ fzf-edit-all-widget() {
 }
 zle -N fzf-edit-all-widget
 
+# Replace the command line with a history entry selected by fzf.
+# The query starts with the text left of the cursor.
+# Without fzf, fall back to the built-in pattern search.
+fzf-history-widget() {
+    emulate -L zsh
+    zmodload -i zsh/parameter
+
+    local selected
+    local num
+
+    if ! command -v fzf >/dev/null 2>&1; then
+        zle history-incremental-pattern-search-backward
+        return
+    fi
+
+    zle -I
+
+    # fc prints "<event> <command>"; fzf shows only the command.
+    # Looking the event up in $history keeps multi-line commands intact.
+    selected="$(
+        fc -rl 1 2>/dev/null |
+            fzf \
+                --height '40%' \
+                --reverse \
+                --scheme=history \
+                --with-nth='2..' \
+                --prompt='history> ' \
+                --query="$LBUFFER"
+    )"
+
+    num="${${=selected}[1]}"
+    num="${num%\*}"
+
+    if [[ "$num" == <-> ]] && (( ${+history[$num]} )); then
+        BUFFER="${history[$num]}"
+        CURSOR=${#BUFFER}
+    fi
+
+    zle reset-prompt
+}
+zle -N fzf-history-widget
+
 # url quote magic
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic

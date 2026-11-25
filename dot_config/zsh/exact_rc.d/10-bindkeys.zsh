@@ -76,7 +76,15 @@ fi
 
 # Useful explicit zeno widgets.
 bind_widget_if_exists '^g' zeno-ghq-cd
-bind_widget_if_exists '^r' zeno-history-selection
+
+# History search: zeno on stem, else fzf, else the built-in pattern search.
+if (( ${+widgets[zeno-history-selection]} )); then
+    bindkey '^r' zeno-history-selection
+elif (( ${+commands[fzf]} )); then
+    bindkey '^r' fzf-history-widget
+else
+    bindkey '^r' history-incremental-pattern-search-backward
+fi
 
 # Keep core editing keys on plain zsh defaults.
 # zeno-completion / auto-snippet widgets break redraw on Linux.
