@@ -47,6 +47,11 @@ It must not contain credentials, local state, history, caches, or machine-specif
 - For refactors, classify changes by purpose and keep commits small enough to review.
   If existing dirty changes overlap the refactor, inspect the diff and continue only when the intended ownership is clear.
 
+## Host Names
+
+- Write host names in lowercase, as the hosts spell them: `depot`, `sazanka`, `banshee`.
+  Never capitalize their first letter, even at the start of a sentence, in a heading or table, or in a commit message or pull request.
+
 ## Git Commits
 
 Use Conventional Commits with lowercase type and scope, an imperative subject, and no trailing period, unless repository history clearly uses another strict format.
