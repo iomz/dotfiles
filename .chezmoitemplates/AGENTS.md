@@ -37,7 +37,11 @@ For commits materially authored by an AI tool in repositories owned by this user
 For external repositories, follow repository policy and disclose material AI assistance in the pull request body.
 Minor research, review, and mechanical assistance require no attribution.
 
-# Markdown Editing
+# Writing and Editing
+
+Do not use the middle dot (U+00B7) in newly written artifact content.
+Use a hyphen for list markers, a pipe for compact separators, or punctuation such as a comma or colon where it reads better.
+Preserve exact quotations, identifiers, and syntax that requires the character.
 
 Make the smallest semantic diff; preserve line breaks, paragraph structure, and document shape unless the requested change requires otherwise.
 Do not auto-wrap or reflow prose to a fixed column width.
