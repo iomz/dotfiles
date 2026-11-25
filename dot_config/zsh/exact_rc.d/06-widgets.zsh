@@ -186,7 +186,7 @@ fzf-history-widget() {
             fzf \
                 --height '40%' \
                 --reverse \
-                --scheme=history \
+                --tiebreak=index \
                 --with-nth='2..' \
                 --prompt='history> ' \
                 --query="$LBUFFER"
