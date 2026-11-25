@@ -54,8 +54,11 @@ Use Conventional Commits with lowercase type and scope, an imperative subject, a
 ## Testing
 
 - Run the unit tests (`python3 -m unittest discover -s tests`, about 80 seconds) after every change.
-- Run the Linux container test (`sh tests/integration/run-linux-host.sh <host-profile>`) only when a change touches files a Linux host applies: scripts, shell, editor, or package configuration.
-  Skip it for documentation-only and macOS-only changes.
+- Run the Linux container test (`sh tests/integration/run-linux-host.sh <host-profile>`) only when a change can break a Linux apply or shell startup in a way the unit tests do not cover.
+  That means run scripts and package-install logic, host profiles and groups, template conditions that decide what a Linux host gets, plugin manager or mise activation, the load order of shell startup files, and Neovim configuration.
+- Skip it for documentation-only and macOS-only changes, and for self-contained changes verified another way.
+  Examples: a package whose name `apt-cache policy` confirms on the target Ubuntu release, or a widget, function, alias or key binding tried in a live shell on a Linux host.
+- When unsure, ask before running it.
 - Run it once on a pull request's final commit, for a `stem` profile and a leaf profile, not after every commit.
 - Start it in the background and keep reviewing and fixing; it gates the merge only.
 - Run at most three to five containers at once on the test host.
