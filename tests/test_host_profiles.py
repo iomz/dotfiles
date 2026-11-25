@@ -49,7 +49,7 @@ class HostProfileTest(unittest.TestCase):
         starship = (self.home / ".config/starship.toml").read_text()
         style = (self.home / ".config/zsh/rc.d/07-style.zsh").read_text()
         color = re.search(r'\[hostname\]\n.*?\nstyle = "bold fg:([^"]+)"', starship, re.S).group(1)
-        prompt = re.search(r"PROMPT='%B%F\{red\}%n%f%b@%B%F\{([^}]+)\}%m", style).group(1)
+        prompt = re.search(r"%B%F\{red\}%n%f%b@%B%F\{([^}]+)\}%m", style).group(1)
         self.assertEqual(prompt, "12" if color == "bright-blue" else color)
         self.assertNotIn("<%", style)
 
