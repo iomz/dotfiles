@@ -2,28 +2,14 @@
 
 [Back to the README](../README.md)
 
-chezmoi deploys OpenCode's configuration, plugins and helper scripts, never the binary.
-The binary is built from source with a local patch, on hosts where you install it explicitly.
+chezmoi deploys OpenCode's configuration and plugins, and installs the binary with OpenCode's own v2 installer on macOS stem hosts.
 
-## Install, update, roll back
+## Install and update
 
-```sh
-# First install; needs Git, Python 3.11+ and a Bun matching the release.
-mise install bun@1.4.4
-mise exec bun@1.4.4 -- ~/.local/bin/opencode-update --install
-
-opencode-update      # update an existing installation
-opencode-rollback    # restore the previous generation
-opencode-update -h   # help, without fetching or building
-```
-
-- `--install` clones the upstream source, builds it with the patch, verifies the result, and creates the `~/.local/bin/opencode` launcher if missing; it never overwrites an existing one.
-  Plain `opencode-update` refuses to bootstrap a host.
-- Builds become generations; `opencode-rollback` restores the previous one, patch included.
-  Right after the first install, both point at the same build.
-- Targets: macOS and glibc Linux, on arm64 or x86_64. Musl Linux is not supported.
-- Credentials and sessions stay on each host; never copy them over.
-- Restart the TUI after a new build.
+- `.chezmoidata/tools.toml` declares `opencode` as a vendor install script: an apply runs `https://opencode.ai/v2/install --no-modify-path` while `~/.opencode/bin/opencode` is missing.
+- `"update": "auto"` in `opencode.jsonc` lets OpenCode update itself through the same installer; restart the TUI after an update.
+- zsh puts `~/.opencode/bin` first in `path`.
+- Credentials and sessions stay on each host in `~/.local/share/opencode`; never copy them over.
 
 ## Which upstream version
 

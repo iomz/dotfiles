@@ -543,6 +543,10 @@ linux.apt = "zsh"
 darwin.script = { url = "https://claude.ai/install.sh", creates = "~/.local/bin/claude" }
 groups = ["stem"]
 
+[tools.opencode]
+darwin.script = { url = "https://opencode.ai/v2/install", args = ["--no-modify-path"], creates = "~/.opencode/bin/opencode" }
+groups = ["stem"]
+
 # --- Homebrew guard -----------------------------------------------------
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.
 # Entries with `homebrew_guard = false` are left out.

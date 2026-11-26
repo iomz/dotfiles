@@ -83,6 +83,9 @@ fi
 
 # $HOME/.local/bin and $HOME/bin
 path=($HOME/.local/bin(N-/) $HOME/bin(N-/) $path)
+# OpenCode's own installer and updater use ~/.opencode/bin; first, so a
+# leftover ~/.local/bin/opencode from the old source build cannot shadow it.
+path=($HOME/.opencode/bin(N-/) $path)
 
 # fzf {{{
 # Default file source for fzf.
