@@ -119,7 +119,8 @@ Run `just` recipes from `~/.local/share/chezmoi`.
 - A tool uses either `mise = "<version>"` or OS keys: `darwin.brew`, `darwin.cask` (macOS apps), `linux.apt`, `linux.brew`, or `darwin.script` / `linux.script`.
 - A `script` key holds `url`, optional `args` and `creates`, the file that marks the tool installed; it is the only manager in its OS table.
 - `hosts = [...]` or `groups = [...]` limits it; neither means every host. mise entries must declare one.
-- `arch`, `hold` and `bin` are optional filters and hints.
+- `arch` limits an entry by architecture, and `hold` keeps `just tool-bump` from changing a pinned version.
+- `bin` records the command name that `just tool-move` checks when it differs from the entry name.
 - `~/.config/mise/config.toml` is rendered from it: edit the inventory, not the rendered file, and never `mise use`.
 
 Edit with the `just tool-*` recipes; each validates the result and reverts an invalid edit.
