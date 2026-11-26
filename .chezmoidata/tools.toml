@@ -443,6 +443,10 @@ darwin.cask = "handbrake-app"
 [tools.karabiner-elements]
 darwin.cask = "karabiner-elements"
 
+[tools.logi-options-plus]
+darwin.cask = "logi-options+"
+groups = ["stem"]
+
 [tools.macfuse]
 darwin.cask = "macfuse"
 hosts = ["oxalis"]
