@@ -78,6 +78,16 @@ gpg --export-ownertrust | grep AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A | ssh <h
 
 Without such a Mac, save the key from Bitwarden to a file, check that `gpg --show-keys <file>` prints the fingerprint above, then run `gpg --batch --import <file>`, delete the file, and set ultimate trust with `gpg --edit-key AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A trust`.
 
+If Pinentry keeps asking for the passphrase despite **Save in Keychain** being checked, restart the GPG agent and sign a test message from a terminal in the Mac's desktop session (cmux works):
+
+```sh
+gpgconf --kill gpg-agent
+printf 'keychain test\n' | gpg --local-user AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A --clearsign >/dev/null
+```
+
+Enter the passphrase with **Save in Keychain** checked, then run both commands again.
+A successful second signature without a prompt confirms Pinentry can read the passphrase from Keychain after the restart clears the agent's memory cache.
+
 When `.chezmoi.toml.tmpl` changes, chezmoi warns on the next apply; regenerate the local config first:
 
 ```sh
