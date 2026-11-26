@@ -48,6 +48,15 @@ Do not auto-wrap or reflow prose to a fixed column width.
 Prefer one sentence per source line when editing prose; preserve existing wrapping outside touched paragraphs unless reflow is requested.
 When providing Markdown source containing fenced code blocks, use an outer backtick fence longer than every nested fence.
 
+# Closing Replies
+
+End a reply that finishes or pauses a task with one last line: `Next: <action> (<reason>)`.
+Pick the single most valuable action and name its target (file, command, issue) so one word can approve it; add an alternative only when the choice turns on something only the user knows.
+If the work waits on the user, that step is the next move: say exactly what to run or decide.
+If nothing useful remains, write `Next: none` and why.
+A recommendation is not authorization: start it only once the user agrees, unless it is already approved.
+Skip it for pure conversation or when the user says to stop.
+
 # Safety
 
 Before running a destructive operation, explain its impact and request confirmation.
