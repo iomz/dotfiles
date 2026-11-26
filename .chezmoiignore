@@ -93,12 +93,14 @@ package.json
 .config/nvim/**
 {{ end }}
 
-# macOS launchd agent for OpenCode Codex resume wake-ups, and cmux settings
+# macOS launchd agent for OpenCode Codex resume wake-ups, cmux settings, and the GnuPG agent's pinentry-mac
 {{ if ne .chezmoi.os "darwin" }}
 Library/**
 .local/bin/opencode-codex-resume-wake
 .config/cmux
 .config/cmux/**
+.gnupg
+.gnupg/**
 {{ end }}
 
 {{ if eq (includeTemplate "variant" .) "agent-sandbox" }}

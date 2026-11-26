@@ -66,6 +66,18 @@ just apm-install
 just skills-pull && chezmoi apply
 ```
 
+On macOS, Git signs every commit with GPG key `AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A` (`dot_gitconfig.tmpl`), so a new Mac cannot commit until it holds the secret key.
+The secret key never enters this repository; Bitwarden keeps the backup.
+chezmoi deploys `~/.gnupg/gpg-agent.conf`, which sends passphrase prompts to `pinentry-mac`.
+Copy the key from a Mac that has it; the export asks for the passphrase on that Mac:
+
+```sh
+gpg --export-secret-keys --armor AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A | ssh <host>.local '/opt/homebrew/bin/gpg --batch --import'
+gpg --export-ownertrust | grep AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A | ssh <host>.local '/opt/homebrew/bin/gpg --import-ownertrust'
+```
+
+Without such a Mac, save the key from Bitwarden to a file, check that `gpg --show-keys <file>` prints the fingerprint above, then run `gpg --batch --import <file>`, delete the file, and set ultimate trust with `gpg --edit-key AD331A6C3ACEBF1F58A056D0E05D48ED7C9BF56A trust`.
+
 When `.chezmoi.toml.tmpl` changes, chezmoi warns on the next apply; regenerate the local config first:
 
 ```sh
