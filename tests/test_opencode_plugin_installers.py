@@ -16,12 +16,13 @@ class PluginInstallerTest(unittest.TestCase):
     def setUp(self):
         self.h = ChezmoiHome(self)
         self.h.configure("oxalis")
-        self.h.copy(".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected")
+        self.h.copy(".chezmoidata/tools.toml", ".chezmoitemplates/tool-selected",
+                    ".chezmoitemplates/brew-path")
         for name in PLUGINS:
             self.h.copy(f"run_after_install-opencode-{name}.sh.tmpl",
                         f"dot_config/opencode/cli-plugins/{name}/package.json",
                         f"dot_config/opencode/cli-plugins/{name}/package-lock.json")
-        tools = self.h.root / "tools"
+        tools = self.tools = self.h.root / "tools"
         tools.mkdir()
         # npm ci, reached only through `mise exec node@<pinned> -- npm`.
         stub(tools, "mise-npm", f'''set -eu
@@ -72,6 +73,14 @@ esac''')
         lock.write_text(lock.read_text() + "\n")
         self.h.run("apply")
         self.assertEqual(self.npm_calls(), 4)
+
+    def test_finds_mise_beside_brew_outside_path(self):
+        # A fresh macOS host: chezmoi inherits a PATH without Homebrew.
+        stub(self.tools, "brew")
+        self.h.configure("oxalis", extra=f'brew_paths = ["/nonexistent/brew", "{self.tools / "brew"}"]\n')
+        self.h.env["PATH"] = "/usr/bin:/bin"
+        self.h.run("apply")
+        self.assertEqual(self.npm_calls(), 2)
 
 
 if __name__ == "__main__":

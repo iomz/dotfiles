@@ -11,6 +11,8 @@ set -eu
 lock_hash="{{ $lockHash }}"
 plugin_dir="{{ $pluginDir }}"
 stamp="$plugin_dir/node_modules/.chezmoi-lock-sha256"
+
+{{ includeTemplate "brew-path" . }}
 if ! command -v mise >/dev/null 2>&1; then
     echo "mise is required to install codex-quota-sidebar dependencies" >&2
     exit 1
