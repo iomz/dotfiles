@@ -117,6 +117,21 @@ class InventorySchemaTest(unittest.TestCase):
                                      f"also declared by {seen.get(package)}")
                     seen[package] = name
 
+    def test_no_homebrew_formula_is_guarded(self):
+        # The package script clears the guard, so it must never install a
+        # formula that interactive zsh forbids.
+        guarded = set(self.data.get("homebrew_guard", {}).get("extra", []))
+        for name, tool in self.tools.items():
+            mise_id = tool.get("mise_id", name)
+            if "mise" in tool and tool.get("homebrew_guard", True) and ":" not in mise_id:
+                guarded.add(mise_id)
+        for name, tool in self.tools.items():
+            for os_name in OS_KEYS:
+                formula = tool.get(os_name, {}).get("brew")
+                if formula:
+                    with self.subTest(tool=name, os=os_name):
+                        self.assertNotIn(formula.rsplit("/", 1)[-1], guarded)
+
 
 @unittest.skipUnless(shutil.which("chezmoi"), "chezmoi required")
 class ToolSelectionTest(unittest.TestCase):

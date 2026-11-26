@@ -3,6 +3,11 @@
 set -eu
 
 {{ includeTemplate "brew-path" . }}
+# A shell started before an update still exports the old Homebrew guard
+# (HOMEBREW_FORBIDDEN_FORMULAE), which can name a tool that just moved from
+# mise to Homebrew. Formulae here come only from OS entries, which the
+# inventory tests keep clear of the guard.
+unset HOMEBREW_FORBIDDEN_FORMULAE
 # Linux packages selected for this host from .chezmoidata/tools.toml, one
 # "<apt name> <brew name>" pair per tool ("-" where none is declared).
 {{- $pairs := list }}
@@ -137,6 +142,11 @@ fi
 set -eu
 
 {{ includeTemplate "brew-path" . }}
+# A shell started before an update still exports the old Homebrew guard
+# (HOMEBREW_FORBIDDEN_FORMULAE), which can name a tool that just moved from
+# mise to Homebrew. Formulae here come only from OS entries, which the
+# inventory tests keep clear of the guard.
+unset HOMEBREW_FORBIDDEN_FORMULAE
 # Homebrew formulae and casks selected for this host from .chezmoidata/tools.toml.
 {{- $formulae := list }}
 {{- $casks := list }}
