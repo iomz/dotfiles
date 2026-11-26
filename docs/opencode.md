@@ -11,27 +11,9 @@ chezmoi deploys OpenCode's configuration and plugins, and installs the binary wi
 - zsh puts `~/.opencode/bin` first in `path`.
 - Credentials and sessions stay on each host in `~/.local/share/opencode`; never copy them over.
 
-## Which upstream version
-
-By default the updater builds the highest stable `v2.<minor>.<patch>` tag of `anomalyco/opencode`, skipping prereleases, the stale `v2` branch and GitHub's "latest release" marker.
-
-```sh
-OPENCODE_UPDATE_REF=refs/tags/v2.1.1 opencode-update   # a specific tag
-OPENCODE_UPDATE_REF=origin/dev opencode-update         # follow a branch
-```
-
-- An older target than the active build is not a downgrade: the active source stays.
-- Divergent upstream history builds in isolation, with the same checks and rollback.
-- The installed Bun must satisfy the target's `packageManager` requirement; the updater stops otherwise, and mise provides the right one.
-
-## The patch and theme
-
-`opencode-update` applies `~/.local/lib/opencode-patches/transparent-borders.patch` in an isolated worktree before building.
-If the patch conflicts with upstream, the update stops and the active build stays.
-The patch's SHA-256 is part of each build's manifest and name, so a changed patch rebuilds even on the same upstream commit.
+## Theme and keys
 
 The `cmux-transparent` theme keeps the main view, sidebar and command surfaces transparent, with opaque dialogs.
-The patch adds a sidebar divider, a bold `YOU` label on your prompts, themed tool-block borders, scrollbar and attachment badges.
 Build keeps a red accent and Plan a cyan one.
 
 `scripts/opencode-theme-lab.html` previews colors on a dark terminal and exports preferences; it never changes the config.
@@ -87,10 +69,10 @@ A missing Caveman skill shows as a plugin error and as `skill missing` in the da
 ## Tests
 
 ```sh
-python3 -m unittest tests/test_opencode_borders.py tests/test_opencode_codex_resume_wake.py
+python3 -m unittest tests/test_opencode_codex_resume_wake.py
 bun test tests/opencode-sidebar.test.ts
 node --test tests/opencode-caveman.test.mjs tests/opencode-codex-resume.test.mjs
 ```
 
 - SDK check: add `OPENCODE_PLUGIN_NODE_MODULES="$HOME/.config/opencode/cli-plugins/codex-quota-sidebar/node_modules"` and run `node --test tests/opencode-codex-resume*.test.mjs`.
-- Renderer check: from the build checkout's `packages/tui`, run `OPENCODE_TUI_SOURCE="$PWD" bun test ~/.local/share/chezmoi/tests/opencode-sidebar-render.test.ts`.
+- Renderer check: from an upstream `anomalyco/opencode` checkout's `packages/tui`, run `OPENCODE_TUI_SOURCE="$PWD" bun test ~/.local/share/chezmoi/tests/opencode-sidebar-render.test.ts`.

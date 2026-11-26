@@ -264,7 +264,7 @@ Use `chezmoi add` for new files.
 
 - [Zsh](docs/zsh.md): startup order, `rc.d`, prompt, profiling, completion
 - [Neovim and Vim](docs/neovim.md): editor selection, layout, plugin sync
-- [OpenCode](docs/opencode.md): build and updates, theme, sidebar, quota recovery
+- [OpenCode](docs/opencode.md): install and updates, theme, sidebar, quota recovery
 
 Not managed here: WakaTime's API key (`wakatime --api-key` per host).
 On macOS, `run_once_install-meslo-nerd-fonts.sh.tmpl` installs MesloLGS NF once, and the Ghostty config, which cmux also reads, selects it.
