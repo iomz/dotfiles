@@ -434,6 +434,10 @@ darwin.cask = "cmux"
 [tools.docker-desktop]
 darwin.cask = "docker-desktop"
 
+[tools.firefox]
+darwin.cask = "firefox"
+groups = ["stem"]
+
 [tools.font-hack-nerd-font]
 darwin.cask = "font-hack-nerd-font"
 
