@@ -9,11 +9,17 @@
 # Hosts and groups are declared under [hosts].
 # `arch` (list of chezmoi arch values) further limits an entry.
 # `arch` inside an OS table (e.g. `linux.arch`) limits only that OS.
+# `darwin.script` or `linux.script` installs a tool with its vendor's own
+# install script, e.g. { url = "https://...", args = [...], creates = "~/..." }:
+# an apply runs it while the `creates` file is missing, and the tool then
+# updates itself. A script is the only manager in its OS table.
 #
-# Sections (mise, macOS and Linux, macOS, Linux packages), name order and
-# key order are derived; just tool-* recipes and just tool-fmt maintain them.
+# Sections (mise, macOS and Linux, macOS, Linux packages, vendor install
+# scripts), name order and key order are derived; just tool-* recipes and
+# just tool-fmt maintain them.
 #
-# Rendered into ~/.config/mise/config.toml and the package install script.
+# Rendered into ~/.config/mise/config.toml, the package install script and
+# the vendor install script runner.
 # Edit this file, not the rendered output.
 
 [hosts.helianthus]
@@ -530,6 +536,12 @@ linux.apt = "vim"
 
 [tools.zsh]
 linux.apt = "zsh"
+
+# --- Vendor install scripts ---------------------------------------------
+
+[tools.claude-code]
+darwin.script = { url = "https://claude.ai/install.sh", creates = "~/.local/bin/claude" }
+groups = ["stem"]
 
 # --- Homebrew guard -----------------------------------------------------
 # Interactive zsh forbids Homebrew formulae named like mise-owned tools.

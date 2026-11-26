@@ -25,7 +25,8 @@ TAIL_MARKER = "# --- Homebrew guard"
 MISE_ONLY_KEYS = ("mise_id", "mise", "hold", "homebrew_guard")
 # Sections derived from an entry's managers, in file order.
 SECTIONS = (("mise", "mise"), ("both", "macOS and Linux packages"),
-            ("darwin", "macOS packages"), ("cask", "macOS apps"), ("linux", "Linux packages"))
+            ("darwin", "macOS packages"), ("cask", "macOS apps"), ("linux", "Linux packages"),
+            ("script", "Vendor install scripts"))
 MARKER_WIDTH = 74
 # Key order inside an entry; a prefix ending in "." covers an OS table.
 KEY_ORDER = ("mise_id", "mise", "hold", "homebrew_guard", "bin", "darwin.", "linux.",
@@ -103,6 +104,8 @@ def section_marker(title):
 def entry_kind(tool):
     if "mise" in tool:
         return "mise"
+    if any("script" in tool.get(os_name, {}) for os_name in ("darwin", "linux")):
+        return "script"
     if "cask" in tool.get("darwin", {}):
         return "cask"
     darwin, linux = "darwin" in tool, "linux" in tool
@@ -251,6 +254,8 @@ def command_add(args, inventory):
                 raise ToolError(f"{args.name} is managed by mise; use tool-move")
             if key in tool.get(os_name, {}):
                 raise ToolError(f"{args.name} already declares {field}")
+            if "script" in tool.get(os_name, {}):
+                raise ToolError(f"{args.name} already comes from a vendor script on {os_name}")
             if os_name == "darwin" and {"brew", "cask"} & set(tool.get("darwin", {})):
                 raise ToolError(f"{args.name} is already a formula or a cask on macOS")
             if args.hosts or args.groups:

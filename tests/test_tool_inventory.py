@@ -18,7 +18,8 @@ SELECTOR = SOURCE / ".chezmoitemplates/tool-selected"
 
 ENTRY_KEYS = {"mise", "mise_id", "hold", "homebrew_guard", "hosts", "groups", "arch",
               "bin", "darwin", "linux"}
-OS_KEYS = {"darwin": {"brew", "cask", "arch"}, "linux": {"apt", "brew", "arch"}}
+OS_KEYS = {"darwin": {"brew", "cask", "script", "arch"}, "linux": {"apt", "brew", "script", "arch"}}
+SCRIPT_KEYS = {"url", "args", "creates"}
 ARCHES = {"amd64", "arm64"}
 
 
@@ -68,6 +69,34 @@ class InventorySchemaTest(unittest.TestCase):
                 self.assertFalse({"brew", "cask"} <= set(tool.get("darwin", {})),
                                  "an app is installed one way: darwin.brew or darwin.cask")
 
+    def test_a_script_is_the_only_manager_in_its_os_table(self):
+        for name, tool in self.tools.items():
+            for os_name in OS_KEYS:
+                managers = set(tool.get(os_name, {})) - {"arch"}
+                if "script" in managers:
+                    with self.subTest(tool=name, os=os_name):
+                        self.assertEqual(managers, {"script"},
+                                         "a vendor script installs the tool alone on its OS")
+
+    def test_script_shape(self):
+        for name, tool in self.tools.items():
+            for os_name in OS_KEYS:
+                script = tool.get(os_name, {}).get("script")
+                if script is None:
+                    continue
+                with self.subTest(tool=name, os=os_name):
+                    self.assertIsInstance(script, dict)
+                    self.assertLessEqual(set(script), SCRIPT_KEYS)
+                    self.assertTrue(str(script.get("url", "")).startswith("https://"),
+                                    "url is required and uses https")
+                    creates = script.get("creates", "")
+                    self.assertIsInstance(creates, str)
+                    self.assertTrue(creates.startswith(("~/", "/")),
+                                    "creates is required: an absolute or ~/ path")
+                    args = script.get("args", [])
+                    self.assertIsInstance(args, list)
+                    self.assertTrue(all(isinstance(arg, str) for arg in args))
+
     def test_mise_entries_are_restricted(self):
         for name, tool in self.tools.items():
             if "mise" in tool:
@@ -109,7 +138,9 @@ class InventorySchemaTest(unittest.TestCase):
                 packages.append(("mise", tool.get("mise_id", name)))
             for os_name in OS_KEYS:
                 for manager, package in tool.get(os_name, {}).items():
-                    if manager != "arch":
+                    if manager == "script":
+                        packages.append((f"{os_name}.script", package["url"]))
+                    elif manager != "arch":
                         packages.append((f"{os_name}.{manager}", package))
             for package in packages:
                 with self.subTest(package=package):

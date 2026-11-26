@@ -145,6 +145,17 @@ class ToolsScriptTest(unittest.TestCase):
         self.assertIn('[tools.curl]\ndarwin.brew = "curl"\nlinux.apt = "curl"\n', text)
         self.assertIn('[tools.wget]\n# Kept for scripts.\ndarwin.brew = "wget"\n', text)
 
+    def test_vendor_scripts_get_their_own_section_and_refuse_other_managers(self):
+        text = self.inventory.read_text().replace(
+            "# --- Homebrew guard ---",
+            '[tools.agent]\ndarwin.script = { url = "https://example.org/install", '
+            'creates = "~/.local/bin/agent" }\n\n# --- Homebrew guard ---')
+        self.inventory.write_text(load_tools_module().normalize(text))
+        self.assertEqual(self.sections()["Vendor install scripts"], ["agent"])
+        result = self.tools("add", "agent", "brew", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("vendor script", result.stderr)
+
     def test_add_os_package_to_existing_entry(self):
         self.tools("add", "curl", "brew")
         self.assertEqual(self.data()["curl"], {"linux": {"apt": "curl"}, "darwin": {"brew": "curl"}})

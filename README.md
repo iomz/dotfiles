@@ -108,6 +108,7 @@ Run `just` recipes from `~/.local/share/chezmoi`.
 | --- | --- | --- |
 | apt / Homebrew | OS packages, ops tools, macOS apps | `.chezmoidata/tools.toml` |
 | mise | versioned runtimes and developer CLIs, on stem hosts | `.chezmoidata/tools.toml` |
+| vendor install scripts | self-updating tools such as Claude Code | `.chezmoidata/tools.toml` |
 | zinit | zsh plugins and completion snippets, on stem hosts | `dot_config/zsh/exact_rc.d/02-plugin-manager.zsh.tmpl` |
 | chezmoi | dotfiles, templates and helper scripts | this repository |
 
@@ -115,7 +116,8 @@ Run `just` recipes from `~/.local/share/chezmoi`.
 
 `.chezmoidata/tools.toml` declares each tool once; its header describes the format.
 
-- A tool uses either `mise = "<version>"` or OS keys: `darwin.brew`, `darwin.cask` (macOS apps), `linux.apt`, `linux.brew`.
+- A tool uses either `mise = "<version>"` or OS keys: `darwin.brew`, `darwin.cask` (macOS apps), `linux.apt`, `linux.brew`, or `darwin.script` / `linux.script`.
+- A `script` key holds `url`, optional `args` and `creates`, the file that marks the tool installed; it is the only manager in its OS table.
 - `hosts = [...]` or `groups = [...]` limits it; neither means every host. mise entries must declare one.
 - `arch`, `hold` and `bin` are optional filters and hints.
 - `~/.config/mise/config.toml` is rendered from it: edit the inventory, not the rendered file, and never `mise use`.
@@ -132,6 +134,7 @@ Edit with the `just tool-*` recipes; each validates the result and reverts an in
   Without Homebrew, `run_before_10-install-homebrew.sh.tmpl` runs its official installer first; it needs an administrator account and a terminal.
 - **Unknown names**, such as a package missing from an older release, are skipped and reported instead of failing the install.
 - **mise** comes from apt on Linux and Homebrew on macOS, only on stem hosts; `run_onchange_after_mise-install.sh.tmpl` runs `mise install` when the config changes.
+- **Vendor install scripts:** `run_after_install-scripts.sh.tmpl` downloads and runs each selected script whose `creates` file is missing, so a failure is retried on the next apply; the tools then update themselves.
 - **Locale:** Linux generates `en_US.UTF-8` and makes it the system default; zsh exports it as `LANG` and `LC_ALL` everywhere.
 - **Login shell:** on helm hosts whose login shell is not zsh, an apply runs `chsh -s` with `/bin/zsh` or `/usr/bin/zsh`.
 

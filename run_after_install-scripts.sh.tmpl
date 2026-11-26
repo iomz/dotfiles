@@ -1,0 +1,45 @@
+{{- /* Tools whose vendor install script is declared in .chezmoidata/tools.toml
+     (`darwin.script`, `linux.script`) and whose `creates` file is missing. */ -}}
+{{- $os := .chezmoi.os -}}
+{{- $missing := list -}}
+{{- range $name, $tool := .tools -}}
+{{-   $table := get $tool $os | default dict -}}
+{{-   if and (hasKey $table "script") (eq (includeTemplate "tool-selected" (dict "tool" $tool "data" $ "os" $os)) "true") -}}
+{{-     $script := $table.script -}}
+{{-     $creates := regexReplaceAll "^~/" $script.creates (printf "%s/" $.chezmoi.homeDir) -}}
+{{-     if not (stat $creates) -}}
+{{-       $missing = append $missing (list $name $script.url $creates (get $script "args" | default list)) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- if $missing -}}
+#!/bin/sh
+# Install tools that come from their vendor's own install script. Each tool
+# then updates itself, so this never upgrades anything. The script renders
+# empty once every selected tool's `creates` file exists, so a skipped or
+# failed install is retried on the next apply.
+set -eu
+
+dir=$(mktemp -d)
+trap 'rm -rf "$dir"' EXIT
+failed=
+
+install() {
+  name=$1 url=$2 creates=$3
+  shift 3
+  installer="$dir/$name"
+  # Download completely before running, so a broken transfer runs nothing.
+  if curl --proto '=https' --tlsv1.2 -fsSL -o "$installer" "$url" &&
+    bash "$installer" "$@" && [ -e "$creates" ]; then
+    return 0
+  fi
+  failed="$failed $name"
+}
+
+{{ range $missing -}}
+install {{ index . 0 | quote }} {{ index . 1 | quote }} {{ index . 2 | quote }}{{ range index . 3 }} {{ . | quote }}{{ end }}
+{{ end -}}
+if [ -n "$failed" ]; then
+  printf 'install-scripts: failed:%s; the next chezmoi apply retries\n' "$failed" >&2
+fi
+{{ end -}}
