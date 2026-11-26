@@ -88,6 +88,16 @@ printf 'keychain test\n' | gpg --local-user AD331A6C3ACEBF1F58A056D0E05D48ED7C9B
 Enter the passphrase with **Save in Keychain** checked, then run both commands again.
 A successful second signature without a prompt confirms Pinentry can read the passphrase from Keychain after the restart clears the agent's memory cache.
 
+Ansible playbooks such as `iomz/sazanka.io` read the vault password from `~/.local/state/ansible/vault-password`, which their `ansible.cfg` names.
+chezmoi never manages the file; Bitwarden keeps the backup, and the encrypted vault holds `ansible_become_password`, so playbooks need no `-K`.
+Copy the file from a host that has it, or write it from Bitwarden without echo:
+
+```sh
+ssh <host>.local 'cat ~/.local/state/ansible/vault-password' | (umask 077 && mkdir -p ~/.local/state/ansible && cat > ~/.local/state/ansible/vault-password)
+```
+
+To rotate the password, run `ansible-vault rekey vault` in each repository, then update the file on every host and the Bitwarden item.
+
 When `.chezmoi.toml.tmpl` changes, chezmoi warns on the next apply; regenerate the local config first:
 
 ```sh
