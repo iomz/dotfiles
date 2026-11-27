@@ -53,6 +53,14 @@ class HostProfileTest(unittest.TestCase):
         self.assertEqual(prompt, "12" if color == "bright-blue" else color)
         self.assertNotIn("<%", style)
 
+    def test_named_hosts_get_their_own_prompt_colors(self):
+        for host, color in (("oxalis", "#26b8ec"), ("helianthus", "#e05cb0")):
+            self.apply(host)
+            starship = (self.home / ".config/starship.toml").read_text()
+            style = (self.home / ".config/zsh/rc.d/07-style.zsh").read_text()
+            self.assertIn(f'style = "bold fg:{color}"', starship, host)
+            self.assertIn(f"@%B%F{{{color}}}%m", style, host)
+
     def test_stem_links_personal_skills_into_the_clone(self):
         self.apply("sazanka")
         clone = self.home / ".local/share/agent-skills/skills"
