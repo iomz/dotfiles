@@ -239,6 +239,9 @@ darwin.brew = "bat-extras"
 darwin.brew = "blueutil"
 hosts = ["oxalis"]
 
+[tools.ccs]
+darwin.brew = "materkey/ccs/ccs"
+
 [tools.cheat]
 darwin.brew = "cheat"
 
