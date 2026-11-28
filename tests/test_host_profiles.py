@@ -54,7 +54,7 @@ class HostProfileTest(unittest.TestCase):
         self.assertNotIn("<%", style)
 
     def test_named_hosts_get_their_own_prompt_colors(self):
-        for host, color in (("oxalis", "#26b8ec"), ("helianthus", "#e05cb0")):
+        for host, color in (("oxalis", "#26b8ec"), ("helianthus", "#a99cf0")):
             self.apply(host)
             starship = (self.home / ".config/starship.toml").read_text()
             style = (self.home / ".config/zsh/rc.d/07-style.zsh").read_text()

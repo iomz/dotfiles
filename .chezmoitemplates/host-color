@@ -2,7 +2,7 @@
        profile listed below gets its own color; otherwise on Linux a hash of
        the host name picks one of 16 colors; empty on macOS, where each prompt
        falls back to its bright blue. */ -}}
-{{- $named := dict "helianthus" "#e05cb0" "oxalis" "#26b8ec" -}}
+{{- $named := dict "helianthus" "#a99cf0" "oxalis" "#26b8ec" -}}
 {{- $host := get . "host" | default "" -}}
 {{- if hasKey $named $host -}}
 {{-   get $named $host -}}
