@@ -241,6 +241,7 @@ hosts = ["oxalis"]
 
 [tools.ccs]
 darwin.brew = "materkey/ccs/ccs"
+groups = ["stem"]
 
 [tools.cheat]
 darwin.brew = "cheat"
@@ -463,6 +464,10 @@ groups = ["stem"]
 [tools.macfuse]
 darwin.cask = "macfuse"
 hosts = ["oxalis"]
+
+[tools.notion]
+darwin.cask = "notion"
+groups = ["stem"]
 
 [tools.obs]
 darwin.cask = "obs"
